@@ -6,3 +6,6 @@ Agile is guided by the Agile Manifesto which emphasises:
 2.	Working software over comprehensive documentation.
 3.	Customer collaboration over contract negotiation.
 4.	Responding to change over following a plan.
+
+
+Brief to be released...
