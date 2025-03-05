@@ -5,7 +5,6 @@ from .config import Config
 
 mail = Mail()
 
-
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
