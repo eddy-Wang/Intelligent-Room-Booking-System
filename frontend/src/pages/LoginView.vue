@@ -1,10 +1,10 @@
 <template>
-  <div class="header">
-    <img src="../assets/header-logo.png" alt="DIICSU Header Logo" class="header-logo">
-  </div>
   <div class="app-container">
     <div class="main-content">
       <div class="left-content">
+        <div class="header">
+          <img src="../assets/header-logo.png" alt="DIICSU Header Logo" class="header-logo">
+        </div>
         <h1 class="welcome-text">Welcome to</h1>
         <h2 class="system-name">DIICSU Room Booking System</h2>
         <p class="slogan">"Book Smarter: Real-Time Room Reservations for DIICSU."</p>
@@ -42,13 +42,6 @@ body {
   font-family: 'Segoe UI', Arial, sans-serif;
 }
 
-.header {
-  position: fixed;
-  max-width: 400px;
-  top: 40px;
-  left: 60px;
-}
-
 .app-container {
   min-height: 100vh;
   background: #3155ef;
@@ -61,19 +54,28 @@ body {
   display: flex;
   align-items: center;
 }
-.header {
-    background: #3155ef;
+
+.left-content {
+  flex: 0 0 50%;
+  padding: 0 4rem;
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 40px;
+
+  .header {
+    max-width: 400px;
+    left: 60px;
     width: 100%;
+    margin-bottom: 30%;
   }
 
   .header-logo {
     height: 45px;
     width: auto;
   }
-
-.left-content {
-  flex: 0 0 50%;
-  padding: 0 4rem;
 
   .welcome-text {
     width: 100%;
@@ -101,114 +103,138 @@ body {
   }
 
   .sign-in-button {
-    width: 100%;
-    background: #E8E8E8;
-    color: #333;
-    border: none;
-    padding: 0.8rem 3rem;
+    background-image: linear-gradient(to right, #319efd, #9ed2ff);
+    box-shadow: 0 4px 15px 0 rgba(41, 44, 225, 0.75);
+    border: 0;
+    margin: 20px;
+    text-transform: uppercase;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 15px 50px;
     border-radius: 50px;
-    font-size: 1.2rem;
+    color: #FFFFFF;
+    outline: none;
+    position: relative;
     cursor: pointer;
     transition: all 0.3s ease;
-    min-width: 200px;
+
+    &:before {
+      content: '';
+      display: block;
+      background: linear-gradient(to left, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.4) 50%);
+      background-size: 210% 100%;
+      background-position: right bottom;
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      border-radius: 50px;
+      transition: all 1s;
+      -webkit-transition: all 1s;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(79, 172, 254, 0.9);
+
+      &:before {
+        background-position: left bottom;
+      }
+    }
+
+    &:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 10px rgba(79, 172, 254, 0.6);
+    }
+  }
+}
+
+.right-content {
+  flex: 1;
+  width: 40%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100vh;
+  padding: 2rem;
+}
+
+.diicsu-picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    padding: 0;
+    min-height: 100vh;
+    background: #3155ef;
+  }
+
+  .main-content {
+    flex-direction: column;
+    padding: 0;
+    gap: 0;
+    height: 100vh;
+  }
+
+  .header {
+    position: static;
+    padding: 1rem;
+    margin-bottom: 0;
     text-align: center;
   }
 
-  .sign-in-button:hover {
-    background: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  }
+  .left-content {
+    flex: 1;
+    width: 100%;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
-  .sign-in-button:active {
-    transform: translateY(0);
-  }
+    .welcome-text {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
 
+    .system-name {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .slogan {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+
+    .sign-in-button {
+      width: 100%;
+      max-width: 300px;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      margin: 0 auto;
+    }
+  }
 
   .right-content {
-    flex: 1;
-    width: 40%;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    height: 100vh;
-    padding: 2rem;
+    width: 100%;
+    height: 40vh;
+    padding: 0;
+    margin-top: 0;
   }
 
   .diicsu-picture {
     width: 100%;
     height: 100%;
+    border-radius: 0;
     object-fit: cover;
-    border-radius: 20px;
-  }
-
-  @media (max-width: 768px) {
-    .app-container {
-      padding: 0;
-      min-height: 100vh;
-      background: #3155ef;
-    }
-
-    .main-content {
-      flex-direction: column;
-      padding: 0;
-      gap: 0;
-      height: 100vh;
-    }
-
-    .header {
-      position: static;
-      padding: 1rem;
-      margin-bottom: 0;
-      text-align: center;
-    }
-
-    .left-content {
-      flex: 1;
-      width: 100%;
-      padding: 2rem 1.5rem;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-
-      .welcome-text {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-      }
-
-      .system-name {
-        font-size: 1.8rem;
-        margin-bottom: 1rem;
-      }
-
-      .slogan {
-        font-size: 1.1rem;
-        margin-bottom: 2rem;
-      }
-
-      .sign-in-button {
-        width: 100%;
-        max-width: 300px;
-        padding: 1rem 2rem;
-        font-size: 1rem;
-        margin: 0 auto;
-      }
-    }
-
-    .right-content {
-      width: 100%;
-      height: 40vh;
-      padding: 0;
-      margin-top: 0;
-    }
-
-    .diicsu-picture {
-      width: 100%;
-      height: 100%;
-      border-radius: 0;
-      object-fit: cover;
-    }
   }
 }
 
