@@ -21,6 +21,7 @@ class Room:
     def _initialize_schedule(self):
         """
         Initialize the booking schedule for the room with 10 fixed time slots.
+        change the number to 12
         """
         return [[0 for _ in range(12)] for _ in range(7)]  # 7 days, 10 time slots per day
 
