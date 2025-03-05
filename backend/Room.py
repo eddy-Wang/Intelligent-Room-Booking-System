@@ -22,7 +22,7 @@ class Room:
         """
         Initialize the booking schedule for the room with 10 fixed time slots.
         """
-        return [[0 for _ in range(10)] for _ in range(7)]  # 7 days, 10 time slots per day
+        return [[0 for _ in range(12)] for _ in range(7)]  # 7 days, 10 time slots per day
 
     def is_available(self, day, time_index):
         """
@@ -89,7 +89,7 @@ class Room:
     def set_permission(self, permission):
         """
         Set the permission level for the room.
-        :param permission: New permission level (e.g., "所有人", "全体staff", "部分staff").
+        :param permission: New permission.
         """
         self.permission = permission
         print(f"Permission level for Room {self.room_id} set to '{permission}'.")
