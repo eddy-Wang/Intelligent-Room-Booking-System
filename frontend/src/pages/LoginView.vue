@@ -8,7 +8,7 @@
         <h1 class="welcome-text">Welcome to</h1>
         <h2 class="system-name">DIICSU Room Booking System</h2>
         <p class="slogan">"Book Smarter: Real-Time Room Reservations for DIICSU."</p>
-        <button @click="handleLogin" class="sign-in-button">
+        <button @click="handleSignIn" class="sign-in-button">
           Sign In
         </button>
       </div>
@@ -22,9 +22,16 @@
 </template>
 
 <script setup>
+import {useRouter} from 'vue-router'
+
+const router = useRouter()
+
+const handleSignIn = () => {
+  router.push('./email')
+}
 </script>
 
-<style>
+<style scoped>
 * {
   margin: 0;
   padding: 0;
@@ -116,85 +123,93 @@ body {
   .sign-in-button:active {
     transform: translateY(0);
   }
-}
 
-.right-content {
-  flex: 1;
-  width: 40%;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  height: 100vh;
-  padding: 2rem;
-}
-
-.diicsu-picture {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 20px;
-}
-
-@media (max-width: 768px) {
-  .app-container {
-    min-height: 100vh;
-    background: #3155ef;
-    padding: 20px;
-  }
-
-  .main-content {
-    flex-direction: column;
-    padding: 0 !important;
-    gap: 2rem;
-  }
-
-  .left-content {
-    flex: 0 0 auto;
-    width: 100%;
-    padding: 0;
-    order: 1;
-    text-align: center;
-
-    .header {
-      height: auto;
-      margin-bottom: 60px;
-    }
-
-    .welcome-text {
-      font-size: 1.8rem;
-      margin-top: 1rem;
-    }
-
-    .system-name {
-      font-size: 1.4rem;
-      line-height: 1.3;
-    }
-
-    .slogan {
-      font-size: 1rem;
-      margin: 1.5rem 0;
-    }
-
-    .sign-in-button {
-      padding: 0.8rem 1.5rem;
-      font-size: 1rem;
-      max-width: 300px;
-      margin: 0 auto;
-    }
-  }
 
   .right-content {
-    order: 2;
+    flex: 1;
+    width: 40%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 100vh;
+    padding: 2rem;
+  }
+
+  .diicsu-picture {
     width: 100%;
-    height: 200px;
-    padding: 0 !important;
-    margin-top: 20px;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 20px;
+  }
+
+  @media (max-width: 768px) {
+    .app-container {
+      padding: 0;
+      min-height: 100vh;
+      background: #3155ef;
+    }
+
+    .main-content {
+      flex-direction: column;
+      padding: 0;
+      gap: 0;
+      height: 100vh;
+    }
+
+    .header {
+      position: static;
+      padding: 1rem;
+      margin-bottom: 0;
+      text-align: center;
+    }
+
+    .left-content {
+      flex: 1;
+      width: 100%;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      .welcome-text {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+      }
+
+      .system-name {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+      }
+
+      .slogan {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+      }
+
+      .sign-in-button {
+        width: 100%;
+        max-width: 300px;
+        padding: 1rem 2rem;
+        font-size: 1rem;
+        margin: 0 auto;
+      }
+    }
+
+    .right-content {
+      width: 100%;
+      height: 40vh;
+      padding: 0;
+      margin-top: 0;
+    }
 
     .diicsu-picture {
-      height: 200px;
       width: 100%;
-      border-radius: 15px;
+      height: 100%;
+      border-radius: 0;
+      object-fit: cover;
     }
   }
 }
+
 </style>
