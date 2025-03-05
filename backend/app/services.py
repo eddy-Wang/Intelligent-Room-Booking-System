@@ -1,9 +1,7 @@
 import random
 import string
-import time
 from flask_mail import Message
 from . import mail
-from .models import check_email_exists, get_user_data_by_email
 
 # stored the code
 verification_codes = {}
@@ -22,3 +20,8 @@ def send_verification_email(user_email, code):
         print("Verification email sent successfully.")
     except Exception as e:
         print("Error sending email:", e)
+
+def remove_verification_code(user_email):
+    """Remove the verification code for the given email."""
+    if user_email in verification_codes:
+        del verification_codes[user_email]

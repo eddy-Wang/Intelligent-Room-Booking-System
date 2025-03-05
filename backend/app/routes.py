@@ -1,6 +1,6 @@
 import time
 from flask import Blueprint, request, jsonify
-from .services import generate_verification_code, send_verification_email, verification_codes
+from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code
 from .models import check_email_exists, get_user_data_by_email
 
 bp = Blueprint('routes', __name__)
@@ -51,7 +51,7 @@ def verify_code():
         current_time = time.time()
         # If the code is older than 60 seconds, it expires
         if current_time - code_data['timestamp'] > 60:
-            del verification_codes[user_email]  # Remove expired code
+            remove_verification_code(user_email)  # Remove expired code
             return create_response('006', 'Verification code has expired! Please request a new code.')
 
         # If the entered code matches
@@ -59,6 +59,7 @@ def verify_code():
             # After verification, fetch user details and return them
             user_data = get_user_data_by_email(user_email)
             if user_data:
+                remove_verification_code(user_email)
                 return create_response('000', 'Login successful!', user_data)
             else:
                 return create_response('005', 'Failed to retrieve user data.')
