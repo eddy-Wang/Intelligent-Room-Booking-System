@@ -1,0 +1,200 @@
+<template>
+  <div class="header">
+    <img src="../assets/header-logo.png" alt="DIICSU Header Logo" class="header-logo">
+  </div>
+  <div class="app-container">
+    <div class="main-content">
+      <div class="left-content">
+        <h1 class="welcome-text">Welcome to</h1>
+        <h2 class="system-name">DIICSU Room Booking System</h2>
+        <p class="slogan">"Book Smarter: Real-Time Room Reservations for DIICSU."</p>
+        <button @click="handleLogin" class="sign-in-button">
+          Sign In
+        </button>
+      </div>
+
+      <div class="right-content">
+        <img src="../assets/DIICSUPicture.png" alt="DIICSU Building" class="diicsu-picture">
+      </div>
+
+    </div>
+  </div>
+</template>
+
+<script setup>
+</script>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.header {
+  position: fixed;
+  max-width: 400px;
+  top: 40px;
+  left: 60px;
+}
+
+.app-container {
+  min-height: 100vh;
+  background: #3155ef;
+  display: flex;
+  justify-content: space-between;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.header {
+    background: #3155ef;
+    width: 100%;
+  }
+
+  .header-logo {
+    height: 45px;
+    width: auto;
+  }
+
+.left-content {
+  flex: 0 0 50%;
+  padding: 0 4rem;
+
+  .welcome-text {
+    width: 100%;
+    color: white;
+    font-size: 3.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .system-name {
+    width: 100%;
+    color: white;
+    font-size: 2.8rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+
+  .slogan {
+    width: 100%;
+    color: white;
+    font-size: 1.2rem;
+    margin-bottom: 3rem;
+    font-style: italic;
+    opacity: 0.9;
+  }
+
+  .sign-in-button {
+    width: 100%;
+    background: #E8E8E8;
+    color: #333;
+    border: none;
+    padding: 0.8rem 3rem;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 200px;
+    text-align: center;
+  }
+
+  .sign-in-button:hover {
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .sign-in-button:active {
+    transform: translateY(0);
+  }
+}
+
+.right-content {
+  flex: 1;
+  width: 40%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100vh;
+  padding: 2rem;
+}
+
+.diicsu-picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    min-height: 100vh;
+    background: #3155ef;
+    padding: 20px;
+  }
+
+  .main-content {
+    flex-direction: column;
+    padding: 0 !important;
+    gap: 2rem;
+  }
+
+  .left-content {
+    flex: 0 0 auto;
+    width: 100%;
+    padding: 0;
+    order: 1;
+    text-align: center;
+
+    .header {
+      height: auto;
+      margin-bottom: 60px;
+    }
+
+    .welcome-text {
+      font-size: 1.8rem;
+      margin-top: 1rem;
+    }
+
+    .system-name {
+      font-size: 1.4rem;
+      line-height: 1.3;
+    }
+
+    .slogan {
+      font-size: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .sign-in-button {
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+  }
+
+  .right-content {
+    order: 2;
+    width: 100%;
+    height: 200px;
+    padding: 0 !important;
+    margin-top: 20px;
+
+    .diicsu-picture {
+      height: 200px;
+      width: 100%;
+      border-radius: 15px;
+    }
+  }
+}
+</style>
