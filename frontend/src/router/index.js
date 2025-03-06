@@ -20,6 +20,7 @@ const routes = [
     name: 'VerifyView',
     component: VerifyView
   }
+]
 // import TimeTable from '@/components/TimeTable.vue'
 // import MyReservation from '@/views/MyReservation.vue'
 // import RoomDetails from '@/views/RoomDetails.vue'
@@ -34,15 +35,15 @@ const routes = [
 // >>>>>>> main
 // ]
 
-// const router = createRouter({
-//   history: createWebHistory(),
-// <<<<<<< frontend-dev-for-login-module
-//   routes
-// })
+const router = createRouter({
+  history: createWebHistory(),
+<<<<<<< frontend-dev-for-login-module
+  routes
+})
 
-// export default router
-// =======
-//   routes,
-// })
+export default router
+=======
+  routes,
+})
 
-// export default router
+export default router
