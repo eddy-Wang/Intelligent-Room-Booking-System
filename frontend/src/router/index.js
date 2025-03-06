@@ -1,10 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../pages/LoginView.vue'
-import EmailInput from '../pages/EmailInput.vue'
-import LoginView from "@/pages/LoginView.vue";
-import VerifyView from "@/pages/VerifyView.vue";
+import EmailInput from '@/views/EmailInput.vue'
+import LoginView from "@/views/LoginView.vue";
+import VerifyView from "@/views/VerifyView.vue";
 import Index from '@/Index.vue'
-
 const routes = [
   {
     path: '/',
@@ -22,24 +20,11 @@ const routes = [
     component: VerifyView
   },
   {
-    path: '/index',
+    path: '/Index',
     name: 'Index',
     component: Index
-  }
+  },
 ]
-// import TimeTable from '@/components/TimeTable.vue'
-// import MyReservation from '@/views/MyReservation.vue'
-// import RoomDetails from '@/views/RoomDetails.vue'
-// import RoomManagement from '@/views/RoomManagement.vue'
-// import Index from '@/Index.vue'
-
-
-// const routes = [
-//   { path: '/', name: 'Index', component: Index },
-//   { path: '/room/:id', name: 'RoomDetails', component: RoomDetails, props: true },
-//   { path: '/my-reservation', name: 'MyReservation', component: MyReservation },
-// >>>>>>> main
-// ]
 
 const router = createRouter({
   history: createWebHistory(),

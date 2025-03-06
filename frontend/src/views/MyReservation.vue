@@ -42,6 +42,7 @@
 
 <script>
 export default {
+    name: 'MyReservation',
     data() {
         return {
             reservations: [
@@ -133,9 +134,8 @@ body {
     max-width: 1750px;
     margin: 20px auto;
     padding: 20px;
-    background-color: #ffffff;
+    background-color: #eceef8;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
