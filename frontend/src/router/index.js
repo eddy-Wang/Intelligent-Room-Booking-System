@@ -3,6 +3,7 @@ import Home from '../pages/LoginView.vue'
 import EmailInput from '../pages/EmailInput.vue'
 import LoginView from "@/pages/LoginView.vue";
 import VerifyView from "@/pages/VerifyView.vue";
+import Index from '@/Index.vue'
 
 const routes = [
   {
@@ -19,6 +20,11 @@ const routes = [
     path: '/verify/:email',
     name: 'VerifyView',
     component: VerifyView
+  },
+  {
+    path: '/index',
+    name: 'Index',
+    component: Index
   }
 ]
 // import TimeTable from '@/components/TimeTable.vue'

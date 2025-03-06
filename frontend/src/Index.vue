@@ -34,7 +34,7 @@
         </div>
       </div>
 
-      <!-- 下排：房间卡片 + 底部“Rooms”栏 -->
+      <!-- 下排：房间卡片 + 底部"Rooms"栏 -->
       <div class="bottom-row">
         <!-- 房间卡片 -->
         <router-view name="roomDetails"></router-view>
@@ -50,8 +50,16 @@
 </template>
 
 <script>
+import { House, Bell, RefreshRight, Setting } from '@element-plus/icons-vue'
+
 export default {
   name: 'Index',
+  components: {
+    House,
+    Bell,
+    RefreshRight,
+    Setting
+  },
   data() {
     return {
       tabs: ['English Rooms', 'Formal Meeting Room', 'Informal Meeting Room', '622', '634', '635'],
@@ -167,7 +175,7 @@ export default {
   border-color: var(--tab-active-border, #b29775) !important; /* 默认深灰边框 */
 }
 
-/* ----- 下排：房间卡片 + 底部“Rooms”栏 ----- */
+/* ----- 下排：房间卡片 + 底部"Rooms"栏 ----- */
 .bottom-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
