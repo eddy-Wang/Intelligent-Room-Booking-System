@@ -3,6 +3,7 @@ import Home from '../pages/LoginView.vue'
 import EmailInput from '../pages/EmailInput.vue'
 import LoginView from "@/pages/LoginView.vue";
 import VerifyView from "@/pages/VerifyView.vue";
+import MyReservation from "@/views/MyReservation.vue";
 import Index from '@/Index.vue'
 
 const routes = [
@@ -25,6 +26,11 @@ const routes = [
     path: '/index',
     name: 'Index',
     component: Index
+  },
+  {
+    path: '/myReservation',
+    name: 'MyReservation',
+    component: MyReservation
   }
 ]
 // import TimeTable from '@/components/TimeTable.vue'
