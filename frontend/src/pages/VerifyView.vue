@@ -308,7 +308,7 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0.7; /* 半透明效果 */
+    opacity: 0.7;
     border-radius: 0;
   }
   .header {

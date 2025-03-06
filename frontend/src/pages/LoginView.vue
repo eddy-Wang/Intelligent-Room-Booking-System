@@ -173,7 +173,6 @@ body {
   .app-container {
     padding: 0;
     min-height: 100vh;
-    background: #3155ef;
   }
 
   .main-content {
@@ -181,6 +180,7 @@ body {
     padding: 0;
     gap: 0;
     height: 100vh;
+    position:relative;
   }
 
   .header {
@@ -191,22 +191,27 @@ body {
   }
 
   .left-content {
-    flex: 1;
-    width: 100%;
-    padding: 2rem 1.5rem;
+    position: relative;
+    z-index: 2;
+    //background: rgba(255, 255, 255, 0.9); /* 登录框背景颜色，稍微透明 */
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 90%;
+    margin: 0 auto;
     text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    top: 50%;
+    transform: translateY(-50%);
 
     .welcome-text {
-      font-size: 2rem;
+      font-size: 2.2rem;
       margin-bottom: 1rem;
     }
 
     .system-name {
-      font-size: 1.8rem;
-      margin-bottom: 1rem;
+      font-size: 2rem;
+      margin-bottom: 2rem;
     }
 
     .slogan {
@@ -224,17 +229,22 @@ body {
   }
 
   .right-content {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 40vh;
+    height: 100%;
+    z-index: 1;
     padding: 0;
-    margin-top: 0;
+    margin: 0;
   }
 
   .diicsu-picture {
     width: 100%;
     height: 100%;
-    border-radius: 0;
     object-fit: cover;
+    opacity: 0.8;
+    border-radius: 0;
   }
 }
 
