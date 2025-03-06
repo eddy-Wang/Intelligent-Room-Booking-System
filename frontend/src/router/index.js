@@ -37,7 +37,6 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(),
-<<<<<<< frontend-dev-for-login-module
   routes
 })
 
