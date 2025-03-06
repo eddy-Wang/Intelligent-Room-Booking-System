@@ -41,8 +41,3 @@ const router = createRouter({
 })
 
 export default router
-=======
-  routes,
-})
-
-export default router
