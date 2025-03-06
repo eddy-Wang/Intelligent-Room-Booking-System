@@ -35,3 +35,21 @@ def get_user_data_by_email(email):
     if result:
         return {'email': result[0], 'name': result[1], 'permission': result[2]}
     return None
+
+def get_all_room_data():
+    """get all room data"""
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+
+def get_booking_record_of_a_room(room):
+    """get booking record of a room"""
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+
+def get_room_detailed(room):
+    """get detailed room data"""
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    booking_details = get_booking_record_of_a_room(room)

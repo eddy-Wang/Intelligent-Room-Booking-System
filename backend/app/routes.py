@@ -1,7 +1,7 @@
 import time
 from flask import Blueprint, request, jsonify
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code
-from .models import check_email_exists, get_user_data_by_email
+from .models import check_email_exists, get_user_data_by_email, get_all_room_data, get_room_detailed
 
 bp = Blueprint('routes', __name__)
 
@@ -67,3 +67,23 @@ def verify_code():
             return create_response('004', 'Invalid code, please try again.')
     else:
         return create_response('007', 'No verification code sent. Please request a new code.')
+
+@bp.route('/allRoom', methods=['GET', 'OPTIONS'])
+def allRoom():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    all_room_data = get_all_room_data()
+    if all_room_data:
+        return create_response('001', 'All Rooms found!', all_room_data)
+    else:
+        return create_response('002', 'No Rooms found!')
+
+@bp.route('/requestRoomDetails', methods=['GET', 'OPTIONS'])
+def requestRoomDetails():
+    if request.method == 'OPTIONS':
+        return '', 200
+    data = request.get_json()
+    room = data.get('room')
+
+
