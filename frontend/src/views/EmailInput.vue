@@ -65,7 +65,7 @@ const validateEmail = () => {
 const handleNext = async () => {
   if (isValidEmail.value) {
     try {
-      const response = await fetch('http://172.20.10.3:8080/login', {
+      const response = await fetch('http://127.0.0.1:8080/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

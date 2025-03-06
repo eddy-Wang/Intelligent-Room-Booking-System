@@ -71,7 +71,7 @@ const handleVerify = async () => {
   console.log(email)
   if (isValidCode.value) {
     try {
-      const response = await fetch('http://172.20.10.3:8080/verify-code', {
+      const response = await fetch('http://127.0.0.1:8080/verify-code', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
