@@ -26,7 +26,7 @@
                 </div>
                 <div class="user-info">
                     <div class="user-avatar">
-                        <img src="https://images.unsplash.com/photo-1609561505734-7c42d1bbafc9?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDJ8fHxlbnwwfHx8fHw%3D" alt="User Avatar" />
+                        <img :src="userAvatar" alt="User Avatar" />
                     </div>
                     <div class="user-email">{{ user.email }}</div>
                     <div class="user-role">{{ user.role === 0 ? 'Student' : 'Staff' }}</div>
@@ -57,6 +57,10 @@ export default {
                 email: "user@example.com",
                 role: 0, // 0 for Student, 1 for Staff
             },
+            avatarUrls: {
+                student: "https://images.unsplash.com/photo-1609561505734-7c42d1bbafc9?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDJ8fHxlbnwwfHx8fHw%3D", // Student 头像
+                staff: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D", // Staff 头像
+            },
         };
     },
     computed: {
@@ -67,6 +71,9 @@ export default {
             const start = (this.currentPage - 1) * this.itemsPerPage;
             const end = start + this.itemsPerPage;
             return this.reservations.slice(start, end);
+        },
+        userAvatar() {
+            return this.user.role === 0 ? this.avatarUrls.student : this.avatarUrls.staff;
         },
     },
     methods: {
