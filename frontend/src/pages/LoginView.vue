@@ -72,10 +72,10 @@ body {
     margin-bottom: 30%;
   }
 
-  .header-logo {
+.header-logo {
     height: 45px;
     width: auto;
-  }
+}
 
   .welcome-text {
     width: 100%;
@@ -88,7 +88,7 @@ body {
   .system-name {
     width: 100%;
     color: white;
-    font-size: 2.8rem;
+    font-size: 2.5rem;
     font-weight: 500;
     margin-bottom: 1rem;
   }

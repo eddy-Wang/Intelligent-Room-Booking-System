@@ -2,6 +2,9 @@
   <router-view />
 </template>
 <script setup>
-import LoginView from "@/pages/LoginView.vue";
 </script>
-<style></style>
+<style>
+body {
+  overflow-y: hidden;
+}
+</style>

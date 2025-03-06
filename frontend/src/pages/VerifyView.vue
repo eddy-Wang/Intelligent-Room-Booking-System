@@ -51,23 +51,50 @@
 </template>
 
 <script setup>
-import {ref, computed} from 'vue'
-import {useRouter} from 'vue-router'
+import {ref, computed, onMounted} from 'vue'
+import {useRouter, useRoute} from 'vue-router'
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import {faArrowLeft} from '@fortawesome/free-solid-svg-icons'
 import {faBackward} from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter()
+const route = useRoute()
+const email = route.params.email
+
 const verificationCode = ref('')
 
 const isValidCode = computed(() => {
   return verificationCode.value.length === 6
 })
 
-const handleVerify = () => {
+const handleVerify = async () => {
+  console.log(email)
   if (isValidCode.value) {
-    // TODO: 处理验证逻辑
-    console.log('Verification code:', verificationCode.value)
+    try {
+      const response = await fetch('http://172.20.10.3:8080/verify-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email,
+          code: verificationCode.value
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.code==="000") {
+        console.log(data)
+      } else {
+        alert(data.message)
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
   }
 }
 

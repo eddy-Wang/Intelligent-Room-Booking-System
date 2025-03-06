@@ -16,7 +16,7 @@ const routes = [
     component: EmailInput
   },
   {
-    path: '/verify',
+    path: '/verify/:email',
     name: 'VerifyView',
     component: VerifyView
   }

@@ -62,9 +62,36 @@ const validateEmail = () => {
   showError.value = !emailPattern.test(email.value + '@dundee.ac.uk')
 }
 
-const handleNext = () => {
+const handleNext = async () => {
   if (isValidEmail.value) {
-    router.push('/verify')
+    try {
+      const response = await fetch('http://172.20.10.3:8080/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email.value+"@dundee.ac.uk",
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.code === "000") {
+          await router.push({
+            name: 'VerifyView',
+            params: {
+              email: email.value + "@dundee.ac.uk"
+            }
+          })
+        } else {
+          alert(data.message)
+        }
+
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
   }
 }
 </script>
@@ -339,14 +366,14 @@ body {
     }
 
     .email-input {
-      font-size: 0.95rem;
+      font-size: 0.8rem;
       //padding: 0.6rem;
       padding: 0.3rem 0 0.3rem 0.3rem;
       width: 60%;
     }
 
     .email-suffix {
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       padding: 0;
       width: 40%;
       white-space: nowrap;
