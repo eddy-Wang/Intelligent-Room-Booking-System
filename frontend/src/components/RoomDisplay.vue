@@ -1,7 +1,6 @@
 <template>
   <div class="room-display" @mousemove="handleMouseMove" @mouseleave="stopAutoScroll">
-    <div class="edge-mask left"></div>
-    <div class="edge-mask right"></div>
+
 
     <div class="rooms-container" :style="{ transform: `translateX(${scrollPosition}px)` }">
       <div
@@ -175,19 +174,20 @@ const stopAutoScroll = () => {
 }
 
 .room-display {
-  width: 1020px;
+  width: 1080px;
   height: 280px;
   overflow: hidden;
   position: relative;
   background: #eceef8;
-  padding: 20px 40px;
+  padding: 0 0;
   display: flex;
   justify-content: center;
 }
 
 .rooms-container {
-  width: 1020px;
-  max-width: 1020px;
+  background: #eceef8;
+  width: 1050px;
+  max-width: 1050px;
   margin: auto auto;
   display: flex;
   gap: 20px;
@@ -196,14 +196,14 @@ const stopAutoScroll = () => {
 }
 
 .room-card {
-  width: 320px;
+  width: 340px;
   min-width: 320px;
-  max-width: 320px;
+  max-width: 340px;
   height: 240px;
   flex-shrink: 0;
   border-radius: 12px;
   overflow: hidden;
-  background: white;
+  background: #eceef8;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: transform 0.3s ease;
@@ -235,15 +235,6 @@ const stopAutoScroll = () => {
   background: #d5ddff;
 }
 
-.edge-mask {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: calc((100% - 1020px) / 2);
-  background: #f8f9fa;
-  z-index: 1;
-  pointer-events: none;
-}
 
 @media (max-width: 768px) {
   .room-card {
