@@ -30,7 +30,7 @@ import {ref} from "vue";
 import RoomSearch from "@/components/RoomSearch.vue";
 import TimeTable from '@/components/TimeTable.vue';
 //TODO filter给数组
-const roomIds = ref([1, 3, 5])
+const roomIds = ref([1,2,3,4,5])
 import RoomDisplay from '@/components/RoomDisplay.vue';
 
 </script>

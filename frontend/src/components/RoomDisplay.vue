@@ -13,7 +13,7 @@
         <div class="room-image">
           <img :src="room.image" :alt="room.name">
         </div>
-        <div class="room-name">{{ room.name }}</div>
+        <div class="room-name"><strong>{{ room.name }}</strong></div>
       </div>
     </div>
 
@@ -57,7 +57,7 @@ const rooms = ref([
   {
     id: 1,
     name: 'Informal Meeting Room',
-    image: new URL('@/assets/room1.png', import.meta.url).href,
+    image: new URL('@/assets/informal-meeting.png', import.meta.url).href,
     capacity: '15-30',
     equipment: ['Projector', 'Whiteboard', 'Power Outlets', 'Wi-Fi'],
     access: 'All'
@@ -65,15 +65,15 @@ const rooms = ref([
   {
     id: 2,
     name: 'Formal Meeting Room',
-    image: new URL('@/assets/room1.png', import.meta.url).href,
+    image: new URL('@/assets/formal-meeting.png', import.meta.url).href,
     capacity: '30-45',
     equipment: ['Projector', 'Whiteboard', 'Computers', 'Wi-Fi'],
     access: 'Staff Only'
   },
   {
     id: 3,
-    name: '635',
-    image: new URL('@/assets/2.png', import.meta.url).href,
+    name: 'Room 635',
+    image: new URL('@/assets/635.png', import.meta.url).href,
     capacity: '15-30',
     equipment: ['Whiteboard', 'Power Outlets', 'Wi-Fi'],
     access: 'All'
@@ -81,14 +81,14 @@ const rooms = ref([
   {
     id: 4,
     name: 'English Corridor',
-    image: new URL('@/assets/room1.png', import.meta.url).href,
+    image: new URL('@/assets/corridor.png', import.meta.url).href,
     capacity: '15-30',
     equipment: ['Whiteboard', 'Power Outlets', 'Wi-Fi'],
     access: 'All'
   }, {
     id: 5,
     name: 'Seminar Room',
-    image: new URL('@/assets/room1.png', import.meta.url).href,
+    image: new URL('@/assets/seminar-room.png', import.meta.url).href,
     capacity: '15-30',
     equipment: ['Whiteboard', 'Power Outlets', 'Wi-Fi'],
     access: 'All'
@@ -132,7 +132,7 @@ const updateScroll = () => {
   if (!isScrolling.value) return
 
   scrollPosition.value += scrollSpeed.value
-  const maxScroll = -((rooms.value.length - 3) * 340)
+  const maxScroll = -((rooms.value.length - 3) * 360)
   scrollPosition.value = Math.max(Math.min(0, scrollPosition.value), maxScroll)
 
   if (isScrolling.value) {
