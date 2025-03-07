@@ -154,7 +154,7 @@ const stopAutoScroll = () => {
   position: absolute;
   top: 20px;
   left: 340px;
-  width: 620px;;
+  width: 660px;
   height: 240px;
   background: white;
   border-radius: 12px;

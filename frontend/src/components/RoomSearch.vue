@@ -49,7 +49,7 @@
 
       <div class="input-section">
         <h2>Book Information</h2>
-        <div class="result-box">房间信息</div>
+        <div class="result-box">Detailed Room Information</div>
       </div>
       <div class="input-section">
         <h2>Purpose</h2>

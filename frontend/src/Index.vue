@@ -28,7 +28,6 @@ import HomeView from './views/HomeView.vue';
 import MyReservation from './views/MyReservation.vue';
 import NotificationView from './views/NotificationView.vue';
 import SettingsView from './views/SettingsView.vue';
-import RoomSearch from "@/components/RoomSearch.vue";
 export default {
   name: 'Index',
   components:{
