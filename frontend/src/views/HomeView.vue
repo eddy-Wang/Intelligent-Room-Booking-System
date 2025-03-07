@@ -10,7 +10,6 @@
       <div class="middle-row">
         <!-- 房间卡片 -->
         <room-display :room-ids="roomIds"/>
-        <room-display/>
 
       </div>
       <div class="bottom-row">
@@ -42,8 +41,7 @@ import RoomDisplay from '@/components/RoomDisplay.vue';
     align-items: start; /* 可选：让它们顶对齐 */
     width: 100%;
     height: 100%;
-    align-items: stretch;
-  }
+    }
     /* ========== 中间列：上下两排 ========== */
     .middle-column {
     flex: 1;
@@ -55,17 +53,17 @@ import RoomDisplay from '@/components/RoomDisplay.vue';
 
     /* ----- 上排：标题 + Tab ----- */
     .top-row {
-      margin - bottom: 0px;
+      margin-bottom: 0;
   }
 
     .top-row h1 {
-    margin: 80px 0 8px 0;
+    margin: 0 0 0 0;
     font-size: 48px;
     font-weight: bold;
   }
 
     .top-row h2 {
-    margin: 0 0 50px;
+    margin: 0 0 5px;
     font-size: 48px;
     color: #555;
   }
@@ -86,7 +84,7 @@ import RoomDisplay from '@/components/RoomDisplay.vue';
 
     /* ========== 右侧列 ========== */
     .right-column {
-      background - color: #eceef8;
+      background-color: #eceef8;
     padding: 20px;
     width: 450px;
 

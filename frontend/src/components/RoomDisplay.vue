@@ -165,7 +165,7 @@ const stopAutoScroll = () => {
   position: absolute;
   top: 20px;
   left: 340px;
-  width: 620px;;
+  width: 660px;;
   height: 240px;
   background: white;
   border-radius: 12px;
@@ -180,7 +180,7 @@ const stopAutoScroll = () => {
   overflow: hidden;
   position: relative;
   background: #eceef8;
-  padding: 20px 0;
+  padding: 20px 40px;
   display: flex;
   justify-content: center;
 }
