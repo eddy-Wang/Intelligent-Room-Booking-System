@@ -156,7 +156,7 @@ h1 {
     flex: 1; /* 占据剩余空间 */
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 20px;
 }
 
 .reservation-item {
@@ -180,13 +180,13 @@ h1 {
 }
 
 .reservation-name {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: bold;
     color: #34495e;
 }
 
 .reservation-time {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     color: #555;
     margin-top: 5px;
 }
