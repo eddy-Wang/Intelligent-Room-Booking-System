@@ -23,7 +23,7 @@ const routes = [
     path: '/Index',
     name: 'Index',
     component: Index
-  },
+  }
 ]
 
 const router = createRouter({

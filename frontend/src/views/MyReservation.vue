@@ -23,7 +23,12 @@
                             </div>
                         </div>
                     </div>
+                    <div class="pagination">
+                        <button @click="prevPage" :disabled="currentPage === 1" class="pagination-button">Previous</button>
+                        <button @click="nextPage" :disabled="currentPage === totalPages" class="pagination-button">Next</button>
+                    </div>
                 </div>
+
                 <div class="user-info">
                     <div class="user-avatar">
                         <img :src="userAvatar" alt="User Avatar" />
@@ -32,10 +37,7 @@
                     <div class="user-role">{{ user.role === 0 ? 'Student' : 'Staff' }}</div>
                 </div>
             </div>
-            <div class="pagination">
-                <button @click="prevPage" :disabled="currentPage === 1" class="pagination-button">Previous</button>
-                <button @click="nextPage" :disabled="currentPage === totalPages" class="pagination-button">Next</button>
-            </div>
+
         </div>
     </div>
 </template>
@@ -154,7 +156,7 @@ h1 {
     flex: 1; /* 占据剩余空间 */
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
 }
 
 .reservation-item {
@@ -246,7 +248,7 @@ h1 {
     width: 450px; /* 用户信息区域宽度 */
     height: 660px; /* 确保容器高度占满父容器 */
     padding: 20px;
-    background-color: #ffffff;
+    background-color: #eceef8;
     border-radius: 12px;
     text-align: center;
     display: flex;
@@ -283,7 +285,7 @@ h1 {
 .pagination {
     display: flex;
     justify-content: center;
-    margin-top: 30px;
+    margin-top: 10px;
     gap: 10px;
 }
 
@@ -292,7 +294,7 @@ h1 {
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    background-color: #eceef8;
+    background-color: #ffffff;
     color: #333;
     font-size: 1rem;
     transition: background-color 0.2s ease;
