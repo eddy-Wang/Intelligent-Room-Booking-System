@@ -48,6 +48,10 @@ const props = defineProps({
 const filteredRooms = computed(() => {
   return rooms.value.filter(room => props.roomIds.includes(room.id))
 })
+const shouldScroll = computed(() => {
+  return filteredRooms.value.length > 3
+})
+
 
 const rooms = ref([
   {
@@ -107,7 +111,7 @@ const handleRoomClick = (room) => {
   emit('roomSelected', room)
 }
 const handleMouseMove = (e) => {
-  if (selectedRoom.value) return
+  if (selectedRoom.value || !shouldScroll.value) return // 如果不需要滑动，直接返回
   const container = e.currentTarget
   const containerRect = container.getBoundingClientRect()
   const mouseX = e.clientX - containerRect.left
