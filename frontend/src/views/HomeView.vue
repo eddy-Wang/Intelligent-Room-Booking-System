@@ -7,10 +7,15 @@
             <h2><strong>Room Booking System</strong></h2>
         </div>
         <!-- 下排：房间卡片 + 底部“Rooms”栏 -->
-        <div class="bottom-row">
+        <div class="middle-row">
             <!-- 房间卡片 -->
             <room-display />
+
         </div>
+        <div class="bottom-row">
+          <time-table />
+        </div>
+                   
         </main>
 
         <!-- 右侧区域（第三列） -->
@@ -20,16 +25,10 @@
     </div>
 </template>
 
-<script>
-import RoomDisplay from '@/components/RoomDisplay.vue';
-import RoomSearch from "@/components/RoomSearch.vue";
-export default {
-    name: 'Home',
-    components: {
-      RoomDisplay,
-      RoomSearch
-    }
-}
+<script setup>
+  import RoomDisplay from '@/components/RoomDisplay.vue';
+  import RoomSearch from "@/components/RoomSearch.vue";
+  import TimeTable from '@/components/TimeTable.vue';
 </script>
 
 <style>
@@ -44,7 +43,7 @@ export default {
 .middle-column {
   flex: 1;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto;
   background-color: #eceef8;
   padding: 20px;
 }
@@ -67,10 +66,17 @@ export default {
   color: #555;
 }
 
-/* ----- 下排：房间卡片 + 底部“Rooms”栏 ----- */
-.bottom-row {
+/* ----- 中间（房间卡片）----- */
+.middle-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* ----- 下排（TimeTable）----- */
+.bottom-row {
+  display: block;
+  width: 100%;
   gap: 20px;
 }
 
