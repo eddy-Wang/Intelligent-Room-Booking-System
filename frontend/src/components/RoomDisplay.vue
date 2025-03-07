@@ -165,7 +165,7 @@ const stopAutoScroll = () => {
   position: absolute;
   top: 20px;
   left: 340px;
-  width: 660px;;
+  width: 620px;;
   height: 240px;
   background: white;
   border-radius: 12px;
@@ -206,7 +206,7 @@ const stopAutoScroll = () => {
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.3s ease,opacity 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .room-card:hover {
