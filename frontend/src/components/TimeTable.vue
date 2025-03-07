@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <v-row align="stretch">
+    <v-row justify="space-between" align="stretch">
       <!-- 日历和时间表并列 -->
       <v-col cols="12" md="6">
         <v-card style="background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
@@ -163,7 +163,6 @@ export default {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   width: 1050px; /* 固定宽度 */
-  height: 400px; /* 固定高度 */
   margin: 0 auto; /* 居中 */
 }
 

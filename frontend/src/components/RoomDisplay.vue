@@ -100,7 +100,7 @@ const emit = defineEmits(['roomSelected'])
 
 const handleRoomClick = (room) => {
   const index = filteredRooms.value.findIndex(r => r.id === room.id)
-  scrollPosition.value = -index * 340
+  scrollPosition.value = -index * 360
   selectedRoom.value = room
 
   isScrolling.value = false
@@ -163,9 +163,9 @@ const stopAutoScroll = () => {
 .room-info {
   position: absolute;
   top: 20px;
-  left: 340px;
-  width: 660px;;
-  height: 240px;
+  left: 375px;
+  width: 703px;;
+  height: 242px;
   background: white;
   border-radius: 12px;
   padding: 20px;
@@ -179,7 +179,7 @@ const stopAutoScroll = () => {
   overflow: hidden;
   position: relative;
   background: #eceef8;
-  padding: 0 0;
+  margin: 0 20px;
   display: flex;
   justify-content: center;
 }
@@ -188,7 +188,7 @@ const stopAutoScroll = () => {
   background: #eceef8;
   width: 1050px;
   max-width: 1050px;
-  margin: auto auto;
+  margin: auto 0;
   display: flex;
   gap: 20px;
   position: relative;
