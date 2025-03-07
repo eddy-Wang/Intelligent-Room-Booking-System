@@ -5,9 +5,10 @@
 
     <div class="rooms-container" :style="{ transform: `translateX(${scrollPosition}px)` }">
       <div
-          v-for="room in rooms"
+          v-for="room in filteredRooms"
           :key="room.id"
           class="room-card"
+          :class="{ 'selected': selectedRoom && selectedRoom.id === room.id }"
           @click="handleRoomClick(room)"
       >
         <div class="room-image">
@@ -35,7 +36,19 @@
 </template>
 
 <script setup>
-import {ref, onMounted} from 'vue'
+import {ref, onMounted, computed} from 'vue'
+
+const props = defineProps({
+  roomIds: {
+    type: Array,
+    required: true,
+    default: () => []
+  }
+})
+
+const filteredRooms = computed(() => {
+  return rooms.value.filter(room => props.roomIds.includes(room.id))
+})
 
 const rooms = ref([
   {
@@ -87,9 +100,7 @@ const selectedRoom = ref(null)
 const emit = defineEmits(['roomSelected'])
 
 const handleRoomClick = (room) => {
-  if (selectedRoom.value?.id === room.id) return
-
-  const index = rooms.value.findIndex(r => r.id === room.id)
+  const index = filteredRooms.value.findIndex(r => r.id === room.id)
   scrollPosition.value = -index * 340
   selectedRoom.value = room
 
@@ -154,7 +165,7 @@ const stopAutoScroll = () => {
   position: absolute;
   top: 20px;
   left: 340px;
-  width: 620px;;
+  width: 660px;;
   height: 240px;
   background: white;
   border-radius: 12px;
@@ -195,7 +206,7 @@ const stopAutoScroll = () => {
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease,opacity 0.3s ease;
 }
 
 .room-card:hover {
@@ -222,6 +233,16 @@ const stopAutoScroll = () => {
   color: #333;
   font-weight: 500;
   background: #d5ddff;
+}
+
+.edge-mask {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: calc((100% - 1020px) / 2);
+  background: #f8f9fa;
+  z-index: 1;
+  pointer-events: none;
 }
 
 @media (max-width: 768px) {

@@ -12,7 +12,7 @@
         <!-- 下排：房间卡片 + 底部“Rooms”栏 -->
         <div class="bottom-row">
             <!-- 房间卡片 -->
-            <room-display />
+            <room-display :room-ids="roomIds"/>
         </div>
         </main>
 
@@ -24,14 +24,12 @@
     </div>
 </template>
 
-<script>
+<script setup>
+import {ref} from "vue";
+
+//TODO filter给数组
+const roomIds = ref([1, 3, 5])
 import RoomDisplay from '@/components/RoomDisplay.vue';
-export default {
-    name: 'Home',
-    components: {
-      RoomDisplay,
-    }
-}
 </script>
 
 <style>
