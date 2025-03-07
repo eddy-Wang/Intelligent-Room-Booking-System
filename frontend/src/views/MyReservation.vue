@@ -26,7 +26,7 @@
                 </div>
                 <div class="user-info">
                     <div class="user-avatar">
-                        <img src="https://images.unsplash.com/photo-1609561505734-7c42d1bbafc9?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDJ8fHxlbnwwfHx8fHw%3D" alt="User Avatar" />
+                        <img :src="userAvatar" alt="User Avatar" />
                     </div>
                     <div class="user-email">{{ user.email }}</div>
                     <div class="user-role">{{ user.role === 0 ? 'Student' : 'Staff' }}</div>
@@ -42,6 +42,7 @@
 
 <script>
 export default {
+    name: 'MyReservation',
     data() {
         return {
             reservations: [
@@ -57,6 +58,10 @@ export default {
                 email: "user@example.com",
                 role: 0, // 0 for Student, 1 for Staff
             },
+            avatarUrls: {
+                student: "https://images.unsplash.com/photo-1609561505734-7c42d1bbafc9?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDJ8fHxlbnwwfHx8fHw%3D", // Student 头像
+                staff: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHN0YWZmfGVufDB8fDB8fHww", // Staff 头像
+            },
         };
     },
     computed: {
@@ -67,6 +72,9 @@ export default {
             const start = (this.currentPage - 1) * this.itemsPerPage;
             const end = start + this.itemsPerPage;
             return this.reservations.slice(start, end);
+        },
+        userAvatar() {
+            return this.user.role === 0 ? this.avatarUrls.student : this.avatarUrls.staff;
         },
     },
     methods: {
@@ -126,9 +134,8 @@ body {
     max-width: 1750px;
     margin: 20px auto;
     padding: 20px;
-    background-color: #ffffff;
+    background-color: #eceef8;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
