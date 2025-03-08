@@ -84,6 +84,12 @@ def requestRoomDetails():
     if request.method == 'OPTIONS':
         return '', 200
     data = request.get_json()
-    room = data.get('room')
+    room_id = data.get('room_id')
+
+    room_data = get_room_detailed(room_id)
+    if room_data:
+        return create_response('001', 'Room found!', room_data)
+    else:
+        return create_response('002', 'Room not found!')
 
 
