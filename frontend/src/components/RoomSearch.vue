@@ -96,39 +96,78 @@ export default {
         {label: 'Wi-Fi', value: 'wifi'}
       ],
       activeEquipmentFilters: [],
-
-
-      startTime: '',
-      endTime: ''
     };
+  },
+
+  computed: {
+    combinedFilters() {
+      const filters = [];
+      // 添加Access過濾條件（排除默認的'all'）
+      if (this.activeAccessFilter !== 'all') {
+        filters.push({ type: 'access', value: this.activeAccessFilter });
+      }
+      // 添加Capacity過濾條件
+      if (this.activeCapacityFilter) {
+        filters.push({ type: 'capacity', value: this.activeCapacityFilter });
+      }
+      // 添加Equipment過濾條件（僅當有選中時）
+      if (this.activeEquipmentFilters.length > 0) {
+        filters.push({ type: 'equipment', value: [...this.activeEquipmentFilters] });
+      }
+      return filters;
+    }
+  },
+  watch: {
+    combinedFilters(newFilters) {
+      this.$emit('filters-updated', newFilters); // 觸發事件傳遞數組
+    }
   },
   methods: {
     handleAccessFilter(filterValue) {
       this.activeAccessFilter = filterValue;
-      this.$emit('filter-access', filterValue);
     },
-
     handleCapacityFilter(filterValue) {
-      if (this.activeCapacityFilter === filterValue) {
-        this.activeCapacityFilter = '';
-      } else {
-        this.activeCapacityFilter = filterValue;
-      }
-      this.$emit('filter-capacity', this.activeCapacityFilter);
+      this.activeCapacityFilter =
+          this.activeCapacityFilter === filterValue ? '' : filterValue;
     },
-
     handleEquipmentFilter(filterValue) {
       if (this.activeEquipmentFilters.includes(filterValue)) {
         this.activeEquipmentFilters = this.activeEquipmentFilters.filter(
-            value => value !== filterValue
+            v => v !== filterValue
         );
       } else {
         this.activeEquipmentFilters.push(filterValue);
       }
-      this.$emit('filter-equipment', this.activeEquipmentFilters);
     }
   }
 };
+//   methods: {
+//     handleAccessFilter(filterValue) {
+//       this.activeAccessFilter = filterValue;
+//       this.$emit('filter-access', filterValue);
+//     },
+//
+//     handleCapacityFilter(filterValue) {
+//       if (this.activeCapacityFilter === filterValue) {
+//         this.activeCapacityFilter = '';
+//       } else {
+//         this.activeCapacityFilter = filterValue;
+//       }
+//       this.$emit('filter-capacity', this.activeCapacityFilter);
+//     },
+//
+//     handleEquipmentFilter(filterValue) {
+//       if (this.activeEquipmentFilters.includes(filterValue)) {
+//         this.activeEquipmentFilters = this.activeEquipmentFilters.filter(
+//             value => value !== filterValue
+//         );
+//       } else {
+//         this.activeEquipmentFilters.push(filterValue);
+//       }
+//       this.$emit('filter-equipment', this.activeEquipmentFilters);
+//     }
+//   }
+// };
 </script>
 
 <style scoped>
