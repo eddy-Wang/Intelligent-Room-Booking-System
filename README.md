@@ -1,3 +1,5 @@
+I have no idea which group this repo belongs to, it should really be in repo title, but having it in the readme would help. 
+
 # Agile-Software-Engineering
 ## DIICSU Intelligent Room Booking System
 
@@ -12,3 +14,4 @@ Agile is guided by the Agile Manifesto which emphasises:
 2.	Working software over comprehensive documentation.
 3.	Customer collaboration over contract negotiation.
 4.	Responding to change over following a plan.
+
