@@ -1,4 +1,4 @@
-# DIICSU Intelligent Booking System
+# DIICSU Room Booking System
 ## by RETURN-FALSE
 This system is for all the stuffs and students in DIICSU to book rooms accroading to their role and previous booking records, while providing a beauriful and easy-to-go UI.
 
