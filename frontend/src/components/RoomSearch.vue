@@ -49,7 +49,27 @@
 
       <div class="input-section">
         <h2>Book Information</h2>
-        <div class="result-box">Detailed Room Information</div>
+        <div class="result-box">
+          <div v-if="selectedRoom" class="booking-info">
+            <p>Room: {{ selectedRoom.name }}</p>
+            <p v-if="selectedDate">Date: {{ formatDate(selectedDate) }}</p>
+            <div v-if="selectedSlots.length > 0">
+              <p>Selected Time Slots:</p>
+              <ul>
+                <li v-for="(slot, index) in selectedSlots" :key="index">
+                  {{ formatTime(slot.start) }} - {{ formatTime(slot.end) }}
+                </li>
+              </ul>
+            </div>
+            <div v-else>
+              No time slots selected
+            </div>
+            <p v-else>No time slots selected</p>
+          </div>
+          <div v-else>
+            Please select a room, date and time slots
+          </div>
+        </div>
       </div>
       <div class="input-section">
         <h2>Purpose</h2>
@@ -138,36 +158,28 @@ export default {
       } else {
         this.activeEquipmentFilters.push(filterValue);
       }
+    },
+
+
+    formatDate(date) {
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    },
+    formatTime(timeStr) {
+      return timeStr.slice(0, 5) // 保持原有格式
     }
-  }
+  },
+
+
+  props: {
+    selectedRoom: Object,
+    selectedDate: Date,
+    selectedSlots: Array
+  },
 };
-//   methods: {
-//     handleAccessFilter(filterValue) {
-//       this.activeAccessFilter = filterValue;
-//       this.$emit('filter-access', filterValue);
-//     },
-//
-//     handleCapacityFilter(filterValue) {
-//       if (this.activeCapacityFilter === filterValue) {
-//         this.activeCapacityFilter = '';
-//       } else {
-//         this.activeCapacityFilter = filterValue;
-//       }
-//       this.$emit('filter-capacity', this.activeCapacityFilter);
-//     },
-//
-//     handleEquipmentFilter(filterValue) {
-//       if (this.activeEquipmentFilters.includes(filterValue)) {
-//         this.activeEquipmentFilters = this.activeEquipmentFilters.filter(
-//             value => value !== filterValue
-//         );
-//       } else {
-//         this.activeEquipmentFilters.push(filterValue);
-//       }
-//       this.$emit('filter-equipment', this.activeEquipmentFilters);
-//     }
-//   }
-// };
 </script>
 
 <style scoped>
@@ -309,5 +321,17 @@ export default {
   transform: translateY(0);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
+.booking-info {
+  font-size: 14px;
+  line-height: 1.5;
+}
 
+.booking-info ul {
+  margin: 5px 0;
+  padding-left: 20px;
+}
+
+.booking-info li {
+  margin: 3px 0;
+}
 </style>

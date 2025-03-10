@@ -143,6 +143,7 @@ const updateScroll = () => {
 const resetSelection = () => {
   selectedRoom.value = null
   scrollPosition.value = 0
+  emit('room-unselected') // 添加新的事件触发
 }
 
 const stopAutoScroll = () => {

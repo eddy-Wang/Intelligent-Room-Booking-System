@@ -9,18 +9,29 @@
       <!-- 下排：房间卡片 + 底部“Rooms”栏 -->
       <div class="middle-row">
         <!-- 房间卡片 -->
-        <room-display :room-ids="roomIds"/>
-
+        <!--        <room-display :room-ids="roomIds"/>-->
+        <room-display
+            :room-ids="roomIds"
+            @room-selected="handleRoomSelected"
+            @room-unselected="handleRoomUnselected"
+        />
       </div>
       <div class="bottom-row">
-        <time-table/>
+        <!--        <time-table/>-->
+        <time-table @time-selected="handleTimeSelection"/>
       </div>
 
     </main>
 
     <!-- 右侧区域（第三列） -->
     <div class="right-column">
-      <room-search @filters-updated="handleFilters"/>
+      <!--      <room-search @filters-updated="handleFilters"/>-->
+      <room-search
+          @filters-updated="handleFilters"
+          :selected-room="selectedRoom"
+          :selected-date="selectedDate"
+          :selected-slots="selectedSlots"
+      />
     </div>
   </div>
 </template>
@@ -90,6 +101,27 @@ const handleFilters = (filters) => {
 
   // 提取过滤后的ID
   roomIds.value = filteredRooms.map(room => room.id)
+}
+
+//TODO
+// 新增状态
+const selectedRoom = ref(null)
+const selectedDate = ref(null)
+const selectedSlots = ref([])
+
+// 从RoomDisplay接收选中的房间
+const handleRoomSelected = (room) => {
+  selectedRoom.value = room
+}
+const handleRoomUnselected = () => {
+  selectedRoom.value = null
+  selectedDate.value = null
+  selectedSlots.value = []
+}
+// 从TimeTable接收日期和时间段
+const handleTimeSelection = (date, slots) => {
+  selectedDate.value = date
+  selectedSlots.value = slots
 }
 </script>
 
