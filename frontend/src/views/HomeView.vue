@@ -18,7 +18,11 @@
       </div>
       <div class="bottom-row">
         <!--        <time-table/>-->
-        <time-table @time-selected="handleTimeSelection"/>
+        <time-table
+            @time-selected="handleTimeSelection"
+            :selected-room="selectedRoom"
+            :is-enabled="isTableEnabled"
+        />
       </div>
 
     </main>
@@ -29,6 +33,7 @@
       <room-search
           @filters-updated="handleFilters"
           :selected-room="selectedRoom"
+          :book-date="bookDate"
           :selected-date="selectedDate"
           :selected-slots="selectedSlots"
       />
@@ -37,21 +42,108 @@
 </template>
 
 <script setup>
+import axios from "axios";
 import {ref, computed} from "vue";
 import RoomSearch from "@/components/RoomSearch.vue";
 import TimeTable from '@/components/TimeTable.vue';
+import RoomDisplay from '@/components/RoomDisplay.vue';
+
 
 const roomIds = ref([1, 2, 3, 4, 5])
-import RoomDisplay from '@/components/RoomDisplay.vue';
-// 处理过滤器变化的回调
-//TODO: get from backend
+const isTableEnabled = ref(false);
+//room status
+const bookDate = ref(null)
+const selectedRoom = ref(null)
+const selectedDate = ref(null)
+const selectedSlots = ref([])
+
+
+//TODO: test data. can be deleted after connecting to the back end
 const roomsData = [
-  {id: 1, capacity: 20, equipment: ['projector', 'whiteboard','powerOutlets', 'wifi']},
-  {id: 2, capacity: 10, equipment: ['projector','whiteboard','computers','wifi'], access: 'staff'},
-  {id: 3, capacity: 60, equipment: ['whiteboard','powerOutlets','wifi']},
-  {id: 4, capacity: 15, equipment: ['whiteboard','outlets','wifi']},
-  {id: 5, capacity: 28, equipment: ['whiteboard','powerOutlets','wifi']}
-]
+  {
+    id: 1,
+    capacity: 20,
+    equipment: "{'projector', 'whiteboard', 'powerOutlets', 'wifi'}",
+    access: 1,
+    location: "DIICSU Sixth Floor",
+    info: "",
+    booking: [
+      {
+        booking_id: "1",
+        user_email: "2542762@dundee.ac.uk",
+        room_id: 1,
+        date: "2025-03-19",
+        time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        purpose: "test1",
+        status: "Confirmed"
+      },
+      {
+        booking_id: "2",
+        user_email: "2542762@dundee.ac.uk",
+        room_id: 1,
+        date: "2025-03-14",
+        time: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        purpose: "test2",
+        status: "Missed"
+      }
+    ]
+  },
+  {
+    id: 2,
+    capacity: 10,
+    equipment: "{'projector', 'whiteboard', 'computers', 'wifi'}",
+    access: 1,
+    location: "DIICSU Sixth Floor",
+    info: "",
+    booking: [
+      {
+        booking_id: "1",
+        user_email: "2542762@dundee.ac.uk",
+        room_id: 1,
+        date: "2025-03-19",
+        time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        purpose: "test1",
+        status: "Confirmed"
+      },
+      {
+        booking_id: "2",
+        user_email: "2542762@dundee.ac.uk",
+        room_id: 1,
+        date: "2025-03-13",
+        time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        purpose: "test2",
+        status: "Missed"
+      }
+    ]
+  },
+  {
+    id: 3,
+    capacity: 60,
+    equipment: "{'whiteboard', 'powerOutlets', 'wifi'}",
+    access: 1,
+    location: "DIICSU Sixth Floor",
+    info: "",
+    booking: []
+  },
+  {
+    id: 4,
+    capacity: 15,
+    equipment: "{'whiteboard', 'outlets', 'wifi'}",
+    access: 1,
+    location: "DIICSU Sixth Floor",
+    info: "",
+    booking: []
+  },
+  {
+    id: 5,
+    capacity: 28,
+    equipment: "{'whiteboard', 'powerOutlets', 'wifi'}",
+    access: 1,
+    location: "DIICSU Sixth Floor",
+    info: "",
+    booking: []
+  }
+];
 
 
 const handleFilters = (filters) => {
@@ -70,16 +162,17 @@ const handleFilters = (filters) => {
           }
           // 容量过滤
         case 'capacity':
+          console.log("111");
           // 处理不同范围值
           switch (filter.value) {
-            case '0-15':
-              return room.capacity >= 0 && room.capacity <= 15
-            case '15-30': // 你关注的案例
-              return room.capacity >= 15 && room.capacity <= 30
-            case '30-45':
-              return room.capacity >= 30 && room.capacity <= 45
-            case '45-60':
-              return room.capacity >= 45 && room.capacity <= 60
+            case '1-15':
+              return room.capacity >= 1 && room.capacity <= 15
+            case '16-30': // 你关注的案例
+              return room.capacity >= 16 && room.capacity <= 30
+            case '31-45':
+              return room.capacity >= 31 && room.capacity <= 45
+            case '46-60':
+              return room.capacity >= 46 && room.capacity <= 60
             default:
               return true
           }
@@ -92,6 +185,37 @@ const handleFilters = (filters) => {
             const roomEquipments = room.equipment || [];
             return roomEquipments.includes(equip);
           });
+        case 'date-time':
+          // 如果没有选择日期或时间段则不过滤
+          if (!filter.value.date || filter.value.slots.length === 0) return true;
+          console.log(filter.value.date)
+          console.log(filter.value.slots.length)
+          // 将用户选择的日期转换为YYYY-MM-DD格式
+          const selectedDate = formatDate(filter.value.date);
+
+        function formatDate(date) {
+          if (!date) return '';
+          const d = new Date(date);
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        }
+
+          console.log(selectedDate)
+          // 检查该房间在选定日期的预订情况
+          const hasConflict = room.booking.some(booking => {
+            // 检查日期是否匹配
+            if (booking.date === selectedDate) {
+              // 检查用户选择的时间段是否与预订时间段有重叠
+              return booking.time.some(bookedSlot => filter.value.slots.includes(bookedSlot));
+            }
+            return false;
+          });
+
+          // 如果有冲突，过滤掉该房间
+          return !hasConflict;
+
 
         default:
           return true
@@ -103,32 +227,51 @@ const handleFilters = (filters) => {
   roomIds.value = filteredRooms.map(room => room.id)
 }
 
-//TODO
-// 新增状态
-const selectedRoom = ref(null)
-const selectedDate = ref(null)
-const selectedSlots = ref([])
 
 // 从RoomDisplay接收选中的房间
 const handleRoomSelected = (room) => {
-  selectedRoom.value = room
-}
+  selectedRoom.value = room;
+  isTableEnabled.value = true; // 启用 TimeTable
+};
+
 const handleRoomUnselected = () => {
-  selectedRoom.value = null
-  selectedDate.value = null
-  selectedSlots.value = []
-}
+  selectedRoom.value = null;
+  selectedDate.value = null;
+  selectedSlots.value = [];
+  isTableEnabled.value = false; // 禁用 TimeTable
+};
+
 // 从TimeTable接收日期和时间段
 const handleTimeSelection = (date, slots) => {
-  selectedDate.value = date
-  selectedSlots.value = slots
-}
+  bookDate.value = date;
+  selectedSlots.value = slots;
+};
+
+
+// TODO: connect to back end
+// const fetchRoomData = async () => {
+//   try {
+//     const response = await axios.get('https://backend-api.com/rooms');
+//     roomsData.value = response.data; // 将获取的数据存储到 roomsData 中
+//   } catch (error) {
+//     console.error("获取房间信息失败:", error);
+//   }
+// };
+//
+// // 在组件挂载时调用 fetchRoomData
+// onMounted(() => {
+//   fetchRoomData();
+// });
 </script>
 
 <style>
+body {
+  font-family: 'Cambria', serif;
+}
+
 .home-container {
-  display: flex; /* 关键：横向排列子元素 */
-  align-items: start; /* 可选：让它们顶对齐 */
+  display: flex;
+  align-items: start;
   width: 100%;
   height: 100%;
 }
@@ -176,8 +319,8 @@ const handleTimeSelection = (date, slots) => {
 /* ========== 右侧列 ========== */
 .right-column {
   background-color: #eceef8;
-  padding: 20px;
-  width: 450px;
-
+  padding: 10px;
+  width: 28%;
+  height: 100%;
 }
 </style>
