@@ -45,7 +45,7 @@ def verify_code():
     if not user_email or not entered_code:
         return create_response('003', 'Email and code are required!')
 
-    # Check if the verification code is expired (5 seconds limit)
+    # Check if the verification code is expired (60 seconds limit)
     if user_email in verification_codes:
         code_data = verification_codes[user_email]
         current_time = time.time()

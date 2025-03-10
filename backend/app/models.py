@@ -66,8 +66,6 @@ def get_all_room_data():
             location = row[5]
             info = row[6]
 
-
-
             room_data = {
                 "room_id": room_id,
                 "name": room_name,
@@ -77,7 +75,16 @@ def get_all_room_data():
                 "location": location,
                 "info": info if info else ""
             }
+
+            booking_records = json.loads(get_booking_record_of_a_room(room_id))
+            room_data["booking"] = booking_records
+
+            class_data = json.loads(get_class_of_a_room(room_id))
+            room_data["class"] = class_data
+
             rooms[room_id] = room_data
+
+        print(json.dumps(rooms))
         return json.dumps(rooms, indent=4, ensure_ascii=False)
 
     return None
@@ -114,17 +121,22 @@ def get_booking_record_of_a_room(room_id):
 
     return json.dumps(booking_records, default=str)
 
+def get_class_of_a_room(room_id):
+    return json.dumps([], default=str)
+
 def get_room_detailed(room_id):
     all_rooms = json.loads(get_all_room_data())
     this_room = all_rooms.get(str(room_id), None)
 
     if this_room:
         this_room["booking"] = json.loads(get_booking_record_of_a_room(this_room["room_id"]))
+        this_room["class"] = json.loads(get_class_of_a_room(this_room["room_id"]))
         print(json.dumps(this_room, default=str))
         return json.dumps(this_room, default=str)
 
     return None
 
 if __name__ == '__main__':
+    get_all_room_data()
     get_room_detailed(1)
 
