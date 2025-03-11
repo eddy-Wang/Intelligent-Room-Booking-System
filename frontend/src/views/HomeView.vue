@@ -91,7 +91,6 @@ const handleFilters = (filters) => {
           }
           // 容量过滤
         case 'capacity':
-          console.log("111");
           // 处理不同范围值
           switch (filter.value) {
             case '1-15':
@@ -118,25 +117,18 @@ const handleFilters = (filters) => {
           // 如果没有选择日期或时间段则不过滤
           if (!filter.value.date || filter.value.slots.length === 0) return true;
           console.log(filter.value.date)
-          console.log(filter.value.slots.length)
+          console.log(filter.value.slots)
           // 将用户选择的日期转换为YYYY-MM-DD格式
           const selectedDate = formatDate(filter.value.date);
 
-        function formatDate(date) {
-          if (!date) return '';
-          const d = new Date(date);
-          const year = d.getFullYear();
-          const month = String(d.getMonth() + 1).padStart(2, '0');
-          const day = String(d.getDate()).padStart(2, '0');
-          return `${year}-${month}-${day}`;
-        }
-
-          console.log(selectedDate)
+          console.log("date:",selectedDate)
           // 检查该房间在选定日期的预订情况
           const hasConflict = room.booking.some(booking => {
+            console.log("当前过滤条件：", filters);
             // 检查日期是否匹配
             if (booking.date === selectedDate) {
               // 检查用户选择的时间段是否与预订时间段有重叠
+              //TODO:class timetable filter
               return booking.time.some(bookedSlot => filter.value.slots.includes(bookedSlot));
             }
             return false;
@@ -156,7 +148,14 @@ const handleFilters = (filters) => {
   roomIds.value = filteredRooms.map(room => room.id)
 }
 
-
+function formatDate(date) {
+  if (!date) return '';
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 // 从RoomDisplay接收选中的房间
 const handleRoomSelected = (room) => {
   selectedRoom.value = room;
