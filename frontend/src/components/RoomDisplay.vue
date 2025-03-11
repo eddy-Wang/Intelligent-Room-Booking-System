@@ -1,19 +1,22 @@
 <template>
   <div class="room-display" @mousemove="handleMouseMove" @mouseleave="stopAutoScroll">
-    <div class="edge-mask left"></div>
-    <div class="edge-mask right"></div>
-
-    <div class="rooms-container" :style="{ transform: `translateX(${scrollPosition}px)` }">
-      <div
-          v-for="room in rooms"
-          :key="room.id"
-          class="room-card"
-          @click="handleRoomClick(room)"
-      >
-        <div class="room-image">
-          <img :src="room.image" :alt="room.name">
+    <div class="rooms-container" :style="{ transform: `translateX(${scrollPosition}%)` }">
+      <template v-if="filteredRooms.length > 0">
+        <div
+            v-for="room in filteredRooms"
+            :key="room.id"
+            class="room-card"
+            :class="{ 'selected': selectedRoom && selectedRoom.id === room.id }"
+            @click="handleRoomClick(room)"
+        >
+          <div class="room-image">
+            <img :src="room.image" :alt="room.name">
+          </div>
+          <div class="room-name"><strong>{{ room.name }}</strong></div>
         </div>
-        <div class="room-name">{{ room.name }}</div>
+      </template>
+      <div v-else class="placeholder" >
+        No rooms available.
       </div>
     </div>
 
@@ -30,18 +33,33 @@
         <button class="close-btn" @click="resetSelection">×</button>
       </div>
     </transition>
-
   </div>
 </template>
 
 <script setup>
-import {ref, onMounted} from 'vue'
+import {ref, computed, watch} from 'vue'
+
+const props = defineProps({
+  roomIds: {
+    type: Array,
+    required: true,
+    default: () => []
+  }
+})
+
+const filteredRooms = computed(() => {
+  return rooms.value.filter(room => props.roomIds.includes(room.id))
+})
+const shouldScroll = computed(() => {
+  return filteredRooms.value.length > 3
+})
+
 
 const rooms = ref([
   {
     id: 1,
     name: 'Informal Meeting Room',
-    image: new URL('@/assets/room1.png', import.meta.url).href,
+    image: new URL('@/assets/informal-meeting.png', import.meta.url).href,
     capacity: '15-30',
     equipment: ['Projector', 'Whiteboard', 'Power Outlets', 'Wi-Fi'],
     access: 'All'
@@ -49,15 +67,15 @@ const rooms = ref([
   {
     id: 2,
     name: 'Formal Meeting Room',
-    image: new URL('@/assets/room1.png', import.meta.url).href,
+    image: new URL('@/assets/formal-meeting.png', import.meta.url).href,
     capacity: '30-45',
     equipment: ['Projector', 'Whiteboard', 'Computers', 'Wi-Fi'],
     access: 'Staff Only'
   },
   {
     id: 3,
-    name: '635',
-    image: new URL('@/assets/2.png', import.meta.url).href,
+    name: 'Room 635',
+    image: new URL('@/assets/635.png', import.meta.url).href,
     capacity: '15-30',
     equipment: ['Whiteboard', 'Power Outlets', 'Wi-Fi'],
     access: 'All'
@@ -65,14 +83,14 @@ const rooms = ref([
   {
     id: 4,
     name: 'English Corridor',
-    image: new URL('@/assets/room1.png', import.meta.url).href,
+    image: new URL('@/assets/corridor.png', import.meta.url).href,
     capacity: '15-30',
     equipment: ['Whiteboard', 'Power Outlets', 'Wi-Fi'],
     access: 'All'
   }, {
     id: 5,
     name: 'Seminar Room',
-    image: new URL('@/assets/room1.png', import.meta.url).href,
+    image: new URL('@/assets/seminar-room.png', import.meta.url).href,
     capacity: '15-30',
     equipment: ['Whiteboard', 'Power Outlets', 'Wi-Fi'],
     access: 'All'
@@ -87,39 +105,47 @@ const selectedRoom = ref(null)
 const emit = defineEmits(['roomSelected'])
 
 const handleRoomClick = (room) => {
-  if (selectedRoom.value?.id === room.id) return
+  const index = filteredRooms.value.findIndex(r => r.id === room.id)
 
-  const index = rooms.value.findIndex(r => r.id === room.id)
-  scrollPosition.value = -index * 340
+  scrollPosition.value = -index * 38;
   selectedRoom.value = room
 
   isScrolling.value = false
   emit('roomSelected', room)
 }
+
 const handleMouseMove = (e) => {
-  if (selectedRoom.value) return
-  const container = e.currentTarget
-  const containerRect = container.getBoundingClientRect()
-  const mouseX = e.clientX - containerRect.left
-  const containerCenter = containerRect.width / 2
+  if (selectedRoom.value || !shouldScroll.value) return;
 
-  const distance = mouseX - containerCenter
+  const container = e.currentTarget;
+  const containerRect = container.getBoundingClientRect();
+  const mouseX = e.clientX - containerRect.left;
+  const containerCenter = containerRect.width / 2;
 
-  if (Math.abs(distance) > 150) {
-    scrollSpeed.value = -(distance / containerRect.width) * 8
-    isScrolling.value = true
-    updateScroll()
+  const distanceRatio = (mouseX - containerCenter) / containerCenter;
+
+  const sensitivity = 0.5;
+  const maxScrollSpeed = 4;
+
+  scrollSpeed.value = -distanceRatio * sensitivity * maxScrollSpeed;
+
+  if (Math.abs(distanceRatio) > 0.2) {
+    isScrolling.value = true;
+    updateScroll();
   } else {
-    isScrolling.value = false
+    isScrolling.value = false;
   }
-}
+};
 
 const updateScroll = () => {
   if (!isScrolling.value) return
 
   scrollPosition.value += scrollSpeed.value
-  const maxScroll = -((rooms.value.length - 3) * 340)
-  scrollPosition.value = Math.max(Math.min(0, scrollPosition.value), maxScroll)
+  const cardWidthPercent = 35.5;
+  const totalCardsWidthPercent = filteredRooms.value.length * (cardWidthPercent)
+  const maxScrollPercent = 100 - totalCardsWidthPercent;
+
+  scrollPosition.value = Math.max(Math.min(0, scrollPosition.value), maxScrollPercent);
 
   if (isScrolling.value) {
     requestAnimationFrame(updateScroll)
@@ -129,6 +155,7 @@ const updateScroll = () => {
 const resetSelection = () => {
   selectedRoom.value = null
   scrollPosition.value = 0
+  emit('room-unselected')
 }
 
 const stopAutoScroll = () => {
@@ -136,6 +163,11 @@ const stopAutoScroll = () => {
   isScrolling.value = false
   scrollPosition.value = 0
 }
+watch(filteredRooms, (newValue, oldValue) => {
+  if (newValue !== oldValue) {
+    resetSelection()
+  }
+})
 </script>
 
 <style scoped>
@@ -152,10 +184,9 @@ const stopAutoScroll = () => {
 
 .room-info {
   position: absolute;
-  top: 20px;
-  left: 340px;
-  width: 620px;;
-  height: 240px;
+  left: 34.5%;
+  width: 65%;
+  height: 90%;
   background: white;
   border-radius: 12px;
   padding: 20px;
@@ -164,35 +195,34 @@ const stopAutoScroll = () => {
 }
 
 .room-display {
-  width: 1020px;
-  height: 280px;
+  width: 100%;
+  height: 100% ;
   overflow: hidden;
   position: relative;
   background: #eceef8;
-  padding: 20px 0;
   display: flex;
-  justify-content: center;
+  padding: 16px;
 }
 
 .rooms-container {
-  width: 1020px;
-  max-width: 1020px;
-  margin: auto auto;
+  background: #eceef8;
+  width: 100%;
+  height: 100%;
+  max-width: 90%;
+  margin: auto 0;
   display: flex;
-  gap: 20px;
+  gap: 2%;
   position: relative;
   transition: transform 0.3s ease-out;
 }
 
 .room-card {
-  width: 320px;
-  min-width: 320px;
-  max-width: 320px;
-  height: 240px;
+  width: 36%;
+  height: 100%;
   flex-shrink: 0;
   border-radius: 12px;
   overflow: hidden;
-  background: white;
+  background: #eceef8;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: transform 0.3s ease;
@@ -223,6 +253,18 @@ const stopAutoScroll = () => {
   font-weight: 500;
   background: #d5ddff;
 }
+.placeholder {
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  font-size: 18px;
+  color: #666;
+  padding: 108px;
+  background: #eceef8;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 
 @media (max-width: 768px) {
   .room-card {
@@ -230,21 +272,4 @@ const stopAutoScroll = () => {
   }
 }
 
-.edge-mask {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: calc((100% - 1020px) / 2);
-  background: #f8f9fa;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.edge-mask.left {
-  left: 0;
-}
-
-.edge-mask.right {
-  right: 0;
-}
 </style>

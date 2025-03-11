@@ -1,6 +1,8 @@
 import router from './router'
 import {createApp} from "vue";
 import App from "@/App.vue";
+import ElementPlus from 'element-plus';
+import 'element-plus/dist/index.css';
 
 // about Vuetify
 import 'vuetify/styles'
@@ -25,6 +27,7 @@ const app = createApp(App)
 // use vuetify and router
 app.use(vuetify)
 app.use(router)
+app.use(ElementPlus);
 
 // mount svgicon globally
 app.component('SvgIcon', SvgIcon)
