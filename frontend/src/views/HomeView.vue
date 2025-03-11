@@ -65,6 +65,7 @@ const fetchData = async () => {
     }
     const data = await response.json();
     roomsData.value = data.data
+    console.log(roomsData.value)
   } catch (err) {
   }
 };

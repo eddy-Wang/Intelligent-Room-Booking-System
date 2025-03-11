@@ -9,13 +9,17 @@
             <span class="month-year">{{ currentMonth }} {{ currentYear }}</span>
             <button @click="nextMonth" class="nav-button">›</button>
           </div>
+
           <div class="calendar-grid">
             <div class="calendar-weekday" v-for="day in weekdays" :key="day">{{ day }}</div>
             <div
                 v-for="day in daysInMonth"
                 :key="day.date"
-                :class="['calendar-day', { 'selected': isSelected(day.date), 'disabled': !day.isCurrentMonth }]"
-                @click="selectDate(day.date)"
+                :class="['calendar-day', {
+    'selected': isSelected(day.date),
+    'disabled': !day.isCurrentMonth || day.isPastDate
+  }]"
+                @click="!day.isPastDate && selectDate(day.date)"
             >
               {{ day.day }}
             </div>
@@ -75,7 +79,7 @@ export default {
   computed: {
     // 当前月份和年份
     currentMonth() {
-      return this.currentDate.toLocaleString('en-US', { month: 'long' }); // 英文月份
+      return this.currentDate.toLocaleString('en-US', {month: 'long'}); // 英文月份
     },
     currentYear() {
       return this.currentDate.getFullYear();
@@ -88,23 +92,35 @@ export default {
       const lastDay = new Date(year, month + 1, 0);
       const days = [];
 
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       // 填充上个月的日期
       for (let i = firstDay.getDay(); i > 0; i--) {
         const date = new Date(year, month, -i + 1);
-        days.push({ day: date.getDate(), date: this.formatDate(date), isCurrentMonth: false });
+        days.push({
+          day: date.getDate(), date: this.formatDate(date), isCurrentMonth: false,
+          isPastDate: date < today
+        });
       }
 
       // 填充当前月的日期
       for (let i = 1; i <= lastDay.getDate(); i++) {
         const date = new Date(year, month, i);
-        days.push({ day: i, date: this.formatDate(date), isCurrentMonth: true });
+        days.push({
+          day: i, date: this.formatDate(date), isCurrentMonth: true,
+          isPastDate: date < today
+        });
       }
 
       // 填充下个月的日期
       const nextMonthDays = 7 - (days.length % 7);
       for (let i = 1; i <= nextMonthDays; i++) {
         const date = new Date(year, month + 1, i);
-        days.push({ day: date.getDate(), date: this.formatDate(date), isCurrentMonth: false });
+        days.push({
+          day: date.getDate(), date: this.formatDate(date), isCurrentMonth: false,
+          isPastDate: date < today
+        });
       }
 
       return days;
@@ -124,6 +140,15 @@ export default {
     selectDate(date) {
       this.selectedDate = new Date(date);
       this.handleDateSelection();
+
+
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) {
+        return;
+      }
+      this.selectedDate = selectedDate;
+      this.handleDateSelection();
+
     },
     // 判断日期是否被选中
     isSelected(date) {
@@ -161,10 +186,8 @@ export default {
 
       if (this.timeSlots[index].status === 1) {
         this.timeSlots[index].status = 2;
-        this.bookings[dateKey][index] = 1;
       } else if (this.timeSlots[index].status === 2) {
         this.timeSlots[index].status = 1;
-        this.bookings[dateKey][index] = 0;
       }
 
       this.emitSelection();
@@ -272,7 +295,9 @@ body {
 .calendar-day.disabled {
   color: #ccc;
   cursor: not-allowed;
+  pointer-events: none;
 }
+
 
 /* 时间槽部分 */
 .time-slots-container {
