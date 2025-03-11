@@ -1,24 +1,21 @@
 import mysql.connector
-import json
-# from .config import Config
+import ujson
+import ujson as json
+from mysql.connector import Error
 
+# Database connection setup
 def get_db_connection():
     connection = mysql.connector.connect(
-        # host=Config.DB_HOST,
-        # port=Config.DB_PORT,
-        # user=Config.DB_USER,
-        # password=Config.DB_PASSWORD,
-        # database=Config.DB_NAME,
         host='diidrbs.mysql.polardb.rds.aliyuncs.com',
-        port = 3306,
-        user = 'administrator',
-        password = '!admin123',
-        database = 'diidrbs',
+        port=3306,
+        user='administrator',
+        password='!admin123',
+        database='diidrbs',
     )
     return connection
 
+# Check if the email exists
 def check_email_exists(email):
-    """check if the email exists"""
     connection = get_db_connection()
     cursor = connection.cursor()
     query = "SELECT email FROM users WHERE email = %s"
@@ -28,8 +25,8 @@ def check_email_exists(email):
     connection.close()
     return result is not None
 
+# Get user data by email
 def get_user_data_by_email(email):
-    """get user data by email"""
     connection = get_db_connection()
     cursor = connection.cursor()
     query = "SELECT email, name, permission FROM users WHERE email = %s"
@@ -42,6 +39,7 @@ def get_user_data_by_email(email):
         return {'email': result[0], 'name': result[1], 'permission': result[2]}
     return None
 
+# Get all room data
 def get_all_room_data():
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -55,7 +53,7 @@ def get_all_room_data():
         connection.close()
 
     if result:
-        rooms = {}
+        rooms = []
 
         for row in result:
             room_id = row[0]
@@ -67,7 +65,7 @@ def get_all_room_data():
             info = row[6]
 
             room_data = {
-                "room_id": room_id,
+                "id": room_id,
                 "name": room_name,
                 "access": access,
                 "capacity": capacity,
@@ -76,67 +74,67 @@ def get_all_room_data():
                 "info": info if info else ""
             }
 
-            booking_records = json.loads(get_booking_record_of_a_room(room_id))
+            booking_records = ujson.loads(get_booking_record_of_a_room(room_id))
             room_data["booking"] = booking_records
 
-            class_data = json.loads(get_class_of_a_room(room_id))
+            class_data = ujson.loads(get_class_of_a_room(room_id))
             room_data["class"] = class_data
 
-            rooms[room_id] = room_data
+            rooms.append(room_data)
 
-        print(json.dumps(rooms))
-        return json.dumps(rooms, indent=4, ensure_ascii=False)
+        return rooms
 
     return None
 
+# Get booking records of a room and return as JSON
 def get_booking_record_of_a_room(room_id):
-    """Get booking records of a room and return as JSON"""
     connection = get_db_connection()
     cursor = connection.cursor()
 
     try:
         query = "SELECT * FROM booking WHERE room_id = %s"
         cursor.execute(query, (room_id,))
-
-        # Fetch all results before closing cursor
         results = cursor.fetchall()
-
     finally:
-        cursor.close()  # Now safe to close since all results are fetched
+        cursor.close()
         connection.close()
 
     booking_records = []
 
     for row in results:
+        time_str = row[4]
+        time_points = time_str.split(",")
+        time_array = [int(point) for point in time_points]
+
         booking_record = {
             "booking_id": row[0],
             "user_email": row[1],
             "room_id": row[2],
             "date": row[3],
-            "time": row[4],
+            "time": time_array,
             "purpose": row[5],
             "status": row[6],
         }
         booking_records.append(booking_record)
 
-    return json.dumps(booking_records, default=str)
+    return ujson.dumps(booking_records, default=str)
 
+# Get class of a room
 def get_class_of_a_room(room_id):
-    return json.dumps([], default=str)
+    return ujson.dumps([], default=str)
 
+# Get detailed room data
 def get_room_detailed(room_id):
-    all_rooms = json.loads(get_all_room_data())
+    all_rooms = ujson.loads(get_all_room_data())
     this_room = all_rooms.get(str(room_id), None)
 
     if this_room:
-        this_room["booking"] = json.loads(get_booking_record_of_a_room(this_room["room_id"]))
-        this_room["class"] = json.loads(get_class_of_a_room(this_room["room_id"]))
-        print(json.dumps(this_room, default=str))
-        return json.dumps(this_room, default=str)
+        this_room["booking"] = ujson.loads(get_booking_record_of_a_room(this_room["id"]))
+        this_room["class"] = ujson.loads(get_class_of_a_room(this_room["id"]))
+        return this_room
 
     return None
 
 if __name__ == '__main__':
     get_all_room_data()
-    get_room_detailed(1)
 

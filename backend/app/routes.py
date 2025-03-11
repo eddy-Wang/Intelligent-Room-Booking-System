@@ -91,5 +91,3 @@ def requestRoomDetails():
         return create_response('001', 'Room found!', room_data)
     else:
         return create_response('002', 'Room not found!')
-
-
