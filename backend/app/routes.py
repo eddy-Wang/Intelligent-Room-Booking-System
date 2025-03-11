@@ -67,3 +67,31 @@ def verify_code():
             return create_response('004', 'Invalid code, please try again.')
     else:
         return create_response('007', 'No verification code sent. Please request a new code.')
+from flask import Blueprint, request, jsonify
+from .models import get_user_reservations, cancel_reservation
+
+bp = Blueprint('routes', __name__)
+
+@bp.route('/get-reservations', methods=['POST'])
+def get_reservations():
+    data = request.get_json()
+    user_email = data.get('email')
+
+    if not user_email:
+        return create_response('001', 'Email is required!')
+
+    reservations = get_user_reservations(user_email)
+    return create_response('000', 'Reservations retrieved successfully!', reservations)
+
+@bp.route('/cancel-reservation', methods=['POST'])
+def cancel_reservation_route():
+    data = request.get_json()
+    booking_id = data.get('booking_id')
+
+    if not booking_id:
+        return create_response('001', 'Booking ID is required!')
+
+    if cancel_reservation(booking_id):
+        return create_response('000', 'Reservation cancelled successfully!')
+    else:
+        return create_response('002', 'Failed to cancel reservation. It may already be processed or does not exist.')
