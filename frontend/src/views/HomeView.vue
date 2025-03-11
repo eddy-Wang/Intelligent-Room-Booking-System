@@ -12,6 +12,7 @@
         <!--        <room-display :room-ids="roomIds"/>-->
         <room-display
             :room-ids="roomIds"
+            :rooms="roomsData"
             @room-selected="handleRoomSelected"
             @room-unselected="handleRoomUnselected"
         />
@@ -42,115 +43,127 @@
 </template>
 
 <script setup>
-import axios from "axios";
-import {ref, computed} from "vue";
+import {onMounted, ref} from "vue";
 import RoomSearch from "@/components/RoomSearch.vue";
 import TimeTable from '@/components/TimeTable.vue';
 import RoomDisplay from '@/components/RoomDisplay.vue';
 
 
-const roomIds = ref([1, 2, 3, 4, 5])
+const roomIds = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
 const isTableEnabled = ref(false);
 //room status
 const bookDate = ref(null)
 const selectedRoom = ref(null)
 const selectedDate = ref(null)
 const selectedSlots = ref([])
+const roomsData = ref([])
 
-
-//TODO: test data. can be deleted after connecting to the back end
-const roomsData = [
-  {
-    id: 1,
-    capacity: 20,
-    equipment: "{'projector', 'whiteboard', 'powerOutlets', 'wifi'}",
-    access: 1,
-    location: "DIICSU Sixth Floor",
-    info: "",
-    booking: [
-      {
-        booking_id: "1",
-        user_email: "2542762@dundee.ac.uk",
-        room_id: 1,
-        date: "2025-03-19",
-        time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        purpose: "test1",
-        status: "Confirmed"
-      },
-      {
-        booking_id: "2",
-        user_email: "2542762@dundee.ac.uk",
-        room_id: 1,
-        date: "2025-03-14",
-        time: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-        purpose: "test2",
-        status: "Missed"
-      }
-    ]
-  },
-  {
-    id: 2,
-    capacity: 10,
-    equipment: "{'projector', 'whiteboard', 'computers', 'wifi'}",
-    access: 1,
-    location: "DIICSU Sixth Floor",
-    info: "",
-    booking: [
-      {
-        booking_id: "1",
-        user_email: "2542762@dundee.ac.uk",
-        room_id: 1,
-        date: "2025-03-19",
-        time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        purpose: "test1",
-        status: "Confirmed"
-      },
-      {
-        booking_id: "2",
-        user_email: "2542762@dundee.ac.uk",
-        room_id: 1,
-        date: "2025-03-13",
-        time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-        purpose: "test2",
-        status: "Missed"
-      }
-    ]
-  },
-  {
-    id: 3,
-    capacity: 60,
-    equipment: "{'whiteboard', 'powerOutlets', 'wifi'}",
-    access: 1,
-    location: "DIICSU Sixth Floor",
-    info: "",
-    booking: []
-  },
-  {
-    id: 4,
-    capacity: 15,
-    equipment: "{'whiteboard', 'outlets', 'wifi'}",
-    access: 1,
-    location: "DIICSU Sixth Floor",
-    info: "",
-    booking: []
-  },
-  {
-    id: 5,
-    capacity: 28,
-    equipment: "{'whiteboard', 'powerOutlets', 'wifi'}",
-    access: 1,
-    location: "DIICSU Sixth Floor",
-    info: "",
-    booking: []
+const fetchData = async () => {
+  try {
+    const response = await fetch('http://172.20.10.3:8080/allRoom');
+    if (!response.ok) {
+    }
+    const data = await response.json();
+    roomsData.value = data.data
+  } catch (err) {
   }
-];
+};
+onMounted(() => {
+  fetchData()
+})
+// TODO: test data. can be deleted after connecting to the back end
+// const roomsData = [
+//   {
+//     id: 1,
+//     capacity: 20,
+//     equipment: "{'projector', 'whiteboard', 'powerOutlets', 'wifi'}",
+//     access: 1,
+//     location: "DIICSU Sixth Floor",
+//     info: "",
+//     booking: [
+//       {
+//         booking_id: "1",
+//         user_email: "2542762@dundee.ac.uk",
+//         room_id: 1,
+//         date: "2025-03-19",
+//         time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+//         purpose: "test1",
+//         status: "Confirmed"
+//       },
+//       {
+//         booking_id: "2",
+//         user_email: "2542762@dundee.ac.uk",
+//         room_id: 1,
+//         date: "2025-03-14",
+//         time: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+//         purpose: "test2",
+//         status: "Missed"
+//       }
+//     ]
+//   },
+//   {
+//     id: 2,
+//     capacity: 10,
+//     equipment: "{'projector', 'whiteboard', 'computers', 'wifi'}",
+//     access: 1,
+//     location: "DIICSU Sixth Floor",
+//     info: "",
+//     booking: [
+//       {
+//         booking_id: "1",
+//         user_email: "2542762@dundee.ac.uk",
+//         room_id: 1,
+//         date: "2025-03-19",
+//         time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+//         purpose: "test1",
+//         status: "Confirmed"
+//       },
+//       {
+//         booking_id: "2",
+//         user_email: "2542762@dundee.ac.uk",
+//         room_id: 1,
+//         date: "2025-03-13",
+//         time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+//         purpose: "test2",
+//         status: "Missed"
+//       }
+//     ]
+//   },
+//   {
+//     id: 3,
+//     capacity: 60,
+//     equipment: "{'whiteboard', 'powerOutlets', 'wifi'}",
+//     access: 1,
+//     location: "DIICSU Sixth Floor",
+//     info: "",
+//     booking: []
+//   },
+//   {
+//     id: 4,
+//     capacity: 15,
+//     equipment: "{'whiteboard', 'outlets', 'wifi'}",
+//     access: 1,
+//     location: "DIICSU Sixth Floor",
+//     info: "",
+//     booking: []
+//   },
+//   {
+//     id: 5,
+//     capacity: 28,
+//     equipment: "{'whiteboard', 'powerOutlets', 'wifi'}",
+//     access: 1,
+//     location: "DIICSU Sixth Floor",
+//     info: "",
+//     booking: []
+//   }
+// ];
 
 
 const handleFilters = (filters) => {
   console.log("当前过滤条件：", filters);
 
   // 执行过滤
-  const filteredRooms = roomsData.filter(room => {
+  const filteredRooms = roomsData.value.filter(room => {
     // 检查所有过滤器是否都满足
     return filters.every(filter => {
       switch (filter.type) {
@@ -158,7 +171,7 @@ const handleFilters = (filters) => {
           if (filter.value === 'all') {
             return true; // 显示全部房间
           } else {
-            return room.access === filter.value; // 严格匹配 access 值
+            return room.access === 1; // 严格匹配 access 值
           }
           // 容量过滤
         case 'capacity':
@@ -246,22 +259,6 @@ const handleTimeSelection = (date, slots) => {
   bookDate.value = date;
   selectedSlots.value = slots;
 };
-
-
-// TODO: connect to back end
-// const fetchRoomData = async () => {
-//   try {
-//     const response = await axios.get('https://backend-api.com/rooms');
-//     roomsData.value = response.data; // 将获取的数据存储到 roomsData 中
-//   } catch (error) {
-//     console.error("获取房间信息失败:", error);
-//   }
-// };
-//
-// // 在组件挂载时调用 fetchRoomData
-// onMounted(() => {
-//   fetchRoomData();
-// });
 </script>
 
 <style>
