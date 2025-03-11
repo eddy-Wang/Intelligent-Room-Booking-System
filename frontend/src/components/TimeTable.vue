@@ -63,25 +63,17 @@ export default {
   },
   watch: {
     childData(newVal, oldVal) {
-      console.log("old:",oldVal)
-      console.log("new:",newVal)
+      console.log("old:", oldVal);
+      console.log("new:", newVal);
+      this.updateBookings(newVal);
+      this.handleDateSelection(); // 更新时间槽状态
     }
   },
   data() {
     return {
       selectedDate: null,
       currentDate: new Date(), // 当前显示的月份
-      bookings: {
-        '2025-03-07': new Array(12).fill(0),
-        '2025-03-08': new Array(12).fill(0),
-        '2025-03-09': [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-        '2025-03-10': new Array(12).fill(1),
-        '2025-03-11': [1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0],
-        '2025-03-12': new Array(12).fill(1),
-        '2025-03-13': new Array(12).fill(1),
-        '2025-03-14': new Array(12).fill(1),
-        '2025-03-15': new Array(12).fill(1),
-      },
+      bookings: {}, // 初始化为空对象，等待 childData 注入
       timeSlots: Array(12).fill().map((_, index) => ({
         start: ['08:00', '08:55', '10:00', '10:55', '12:00', '12:55', '14:00', '14:55', '16:00', '16:55', '19:00', '19:55'][index],
         end: ['08:45', '09:40', '10:45', '11:40', '12:45', '13:40', '14:45', '15:40', '16:45', '17:40', '19:45', '20:40'][index],
@@ -153,17 +145,16 @@ export default {
     },
     // 选择日期
     selectDate(date) {
-      this.selectedDate = new Date(date);
-      this.handleDateSelection();
-
-
+      const selectedDate = new Date(date);
+      const today = new Date();
       today.setHours(0, 0, 0, 0);
+
       if (selectedDate < today) {
         return;
       }
+
       this.selectedDate = selectedDate;
       this.handleDateSelection();
-
     },
     // 判断日期是否被选中
     isSelected(date) {
@@ -225,7 +216,36 @@ export default {
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
-    }
+    },
+    // 将 childData 转换为 bookings 对象
+    updateBookings(bookingsArray) {
+      this.bookings = {}; // 清空旧的 bookings
+
+      bookingsArray.forEach(booking => {
+        const date = new Date(booking.date);
+        const timeSlots = booking.time; // 例如 [3, 7]
+
+        // 初始化当前日期及往后 7 天的时间槽
+        for (let i = 0; i < 8; i++) { // 包括当天和往后 7 天
+          const currentDate = new Date(date);
+          currentDate.setDate(date.getDate() + i);
+          const dateKey = this.formatDate(currentDate);
+
+          if (!this.bookings[dateKey]) {
+            this.bookings[dateKey] = new Array(12).fill(1); // 默认全部可用
+          }
+
+          // 如果是当天，标记不可用的时间槽
+          if (i === 0) {
+            timeSlots.forEach(slot => {
+              if (slot >= 0 && slot < 12) {
+                this.bookings[dateKey][slot] = 0; // 标记为不可用
+              }
+            });
+          }
+        }
+      });
+    },
   }
 };
 </script>

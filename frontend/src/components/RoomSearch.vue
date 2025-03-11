@@ -1,19 +1,6 @@
 <template>
   <div class="panel">
     <div class="panel-content">
-      <div class="filter-section">
-        <h2>Room Access</h2>
-        <div class="button-filters">
-          <button
-              v-for="(filter, index) in accessFilters"
-              :key="index"
-              :class="{ 'active-filter': activeAccessFilter === filter.value }"
-              @click="handleAccessFilter(filter.value)"
-          >
-            {{ filter.label }}
-          </button>
-        </div>
-      </div>
 
       <!-- Capacity  -->
       <div class="filter-section">
@@ -51,7 +38,7 @@
 
         <div class="date-picker">
 
-          <div  class="date-picker-toggle">
+          <div class="date-picker-toggle">
             <vue3-datepicker
                 placeholder="Select a date"
                 v-model="selectedDate"
@@ -119,7 +106,7 @@
             class="input-box"
             placeholder="Enter purpose..."
             rows="3"
-            style="max-height: 60px; overflow-y: auto;"
+            style="max-height: 80px; overflow-y: auto;"
         ></textarea>
       </div>
       <button class="book-button" @click="handleBook">Book</button>
@@ -160,12 +147,12 @@ export default {
 
       // Available Equipment
       equipmentFilters: [
-        {label: 'Projector', value: 'projector'},
-        {label: 'Whiteboard', value: 'whiteboard'},
-        {label: 'Microphone', value: 'microphone'},
-        {label: 'Computers', value: 'computers'},
-        {label: 'Power Outlets', value: 'powerOutlets'},
-        {label: 'Wi-Fi', value: 'wifi'}
+        {label: 'Projector', value: 'Projector'},
+        {label: 'Whiteboard', value: 'Whiteboard'},
+        {label: 'Microphone', value: 'Microphone'},
+        {label: 'Computer', value: 'Computer'},
+        {label: 'Power Outlets', value: 'Power Outlets'},
+        {label: 'Wi-Fi', value: 'Wi-Fi'}
       ],
       activeEquipmentFilters: [],
 
@@ -416,7 +403,7 @@ export default {
 
 .button-filters button {
   width: 100%;
-  height: 35px;
+  height: 40px;
   font-size: 18px;
   border-radius: 10px;
   background-color: #eceef8;
@@ -472,7 +459,7 @@ export default {
 
 .divider-line {
   border: none;
-  height: 1px;
+  height: 3px;
   background-color: #ddd;
   margin-top: 10px;
 }
