@@ -49,9 +49,24 @@
 </template>
 
 <script>
+import {inject} from "vue";
+
 export default {
   emits: ['time-selected'],
+  setup() {
+    // 注入父组件提供的数据
+    const childData = inject('childData');
 
+    return {
+      childData
+    };
+  },
+  watch: {
+    childData(newVal, oldVal) {
+      console.log("old:",oldVal)
+      console.log("new:",newVal)
+    }
+  },
   data() {
     return {
       selectedDate: null,

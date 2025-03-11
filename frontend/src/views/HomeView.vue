@@ -21,7 +21,6 @@
         <!--        <time-table/>-->
         <time-table
             @time-selected="handleTimeSelection"
-            :selected-room="selectedRoom"
             :is-enabled="isTableEnabled"
         />
       </div>
@@ -43,7 +42,7 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from "vue";
+import {onMounted, provide, ref} from "vue";
 import RoomSearch from "@/components/RoomSearch.vue";
 import TimeTable from '@/components/TimeTable.vue';
 import RoomDisplay from '@/components/RoomDisplay.vue';
@@ -57,6 +56,9 @@ const selectedRoom = ref(null)
 const selectedDate = ref(null)
 const selectedSlots = ref([])
 const roomsData = ref([])
+const childData = ref([])
+
+provide('childData', childData)
 
 const fetchData = async () => {
   try {
@@ -72,93 +74,6 @@ const fetchData = async () => {
 onMounted(() => {
   fetchData()
 })
-// TODO: test data. can be deleted after connecting to the back end
-// const roomsData = [
-//   {
-//     id: 1,
-//     capacity: 20,
-//     equipment: "{'projector', 'whiteboard', 'powerOutlets', 'wifi'}",
-//     access: 1,
-//     location: "DIICSU Sixth Floor",
-//     info: "",
-//     booking: [
-//       {
-//         booking_id: "1",
-//         user_email: "2542762@dundee.ac.uk",
-//         room_id: 1,
-//         date: "2025-03-19",
-//         time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-//         purpose: "test1",
-//         status: "Confirmed"
-//       },
-//       {
-//         booking_id: "2",
-//         user_email: "2542762@dundee.ac.uk",
-//         room_id: 1,
-//         date: "2025-03-14",
-//         time: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-//         purpose: "test2",
-//         status: "Missed"
-//       }
-//     ]
-//   },
-//   {
-//     id: 2,
-//     capacity: 10,
-//     equipment: "{'projector', 'whiteboard', 'computers', 'wifi'}",
-//     access: 1,
-//     location: "DIICSU Sixth Floor",
-//     info: "",
-//     booking: [
-//       {
-//         booking_id: "1",
-//         user_email: "2542762@dundee.ac.uk",
-//         room_id: 1,
-//         date: "2025-03-19",
-//         time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-//         purpose: "test1",
-//         status: "Confirmed"
-//       },
-//       {
-//         booking_id: "2",
-//         user_email: "2542762@dundee.ac.uk",
-//         room_id: 1,
-//         date: "2025-03-13",
-//         time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-//         purpose: "test2",
-//         status: "Missed"
-//       }
-//     ]
-//   },
-//   {
-//     id: 3,
-//     capacity: 60,
-//     equipment: "{'whiteboard', 'powerOutlets', 'wifi'}",
-//     access: 1,
-//     location: "DIICSU Sixth Floor",
-//     info: "",
-//     booking: []
-//   },
-//   {
-//     id: 4,
-//     capacity: 15,
-//     equipment: "{'whiteboard', 'outlets', 'wifi'}",
-//     access: 1,
-//     location: "DIICSU Sixth Floor",
-//     info: "",
-//     booking: []
-//   },
-//   {
-//     id: 5,
-//     capacity: 28,
-//     equipment: "{'whiteboard', 'powerOutlets', 'wifi'}",
-//     access: 1,
-//     location: "DIICSU Sixth Floor",
-//     info: "",
-//     booking: []
-//   }
-// ];
-
 
 const handleFilters = (filters) => {
   console.log("当前过滤条件：", filters);
@@ -246,6 +161,8 @@ const handleFilters = (filters) => {
 const handleRoomSelected = (room) => {
   selectedRoom.value = room;
   isTableEnabled.value = true; // 启用 TimeTable
+  childData.value = selectedRoom.value.booking
+  console.log(childData.value)
 };
 
 const handleRoomUnselected = () => {
