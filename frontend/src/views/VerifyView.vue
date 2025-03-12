@@ -51,11 +51,13 @@
 </template>
 
 <script setup>
-import {ref, computed, onMounted} from 'vue'
+import {ref, computed, onMounted, getCurrentInstance} from 'vue'
 import {useRouter, useRoute} from 'vue-router'
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import {faArrowLeft} from '@fortawesome/free-solid-svg-icons'
 import {faBackward} from '@fortawesome/free-solid-svg-icons';
+
+const vueInstance = getCurrentInstance()
 
 const router = useRouter()
 const route = useRoute()
@@ -89,6 +91,11 @@ const handleVerify = async () => {
       const data = await response.json();
       if (data.code==="000") {
         console.log(data)
+        vueInstance.appContext.config.globalProperties.$user.email = data.data.email
+        vueInstance.appContext.config.globalProperties.$user.name = data.data.name
+        vueInstance.appContext.config.globalProperties.$user.permission = data.data.permission
+
+        console.log(vueInstance.appContext.config.globalProperties.$user)
       } else {
         alert(data.message)
       }
