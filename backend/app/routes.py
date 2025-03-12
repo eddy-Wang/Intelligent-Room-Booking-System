@@ -2,7 +2,7 @@ import time
 from flask import Blueprint, request, jsonify
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
-    get_all_room_data_for_user
+    get_all_room_data_for_user, fetch_users, fetch_rooms, fetch_bookings, update_booking_status, delete_booking
 
 bp = Blueprint('routes', __name__)
 
@@ -94,3 +94,54 @@ def requestRoomDetails():
         return create_response('001', 'Room found!', room_data)
     else:
         return create_response('002', 'Room not found!')
+
+# Fetch users route
+@bp.route('/users', methods=['GET'])
+def get_users():
+    try:
+        users = fetch_users()
+        return create_response('000', 'Users fetched successfully!', users)
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
+
+# Fetch rooms route
+@bp.route('/rooms', methods=['GET'])
+def get_rooms():
+    try:
+        rooms = fetch_rooms()
+        print(rooms)
+        return create_response('000', 'Rooms fetched successfully!', rooms)
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
+
+# Fetch bookings route
+@bp.route('/bookings', methods=['GET'])
+def get_bookings():
+    try:
+        bookings = fetch_bookings()
+        print(bookings)
+        return create_response('000', 'Bookings fetched successfully!', bookings)
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
+
+# Update booking status route
+@bp.route('/bookings/<int:id>', methods=['PUT'])
+def update_booking(id):
+    status = request.json.get('status')
+    if not status:
+        return create_response('400', 'Status is required.')
+
+    try:
+        update_booking_status(id, status)
+        return create_response('000', 'Booking updated successfully!')
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
+
+# Delete booking route
+@bp.route('/bookings/<int:id>', methods=['DELETE'])
+def delete_booking_route(id):
+    try:
+        delete_booking(id)
+        return create_response('000', 'Booking deleted successfully!')
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')

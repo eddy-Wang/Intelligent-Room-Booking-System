@@ -151,6 +151,58 @@ def get_room_detailed(room_id):
 
     return None
 
+# Fetch users from the database
+def fetch_users():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    query = "SELECT email, permission FROM users"
+    cursor.execute(query)
+    result = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return result
+
+# Fetch rooms from the database
+def fetch_rooms():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    query = "SELECT room_id, name FROM room"
+    cursor.execute(query)
+    result = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return result
+
+# Fetch all bookings from the database
+def fetch_bookings():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    query = "SELECT * FROM booking"
+    cursor.execute(query)
+    result = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return result
+
+# Update booking status
+def update_booking_status(booking_id, status):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    query = "UPDATE booking SET status = %s WHERE booking_id = %s"
+    cursor.execute(query, (status, booking_id))
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+# Delete a booking
+def delete_booking(booking_id):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    query = "DELETE FROM booking WHERE booking_id = %s"
+    cursor.execute(query, (booking_id,))
+    connection.commit()
+    cursor.close()
+    connection.close()
 
 if __name__ == '__main__':
     get_room_detailed(1)
