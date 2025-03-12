@@ -1,7 +1,8 @@
 import time
 from flask import Blueprint, request, jsonify
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code
-from .models import check_email_exists, get_user_data_by_email
+from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
+    get_all_room_data_for_user
 
 bp = Blueprint('routes', __name__)
 
@@ -45,7 +46,7 @@ def verify_code():
     if not user_email or not entered_code:
         return create_response('003', 'Email and code are required!')
 
-    # Check if the verification code is expired (5 seconds limit)
+    # Check if the verification code is expired (60 seconds limit)
     if user_email in verification_codes:
         code_data = verification_codes[user_email]
         current_time = time.time()
@@ -67,3 +68,29 @@ def verify_code():
             return create_response('004', 'Invalid code, please try again.')
     else:
         return create_response('007', 'No verification code sent. Please request a new code.')
+
+@bp.route('/allRoom', methods=['GET', 'OPTIONS'])
+def allRoom():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.get_json()
+    permission = data.get('permission')
+    all_room_data = get_all_room_data_for_user(permission)
+    if all_room_data:
+        return create_response('001', 'All Rooms found!', all_room_data)
+    else:
+        return create_response('002', 'No Rooms found!')
+
+@bp.route('/requestRoomDetails', methods=['GET', 'OPTIONS'])
+def requestRoomDetails():
+    if request.method == 'OPTIONS':
+        return '', 200
+    data = request.get_json()
+    room_id = data.get('room_id')
+
+    room_data = get_room_detailed(room_id)
+    if room_data:
+        return create_response('001', 'Room found!', room_data)
+    else:
+        return create_response('002', 'Room not found!')
