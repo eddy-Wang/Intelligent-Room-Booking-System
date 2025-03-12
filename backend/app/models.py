@@ -40,7 +40,7 @@ def get_user_data_by_email(email):
     return None
 
 # Get all room data
-def get_all_room_data():
+def get_all_room_data_for_user(permission):
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -64,6 +64,13 @@ def get_all_room_data():
             location = row[5]
             info = row[6]
 
+            # Filter based on permission
+            if permission == "student" and access != 0:
+                continue
+            elif permission == "staffG1" and access not in [0, 1]:
+                continue
+            # staffG2 can access all rooms, no filter needed
+
             room_data = {
                 "id": room_id,
                 "name": room_name,
@@ -85,6 +92,7 @@ def get_all_room_data():
         return rooms
 
     return None
+
 
 # Get booking records of a room and return as JSON
 def get_booking_record_of_a_room(room_id):
