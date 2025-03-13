@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import {onMounted, provide, ref} from "vue";
+import {getCurrentInstance, onMounted, provide, ref} from "vue";
 import RoomSearch from "@/components/RoomSearch.vue";
 import TimeTable from '@/components/TimeTable.vue';
 import RoomDisplay from '@/components/RoomDisplay.vue';
@@ -61,15 +61,10 @@ provide('childData', childData)
 
 const fetchData = async () => {
   try {
-    const url = 'http://172.20.10.3:8080/allRoom';
-    const userPermission = this.$user.permission;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ permissions: userPermission }),
-    });
+    const instance = getCurrentInstance();
+    const userPermission = instance.appContext.config.globalProperties.$user.permission;
+    const url = `http://172.20.10.3:8080/allRoom?permission=${encodeURIComponent(userPermission)}`;
+    const response = await fetch(url);
     const data = await response.json();
     roomsData.value = data.data;
     console.log('Fetched data:', roomsData.value);
@@ -127,7 +122,7 @@ const handleFilters = (filters) => {
           // 将用户选择的日期转换为YYYY-MM-DD格式
           const selectedDate = formatDate(filter.value.date);
 
-          console.log("date:",selectedDate)
+          console.log("date:", selectedDate)
           // 检查该房间在选定日期的预订情况
           const hasConflict = room.booking.some(booking => {
             console.log("当前过滤条件：", filters);
@@ -162,6 +157,7 @@ function formatDate(date) {
   const day = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
+
 // 从RoomDisplay接收选中的房间
 const handleRoomSelected = (room) => {
   selectedRoom.value = room;

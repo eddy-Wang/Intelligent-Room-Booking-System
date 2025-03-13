@@ -24,6 +24,12 @@ const vuetify = createVuetify({
 
 const app = createApp(App)
 
+app.config.globalProperties.$user = {
+  email: '2542699@dundee.ac.uk',
+  name: 'Qi Xiao',
+  permission: 'student',
+};
+
 // use vuetify and router
 app.use(vuetify)
 app.use(router)
