@@ -261,11 +261,34 @@ def modify_booking(booking_data):
     booking_id = booking_data["booking_id"]
     room_id = booking_data["room_id"]
     date = booking_data["date"]
-    time = booking_data["time"]
+    time_slots = booking_data["time"]
     purpose = booking_data["purpose"]
     status = booking_data["status"]
 
-    query = """
+
+    query_check = """
+    SELECT time
+    FROM booking
+    WHERE room_id = %s AND date = %s AND booking_id != %s
+    """
+
+    cursor.execute(query_check, (room_id, date, booking_id))
+    existing_bookings = cursor.fetchall()
+
+
+    time_slots_set = set(time_slots)
+
+
+    for existing_time in existing_bookings:
+        existing_time_slots_set = set(map(int, existing_time[0].split(',')))
+        if time_slots_set & existing_time_slots_set:
+            print(f"Room {room_id} is already booked during the time slots {existing_time_slots_set}.")
+            cursor.close()
+            connection.close()
+            return "The room is already booked at the specified time."
+
+
+    query_update = """
     UPDATE booking
     SET room_id = %s,
         date = %s,
@@ -274,11 +297,13 @@ def modify_booking(booking_data):
         status = %s
     WHERE booking_id = %s
     """
-    cursor.execute(query, (room_id, date, time, purpose, status, booking_id))
+
+    cursor.execute(query_update, (room_id, date, ','.join(map(str, time_slots_set)), purpose, status, booking_id))
     connection.commit()
 
     cursor.close()
     connection.close()
+    return "Booking successfully modified."
 
 
 # Get user reservations by email
@@ -322,13 +347,3 @@ def cancel_reservation(booking_id):
 if __name__ == '__main__':
     get_room_detailed(1)
     fetch_bookings()
-
-    modify_booking({
-        "booking_id": "1710976683000",
-        "date": "Fri, 15 Feb 2025 00:00:00 GMT",
-        "purpose": "test11111",
-        "room_id": 15,
-        "status": "Confirmed",
-        "time": "10",
-        "user_email": "2542999@dundee.ac.uk"
-    })
