@@ -57,18 +57,24 @@ const selectedDate = ref(null)
 const selectedSlots = ref([])
 const roomsData = ref([])
 const childData = ref([])
-
 provide('childData', childData)
 
 const fetchData = async () => {
   try {
-    const response = await fetch('http://172.20.10.3:8080/allRoom');
-    if (!response.ok) {
-    }
+    const url = 'http://172.20.10.3:8080/allRoom';
+    const userPermission = this.$user.permission;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ permissions: userPermission }),
+    });
     const data = await response.json();
-    roomsData.value = data.data
-    console.log(roomsData.value)
+    roomsData.value = data.data;
+    console.log('Fetched data:', roomsData.value);
   } catch (err) {
+    console.error('Failed to fetch data:', err);
   }
 };
 onMounted(() => {
