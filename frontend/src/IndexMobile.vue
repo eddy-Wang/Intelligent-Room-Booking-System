@@ -18,9 +18,9 @@
 
 <script>
 import HomeViewMobile from './views/HomeViewMobile.vue';
-import MyReservationMobile from './views/MyReservation.vue';
-import NotificationViewMobile from './views/NotificationView.vue';
-import SettingsViewMobile from './views/SettingsView.vue';
+import MyReservationMobile from './views/MyReservationMobile.vue';
+import NotificationViewMobile from './views/NotificationViewMobile.vue';
+import SettingsViewMobile from './views/SettingsViewMobile.vue';
 
 export default {
   name: 'IndexMobile',
