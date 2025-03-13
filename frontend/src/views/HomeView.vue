@@ -21,7 +21,6 @@
         <!--        <time-table/>-->
         <time-table
             @time-selected="handleTimeSelection"
-            :is-enabled="isTableEnabled"
         />
       </div>
 
@@ -49,7 +48,6 @@ import RoomDisplay from '@/components/RoomDisplay.vue';
 
 
 const roomIds = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
-const isTableEnabled = ref(false);
 //room status
 const bookDate = ref(null)
 const selectedRoom = ref(null)
@@ -57,13 +55,15 @@ const selectedDate = ref(null)
 const selectedSlots = ref([])
 const roomsData = ref([])
 const childData = ref([])
+const roomSelected = ref(0)
 provide('childData', childData)
+provide('roomSelected', roomSelected)
 
 const fetchData = async () => {
   try {
     const instance = getCurrentInstance();
     const userPermission = instance.appContext.config.globalProperties.$user.permission;
-    const url = `http://127.0.0.1:8080/allRoom?permission=`+userPermission;
+    const url = `http://192.168.110.122:8080/allRoom?permission=`+userPermission;
     const response = await fetch(url);
     const data = await response.json();
     roomsData.value = data.data;
@@ -161,10 +161,10 @@ function formatDate(date) {
 // 从RoomDisplay接收选中的房间
 const handleRoomSelected = async (room) => {
   selectedRoom.value = room;
-  isTableEnabled.value = true; // 启用 TimeTable
+  roomSelected.value = 1
   try {
     // 发送GET请求，假设后端需要room.id作为参数
-    const response = await fetch(`http://127.0.0.1:8080/requestRoomDetails?roomId=${room.id}`);
+    const response = await fetch(`http://192.168.110.122:8080/requestRoomDetails?roomId=${room.id}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -185,7 +185,7 @@ const handleRoomUnselected = () => {
   selectedRoom.value = null;
   selectedDate.value = null;
   selectedSlots.value = [];
-  isTableEnabled.value = false; // 禁用 TimeTable
+  roomSelected.value = 0
 };
 
 // 从TimeTable接收日期和时间段

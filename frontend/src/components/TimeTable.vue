@@ -56,9 +56,10 @@ export default {
   setup() {
     // 注入父组件提供的数据
     const childData = inject('childData');
+    const roomSelected = inject('roomSelected')
 
     return {
-      childData
+      childData, roomSelected
     };
   },
   watch: {
@@ -67,6 +68,13 @@ export default {
       console.log("new:", newVal);
       this.updateBookings(newVal);
       this.handleDateSelection(); // 更新时间槽状态
+    },
+    roomSelected(newVal, oldVal) {
+      if (newVal === 0) {
+        this.timeSlots.forEach((timeSlot) => {
+          timeSlot.status = 0
+        });
+      }
     }
   },
   data() {
@@ -163,7 +171,7 @@ export default {
     // 处理日期选择
     handleDateSelection() {
       if (!this.selectedDate) {
-        this.timeSlots = this.timeSlots.map(slot => ({...slot, status: 0}));
+        this.timeSlots = this.timeSlots.map(slot => ({...slot, status: 1}));
         return;
       }
 
@@ -175,7 +183,7 @@ export default {
           status: this.bookings[dateKey][index]
         }));
       } else {
-        this.timeSlots = this.timeSlots.map(slot => ({...slot, status: 0}));
+        this.timeSlots = this.timeSlots.map(slot => ({...slot, status: 1}));
       }
 
       this.emitSelection();
@@ -187,7 +195,7 @@ export default {
       const dateKey = this.formatDate(this.selectedDate);
 
       if (!this.bookings[dateKey]) {
-        this.bookings[dateKey] = new Array(12).fill(0);
+        this.bookings[dateKey] = new Array(12).fill(1);
       }
 
       if (this.timeSlots[index].status === 1) {
@@ -225,25 +233,19 @@ export default {
         const date = new Date(booking.date);
         const timeSlots = booking.time; // 例如 [3, 7]
 
-        // 初始化当前日期及往后 7 天的时间槽
-        for (let i = 0; i < 8; i++) { // 包括当天和往后 7 天
-          const currentDate = new Date(date);
-          currentDate.setDate(date.getDate() + i);
-          const dateKey = this.formatDate(currentDate);
+        const dateKey = this.formatDate(date);
 
-          if (!this.bookings[dateKey]) {
-            this.bookings[dateKey] = new Array(12).fill(1); // 默认全部可用
-          }
-
-          // 如果是当天，标记不可用的时间槽
-          if (i === 0) {
-            timeSlots.forEach(slot => {
-              if (slot >= 0 && slot < 12) {
-                this.bookings[dateKey][slot] = 0; // 标记为不可用
-              }
-            });
-          }
+        // 初始化当前日期的时间槽，默认全部可用
+        if (!this.bookings[dateKey]) {
+          this.bookings[dateKey] = new Array(12).fill(1); // 默认全部可用
         }
+
+        // 标记不可用的时间槽
+        timeSlots.forEach(slot => {
+          if (slot >= 0 && slot < 12) {
+            this.bookings[dateKey][slot] = 0; // 标记为不可用
+          }
+        });
       });
     },
   }

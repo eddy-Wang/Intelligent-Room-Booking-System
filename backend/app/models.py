@@ -65,9 +65,9 @@ def get_all_room_data_for_user(permission):
             info = row[6]
 
             # Filter based on permission
-            if permission == "student" and access != 0:
+            if permission == "Student" and access != 0:
                 continue
-            elif permission == "staff" and access not in [0, 1]:
+            elif permission == "Staff" and access not in [0, 1]:
                 continue
             # selected staff can access all rooms, no filter needed
 
