@@ -131,25 +131,12 @@ def get_booking_record_of_a_room(room_id):
 def get_class_of_a_room(room_id):
     return ujson.dumps([], default=str)
 
-# Get detailed room data
 def get_room_detailed(room_id):
-    primission = "any"
-    all_rooms = get_all_room_data_for_user(primission)
+    this_room = {"booking": ujson.loads(get_booking_record_of_a_room(room_id)),
+                 "class": ujson.loads(get_class_of_a_room(room_id))}
 
-    # Find the room with the given room_id
-    this_room = None
-    for room in all_rooms:
-        if room['id'] == room_id:
-            this_room = room
-            break
-
-    if this_room:
-        this_room["booking"] = ujson.loads(get_booking_record_of_a_room(this_room["id"]))
-        this_room["class"] = ujson.loads(get_class_of_a_room(this_room["id"]))
-        print(this_room)
-        return this_room
-
-    return None
+    print(this_room)
+    return this_room
 
 
 if __name__ == '__main__':

@@ -89,10 +89,11 @@ def allRoom():
 def requestRoomDetails():
     if request.method == 'OPTIONS':
         return '', 200
-    data = request.get_json()
-    room_id = data.get('room_id')
+
+    room_id = request.args.get('roomId')
 
     room_data = get_room_detailed(room_id)
+    print(room_data)
     if room_data:
         return create_response('001', 'Room found!', room_data)
     else:

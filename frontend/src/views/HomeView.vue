@@ -159,11 +159,26 @@ function formatDate(date) {
 }
 
 // 从RoomDisplay接收选中的房间
-const handleRoomSelected = (room) => {
+const handleRoomSelected = async (room) => {
   selectedRoom.value = room;
   isTableEnabled.value = true; // 启用 TimeTable
-  childData.value = selectedRoom.value.booking
-  console.log(childData.value)
+  try {
+    // 发送GET请求，假设后端需要room.id作为参数
+    const response = await fetch(`http://127.0.0.1:8080/requestRoomDetails?roomId=${room.id}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    childData.value = data.data.booking; // 将获取的数据存入响应式变量
+    console.log("Received room details:", childData.value);
+
+  } catch (error) {
+    console.error("Error fetching room details:", error);
+    // 可以选择重置数据或显示错误信息
+    childData.value = null;
+  }
 };
 
 const handleRoomUnselected = () => {
