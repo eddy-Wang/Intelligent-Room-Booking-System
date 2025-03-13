@@ -1,7 +1,10 @@
 import random
 import string
 from flask_mail import Message
+from mysql.connector import Error
+
 from . import mail
+from .models import get_db_connection
 
 # stored the code
 verification_codes = {}
@@ -25,3 +28,39 @@ def remove_verification_code(user_email):
     """Remove the verification code for the given email."""
     if user_email in verification_codes:
         del verification_codes[user_email]
+
+# Get user reservations by email
+def get_user_reservations(email):
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+    query = """
+    SELECT b.booking_id, b.date, b.time, b.purpose, b.status, r.name, r.capacity
+    FROM booking b
+    JOIN room r ON b.room_id = r.room_id
+    WHERE b.user_email = %s
+    ORDER BY b.date, b.time
+    """
+    cursor.execute(query, (email,))
+    reservations = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return reservations
+
+# Cancel reservation by booking ID
+def cancel_reservation(booking_id):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    query = "UPDATE booking SET status = 'Declined' WHERE booking_id = %s AND status = 'Confirmed'"
+    try:
+        cursor.execute(query, (booking_id,))
+        connection.commit()
+        if cursor.rowcount > 0:
+            return True
+        else:
+            return False
+    except Error as e:
+        print(f"Error cancelling reservation: {e}")
+        return False
+    finally:
+        cursor.close()
+        connection.close()
