@@ -1,6 +1,7 @@
 import time
 from flask import Blueprint, request, jsonify
-from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code
+from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code, \
+    get_user_reservations, cancel_reservation
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
     get_all_room_data_for_user
 
@@ -74,8 +75,10 @@ def allRoom():
     if request.method == 'OPTIONS':
         return '', 200
 
-    data = request.get_json()
-    permission = data.get('permission')
+    permission = request.args.get('permission')
+    if not permission:
+        return create_response('003', 'Permission parameter is required!')
+
     all_room_data = get_all_room_data_for_user(permission)
     if all_room_data:
         return create_response('001', 'All Rooms found!', all_room_data)
@@ -94,3 +97,33 @@ def requestRoomDetails():
         return create_response('001', 'Room found!', room_data)
     else:
         return create_response('002', 'Room not found!')
+
+@bp.route('/get-reservations', methods=['POST', 'OPTIONS'])
+def get_reservations():
+    if request.method == 'OPTIONS':
+        return '', 200
+    data = request.get_json()
+    user_email = data.get('email')
+
+    if not user_email:
+        return create_response('001', 'Email is required!')
+
+    reservations = get_user_reservations(user_email)
+    return create_response('000', 'Reservations retrieved successfully!', reservations)
+
+@bp.route('/cancel-reservation', methods=['POST', 'OPTIONS'])
+def cancel_reservation_route():
+    if request.method == 'OPTIONS':
+        return '', 200
+    data = request.get_json()
+    booking_id = data.get('booking_id')
+    print(booking_id)
+
+    if not booking_id:
+        return create_response('001', 'Booking ID is required!')
+
+    if cancel_reservation(booking_id):
+        return create_response('000', 'Reservation cancelled successfully!')
+    else:
+        return create_response('002', 'Failed to cancel reservation. It may already be processed or does not exist.')
+

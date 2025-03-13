@@ -1,0 +1,368 @@
+<template>
+  <div class="panel">
+    <div class="container">
+      <h1>My Reservation</h1>
+      <div class="content-wrapper">
+        <div class="reservation-list">
+          <div
+              v-for="(reservation, index) in paginatedReservations"
+              :key="index"
+              class="reservation-item"
+          >
+            <div class="reservation-info">
+              <div class="reservation-name">{{ reservation.name }}</div>
+              <div class="reservation-time">
+                {{ reservation.date.split('00:00:00')[0] + convertTimeStrToTimeSlots(reservation.time) }}
+              </div>
+              <div class="reservation-capacity">Capacity: {{ reservation.capacity }}</div>
+              <div class="reservation-purpose">{{ reservation.purpose }}</div>
+            </div>
+            <div class="status-and-actions">
+              <div class="reservation-status">{{ reservation.status }}</div>
+              <div class="reservation-actions" v-if="reservation.status.toString() === 'Confirmed'">
+                <button @click="cancelReservation(index)" class="action-button">Cancel</button>
+              </div>
+            </div>
+          </div>
+          <div class="pagination">
+            <button @click="prevPage" :disabled="currentPage === 1" class="pagination-button">Previous</button>
+            <button @click="nextPage" :disabled="currentPage === totalPages" class="pagination-button">Next</button>
+          </div>
+        </div>
+
+        <div class="user-info">
+          <div class="user-avatar">
+            <img :src="userAvatar" alt="User Avatar"/>
+          </div>
+          <div class="user-email">{{ user.name }}</div>
+          <div class="user-email">{{ user.email }}</div>
+          <div class="user-role">{{ user.permission }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import {getCurrentInstance} from "vue";
+
+const reverseTimeSlotMap = {
+  0: '08:00-08:45',
+  1: '08:55-09:45',
+  2: '10:00-10:45',
+  3: '10:55-11:40',
+  4: '12:00-12:45',
+  5: '12:55-13:40',
+  6: '14:00-14:45',
+  7: '14:55-15:40',
+  8: '16:00-16:45',
+  9: '16:55-17:40',
+  10: '19:00-19:45',
+  11: '19:55-20:40'
+};
+export default {
+
+  name: 'MyReservation',
+  data() {
+    return {
+      user: {
+        email: "",
+        name: "",
+        permission: "",
+      },
+      reservations: [],
+      currentPage: 1,
+      reverseTimeSlotMap,
+      itemsPerPage: 3,
+    };
+  },
+  computed: {
+    totalPages() {
+      return Math.ceil(this.reservations.length / this.itemsPerPage);
+    },
+    paginatedReservations() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.reservations.slice(start, end);
+    },
+    userAvatar() {
+      return this.user.permission === 'student'
+          ? "https://images.unsplash.com/photo-1609561505734-7c42d1bbafc9?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDJ8fHxlbnwwfHx8fHw%3D"
+          : "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHN0YWZmfGVufDB8fDB8fHww";
+    },
+  },
+  methods: {
+    async fetchReservations() {
+      try {
+        const response = await fetch('http://127.0.0.1:8080/get-reservations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({email: this.user.email}),
+        });
+        const data = await response.json();
+        if (data.code === '000') {
+          this.reservations = data.data;
+        } else {
+          alert(data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching reservations:', error);
+      }
+    },
+    async cancelReservation(index) {
+      const bookingId = this.reservations[(this.currentPage - 1) * this.itemsPerPage + index].booking_id;
+      console.log(this.reservations[index])
+      try {
+        const response = await fetch('http://127.0.0.1:8080/cancel-reservation', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            booking_id: bookingId,
+          }),
+        });
+        const data = await response.json();
+        console.log(data)
+        if (data.code === '000') {
+          alert('Reservation cancelled successfully!');
+          this.fetchReservations();
+        } else {
+          alert(data.message);
+        }
+      } catch (error) {
+        console.error('Error cancelling reservation:', error);
+      }
+    },
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+    convertTimeStrToTimeSlots(timeStr) {
+      return timeStr.split(',')
+          .map(Number)
+          .map(index => this.reverseTimeSlotMap[index])
+          .join('  ');
+    }
+  },
+  mounted() {
+    let instance = getCurrentInstance()
+    this.user = instance.appContext.config.globalProperties.$user
+    this.fetchReservations();
+  },
+
+};
+</script>
+
+<style scoped>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.panel {
+  background: #eceef8;
+  display: flex;
+  justify-content: space-between;
+  min-height: 100vh;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+  line-height: 1.6;
+}
+
+.container {
+  width: 100%;
+  height: 80%;
+  max-width: 1750px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #eceef8;
+  border-radius: 12px;
+}
+
+h1 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 3.5rem;
+}
+
+.content-wrapper {
+  display: flex;
+  gap: 20px;
+}
+
+.reservation-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reservation-item {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reservation-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.reservation-info {
+  flex: 1;
+}
+
+.reservation-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #34495e;
+}
+
+.reservation-time {
+  font-size: 1.2rem;
+  color: #555;
+  margin-top: 5px;
+}
+
+.reservation-purpose {
+  font-size: 1.0rem;
+  color: #777;
+  margin-top: 5px;
+}
+
+.reservation-capacity {
+  font-size: 1.0rem;
+  color: #777;
+  margin-top: 5px;
+}
+
+.reservation-status {
+  font-size: 2.5rem;
+  color: #34495e;
+  font-weight: bold;
+  margin-right: 20px;
+}
+
+.status-and-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.reservation-actions {
+  width: 105%;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+
+.action-button {
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  background-color: #eceef8;
+  color: #333;
+  transition: background-color 0.2s ease;
+}
+
+.action-button:disabled {
+  background-color: #a6a6a6;
+  cursor: not-allowed;
+}
+
+.action-button:not(:disabled):hover {
+  background-color: #3155ef;
+  color: #fff;
+}
+
+.user-info {
+  width: 450px;
+  height: 660px;
+  padding: 20px;
+  background-color: #eceef8;
+  border-radius: 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.user-avatar img {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-email {
+  font-size: 1.2rem;
+  color: #333;
+  margin-top: 10px;
+}
+
+.user-role {
+  font-size: 1rem;
+  color: #777;
+  margin-top: 5px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  gap: 10px;
+}
+
+.pagination-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #ffffff;
+  color: #333;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.pagination-button:disabled {
+  background-color: #a6a6a6;
+  cursor: not-allowed;
+}
+
+.pagination-button:not(:disabled):hover {
+  background-color: #3155ef;
+  color: #fff;
+}
+</style>
