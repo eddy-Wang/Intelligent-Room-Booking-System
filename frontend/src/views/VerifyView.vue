@@ -96,6 +96,10 @@ const handleVerify = async () => {
         vueInstance.appContext.config.globalProperties.$user.permission = data.data.permission
 
         console.log(vueInstance.appContext.config.globalProperties.$user)
+
+        await router.push({
+          path: "../index"
+        })
       } else {
         alert(data.message)
       }

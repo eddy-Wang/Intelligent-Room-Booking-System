@@ -3,190 +3,155 @@
     <!-- 左侧导航栏（第一列） -->
     <aside class="left-column">
       <div class="top-icon"></div>
-      <div class="nav-item" @mouseover="hoverNavItem" @mouseleave="leaveNavItem">
-        <el-icon><House /></el-icon>
-      </div>
-      <div class="nav-item" @mouseover="hoverNavItem" @mouseleave="leaveNavItem">
-        <el-icon><Bell /></el-icon>
-      </div>
-      <!-- 底部圆形图标 -->
-      <div class="bottom-icon"><el-icon><RefreshRight /></el-icon></div>
-      <div class="bottom-icon"><el-icon><Setting /></el-icon></div>
-    </aside>
 
-    <!-- 中间主体（第二列，分为上下两排） -->
-    <main class="middle-column">
-      <!-- 上排：标题 + 房间分类按钮 -->
-      <div class="top-row">
-        <h1><strong>DIICSU</strong></h1>
-        <h2><strong>Room Booking System</strong></h2>
-
-        <!-- 房间分类按钮（Tab） -->
-        <div class="tab-bar">
-          <el-button
-            v-for="(tab, index) in tabs"
-            :key="index"
-            :class="{ 'active-tab': activeTab === index }"
-            @click="activeTab = index"
-          >
-            {{ tab }}
-          </el-button>
+      <div class="nav-items-container">
+        <div 
+          v-for="(item, index) in navItems" 
+          :key="index" 
+          class="nav-item"
+          :class="{ active: activeNav === index }" 
+          @click="setActiveNav(index)"
+        >
+          <!-- <el-icon><component :is="item.icon" /></el-icon> -->
+          <svg-icon type="mdi" :path="$mdi[item.icon]"></svg-icon>
         </div>
       </div>
-
-      <!-- 下排：房间卡片 + 底部“Rooms”栏 -->
-      <div class="bottom-row">
-        <!-- 房间卡片 -->
-        <router-view name="roomDetails"></router-view>
-      </div>
-    </main>
-
-    <!-- 右侧区域（第三列） -->
-    <aside class="right-column">
-      <h2>My Reservations</h2>
-      <router-view name="myReservation"></router-view>
+      <!-- 底部圆形图标 -->
+      <div class="bottom-icon"><svg-icon type="mdi" :path="$mdi.mdiExitToApp"></svg-icon></div>
     </aside>
+    <component :is="activeComponent" />
   </div>
 </template>
 
 <script>
+import HomeView from '@/views/HomeView.vue';
+import MyReservation from '@/views/MyReservation.vue';
+import NotificationView from '@/views/NotificationView.vue';
+import SettingsView from '@/views/SettingsView.vue';
 export default {
   name: 'Index',
+  components:{
+    HomeView,
+    MyReservation,
+    NotificationView,
+    SettingsView,
+  },
   data() {
     return {
-      tabs: ['English Rooms', 'Formal Meeting Room', 'Informal Meeting Room', '622', '634', '635'],
       activeTab: 1, // 默认选中第二个 Tab
+      activeNav: 0, // 默认选中第一个导航项
+      navItems: [
+        { icon: 'mdiHomeOutline',  component: 'HomeView' },
+        { icon: 'mdiBellOutline',  component: 'NotificationView'},
+        { icon: 'mdiAccountOutline', component: 'MyReservation'},
+        { icon: 'mdiCogOutline', component: 'SettingsView'}
+      ]
     };
   },
+  computed: {
+    // 根据 activeNav 动态获取要显示的组件名
+    activeComponent() {
+      return this.navItems[this.activeNav].component
+    }
+  },
   methods: {
-    hoverNavItem(event) {
-      event.target.style.backgroundColor = '#87aade';
-      event.target.style.color = '#fff';
-    },
-    leaveNavItem(event) {
-      event.target.style.backgroundColor = '#fff';
-      event.target.style.color = '#000';
-    },
+    setActiveNav(index) {
+      this.activeNav = index;
+    }
   },
 };
 </script>
 
 <style scoped>
-/* CSS 变量 */
-:root {
-  --primary-color: #87aade;
-  --secondary-color: #f0f0f0;
-  --font-size-large: 48px;
-  --font-size-medium: 16px;
-}
-
 /* 整体布局 */
 .index-container {
   display: grid;
-  grid-template-columns: 80px 1fr 300px; /* 左 80px，中间自适应，右 300px */
+  grid-template-columns: 80px 1fr;  /* 左 80px，中间自适应，右 300px */
   height: 100vh;
-  background-color: var(--secondary-color);
+  background-color: #eceef8;
   overflow: hidden;
 }
 
 /* ========== 左侧导航栏 ========== */
 .left-column {
-  background-color: #F0ECE6;
+  background-color: #3155ef;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 10px 0;
-  gap: 20px;
+  height: 100vh;
   border-right: 1px solid #ddd;
+  position: relative;
 }
 
-.top-icon,
-.bottom-icon {
+.top-icon {
   margin: 20px;
   width: 40px;
   height: 40px;
-  background-color: #fff;
+  background-color: #eceef8;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.nav-items-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 25px;
+}
+
+.bottom-icon {
+  margin: 20px;
+  width: 40px;
+  height: 40px;
+  background-color: #3155ef;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff
 }
 
 .nav-item {
   width: 40px;
   height: 40px;
-  background-color: #fff;
+  background-color: #3155ef;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
 }
 
-/* ========== 中间列：上下两排 ========== */
-.middle-column {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  background-color: #fcf8f6;
-  padding: 20px;
+.nav-item svg {
+  color: #fff; /* 如果你的图标库基于 currentColor，图标就会显示为白色 */
 }
 
-/* ----- 上排：标题 + Tab ----- */
-.top-row {
-  margin-bottom: 0px;
+/* 活跃状态样式 */
+.nav-item.active {
+  border-radius: 50% 0 0 50%;
+  background-color: #eceef8;
 }
 
-.top-row h1 {
-  margin: 80px 0 8px 0;
-  font-size: 48px;
-  font-weight: bold;
+.nav-item.active svg {
+  color: #000;
 }
 
-.top-row h2 {
-  margin: 0 0 50px;
-  font-size: 48px;
-  color: #555;
+/* 使用伪元素创建向右延伸的连接部分 */
+.nav-item.active::after {
+  content: "";
+  position: absolute;
+  width: 20px;  /* 向右延伸的宽度 */
+  height: 40px;
+  background-color: #eceef8;
+  right: -20px;
+  z-index: 1;
 }
 
-.tab-bar .el-button {
-  /* 基础样式 */
-  border-radius: 8px !important;  /* 圆角 */
-  padding: 12px 20px !important;
-  font-weight: 500;
-  
-  /* 未选中状态（颜色可自定义） */
-  background-color: var(--tab-inactive-bg, #F0ECE6) !important; /* 默认白色 */
-  border: 1px solid var(--tab-inactive-border, #F0ECE6) !important; 
-  color: #000 !important; /* 强制黑色字体 */
-}
-
-/* 选中状态（颜色可自定义） */
-.tab-bar .active-tab {
-  background-color: var(--tab-active-bg, #b29775) !important; /* 默认浅灰 */
-  border-color: var(--tab-active-border, #b29775) !important; /* 默认深灰边框 */
-}
-
-/* ----- 下排：房间卡片 + 底部“Rooms”栏 ----- */
-.bottom-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-/* ========== 右侧列 ========== */
-.right-column {
-  background-color: #fcf8f6;
-  padding: 20px;
-}
-
-/* 响应式布局 */
-@media (max-width: 768px) {
-  .index-container {
-    grid-template-columns: 60px 1fr; /* 在小屏幕上隐藏右侧栏 */
-  }
-  .right-column {
-    display: none;
-  }
-}
 </style>

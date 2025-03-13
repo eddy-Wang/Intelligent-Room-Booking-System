@@ -74,8 +74,10 @@ def allRoom():
     if request.method == 'OPTIONS':
         return '', 200
 
-    data = request.get_json()
-    permission = data.get('permission')
+    permission = request.args.get('permission')
+    if not permission:
+        return create_response('003', 'Permission parameter is required!')
+
     all_room_data = get_all_room_data_for_user(permission)
     if all_room_data:
         return create_response('001', 'All Rooms found!', all_room_data)
