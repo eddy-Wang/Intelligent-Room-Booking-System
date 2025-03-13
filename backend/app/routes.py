@@ -2,7 +2,8 @@ import time
 from flask import Blueprint, request, jsonify
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
-    get_all_room_data_for_user, fetch_users, fetch_rooms, fetch_bookings, update_booking_status, delete_booking
+    get_all_room_data_for_user, fetch_users, fetch_rooms, fetch_bookings, update_booking_status, delete_booking, \
+    modify_booking
 
 bp = Blueprint('routes', __name__)
 
@@ -151,8 +152,13 @@ def delete_booking_route(id):
         return create_response('500', f'Error: {str(e)}')
 
 @bp.route('/modifyBooking', methods=['PUT','OPTIONS'])
-def modify_booking():
+def modify_booking_route():
     if request.method == 'OPTIONS':
         return '', 200
     booking_data = request.get_json()
-    print(booking_data)
+    try:
+        modify_booking(booking_data)
+        return create_response('000', 'Booking updated successfully!')
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
+

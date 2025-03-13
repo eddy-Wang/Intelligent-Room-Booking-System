@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import mysql.connector
 import ujson
 import ujson as json
@@ -253,6 +255,50 @@ def delete_booking(booking_id):
     connection.close()
 
 
+def modify_booking(booking_data):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    booking_id = booking_data["booking_id"]
+    room_id = booking_data["room_id"]
+    raw_date = booking_data["date"]
+    time = booking_data["time"]
+    purpose = booking_data["purpose"]
+    status = booking_data["status"]
+
+
+    date_obj = datetime.strptime(raw_date, "%a, %d %b %Y %H:%M:%S GMT")
+    print(date_obj)
+    date = date_obj.strftime("%Y-%m-%d")
+    print(date)
+
+    query = """
+    UPDATE booking
+    SET room_id = %s,
+        date = %s,
+        time = %s,
+        purpose = %s,
+        status = %s
+    WHERE booking_id = %s
+    """
+    cursor.execute(query, (room_id, date, time, purpose, status, booking_id))
+    connection.commit()
+
+    cursor.close()
+    connection.close()
+
+
 if __name__ == '__main__':
     get_room_detailed(1)
     fetch_bookings()
+
+
+    modify_booking({
+    "booking_id": "1710976683000",
+    "date": "Fri, 15 Feb 2025 00:00:00 GMT",
+    "purpose": "test11111",
+    "room_id": 15,
+    "status": "Confirmed",
+    "time": "10",
+    "user_email": "2542999@dundee.ac.uk"
+})
