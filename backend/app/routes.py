@@ -119,14 +119,40 @@ def book_room():
     purpose = data.get('purpose')
     user_email = data.get('user_email', 'test@example.com')
 
-    time_str = ",".join(map(str, time_slots))
-    booking_id = str(int(time.time() * 1000))
-    status = "Pending"
-
     try:
         from .models import get_db_connection
         conn = get_db_connection()
         cursor = conn.cursor()
+
+        query_check = "SELECT time FROM booking WHERE room_id = %s AND date = %s"
+        cursor.execute(query_check, (room_id, date))
+        existing_bookings = cursor.fetchall()
+
+        requested_slots_set = set(time_slots)
+        for (existing_time_str,) in existing_bookings:
+            if existing_time_str.strip():
+                existing_slots = set(map(int, existing_time_str.split(',')))
+            else:
+                existing_slots = set()
+            if requested_slots_set.intersection(existing_slots):
+                cursor.close()
+                conn.close()
+                return create_response('005', 'Room already booked for one or more selected time slots.')
+
+        query_access = "SELECT access FROM room WHERE room_id = %s"
+        cursor.execute(query_access, (room_id,))
+        result = cursor.fetchone()
+        if result:
+            room_access = result[0]
+        else:
+            cursor.close()
+            conn.close()
+            return create_response('006', 'Room not found.')
+
+        status = "Confirmed" if room_access == 0 else "Pending"
+        time_str = ",".join(map(str, time_slots))
+        booking_id = str(int(time.time() * 1000))
+
         query = """
             INSERT INTO booking (booking_id, user_email, room_id, date, time, purpose, status)
             VALUES (%s, %s, %s, %s, %s, %s, %s)

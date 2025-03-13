@@ -45,7 +45,8 @@
                   :language="'en'"
                   :format="'yyyy-MM-dd'"
                   @change="updateDateDisplay"
-                  :disabled-date="disabledDate"
+                  ::disabledDate="disabledDate"
+                  :clearable="true"
               />
             </div>
           </div>
@@ -91,7 +92,7 @@
               <h2>{{ room.name }}</h2>
               <p>Capacity: {{ room.capacity }}</p>
               <p>Equipment: {{ room.equipment.join(', ') }}</p>
-              <p>Access: {{ room.access }}</p>
+              <p>Location: {{ room.location }}</p>
             </div>
           </div>
         </div>
@@ -167,18 +168,27 @@
           </div>
         </div>
       </div>
-
       <div class="book-information-content">
         <h2>Purpose</h2>
+        <!-- 使用 v-model 绑定预定目的 -->
         <textarea
             class="input-box"
             placeholder="Enter purpose..."
             rows="3"
             style="max-height: 60px; overflow-y: auto;"
+            v-model="bookingPurpose"
         ></textarea>
       </div>
     </div>
-    <button class="book-button" @click="handleBook">Book</button>
+    <!-- Book 按钮：当条件满足时按钮可点击，并应用不同样式 -->
+    <button
+        class="book-button"
+        :class="{ enabled: isBookable }"
+        :disabled="!isBookable"
+        @click="handleBook"
+    >
+      Book
+    </button>
   </div>
 </template>
 
@@ -187,104 +197,63 @@ import {ref, computed, watch, onMounted, onBeforeUnmount} from 'vue';
 import Vue3Datepicker from 'vue3-datepicker';
 import axios from 'axios';
 
-// 定义响应式数据
-const roomIds = ref([1, 2, 3, 4, 5]);
+const roomIds = ref([]);
 const bookDate = ref(null);
 const selectedRoom = ref(null);
 const selectedDate = ref(null);
 const selectedSlots = ref([]);
-
-// 模拟房间数据
-const roomsData = [
-  {
-    id: 1,
-    capacity: 20,
-    equipment: "{'projector', 'whiteboard', 'powerOutlets', 'wifi'}",
-    access: 1,
-    location: "DIICSU Sixth Floor",
-    info: "",
-    booking: [
-      {
-        booking_id: "1",
-        user_email: "2542762@dundee.ac.uk",
-        room_id: 1,
-        date: "2025-03-19",
-        time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        purpose: "test1",
-        status: "Confirmed"
-      },
-      {
-        booking_id: "2",
-        user_email: "2542762@dundee.ac.uk",
-        room_id: 1,
-        date: "2025-03-14",
-        time: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-        purpose: "test2",
-        status: "Missed"
-      }
-    ]
-  },
-  {
-    id: 2,
-    capacity: 10,
-    equipment: "{'projector', 'whiteboard', 'computers', 'wifi'}",
-    access: 1,
-    location: "DIICSU Sixth Floor",
-    info: "",
-    booking: [
-      {
-        booking_id: "1",
-        user_email: "2542762@dundee.ac.uk",
-        room_id: 1,
-        date: "2025-03-19",
-        time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        purpose: "test1",
-        status: "Confirmed"
-      },
-      {
-        booking_id: "2",
-        user_email: "2542762@dundee.ac.uk",
-        room_id: 1,
-        date: "2025-03-13",
-        time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-        purpose: "test2",
-        status: "Missed"
-      }
-    ]
-  },
-  {
-    id: 3,
-    capacity: 60,
-    equipment: "{'whiteboard', 'powerOutlets', 'wifi'}",
-    access: 1,
-    location: "DIICSU Sixth Floor",
-    info: "",
-    booking: []
-  },
-  {
-    id: 4,
-    capacity: 15,
-    equipment: "{'whiteboard', 'outlets', 'wifi'}",
-    access: 1,
-    location: "DIICSU Sixth Floor",
-    info: "",
-    booking: []
-  },
-  {
-    id: 5,
-    capacity: 28,
-    equipment: "{'whiteboard', 'powerOutlets', 'wifi'}",
-    access: 1,
-    location: "DIICSU Sixth Floor",
-    info: "",
-    booking: []
+const roomsData = ref([]);
+const bookingPurpose = ref('');
+onMounted(async () => {
+  try {
+    const response = await axios.post('http://localhost:8080/allRoom', {
+      permission: 'student'
+    }, {
+      headers: {'Content-Type': 'application/json'}
+    });
+    if (response.data.code === '001') {
+      roomsData.value = response.data.data.map(room => {
+        const newRoom = {...room};
+        newRoom.equipment = parseEquipment(room.equipment);
+        newRoom.image = getRoomImage(newRoom);
+        return newRoom;
+      });
+      roomIds.value = roomsData.value.map(room => room.id);
+    } else {
+      console.error(response.data.message);
+    }
+  } catch (error) {
+    console.error('Error fetching rooms:', error);
   }
-];
+});
 
-// 根据筛选条件过滤房间
+function getRoomImage(room) {
+  switch (room.id) {
+    case 1:
+      return new URL('@/assets/seminar-room.png', import.meta.url).href;
+    case 2:
+      return new URL('@/assets/room1.png', import.meta.url).href;
+    case 3:
+      return new URL('@/assets/635.png', import.meta.url).href;
+    case 16:
+      return new URL('@/assets/formal-meeting.png', import.meta.url).href;
+    case 17:
+      return new URL('@/assets/informal-meeting.png', import.meta.url).href;
+    default:
+      return new URL('@/assets/corridor.png', import.meta.url).href;
+  }
+}
+
+function parseEquipment(equipStr) {
+  return equipStr
+      .replace(/{|}|'/g, '')
+      .split(',')
+      .map(item => item.trim());
+}
+
 const handleFilters = (filters) => {
   console.log("Current filters:", filters);
-  const filteredRooms = roomsData.filter(room => {
+  const filteredRooms = roomsData.value.filter(room => {
     return filters.every(filter => {
       switch (filter.type) {
         case 'access':
@@ -305,8 +274,7 @@ const handleFilters = (filters) => {
         case 'equipment':
           if (filter.value.length === 0) return true;
           return filter.value.every(equip => {
-            const roomEquipments = room.equipment || [];
-            return roomEquipments.includes(equip);
+            return room.equipment.includes(equip);
           });
         case 'date-time':
           if (!filter.value.date || filter.value.slots.length === 0) return true;
@@ -326,7 +294,6 @@ const handleFilters = (filters) => {
   roomIds.value = filteredRooms.map(room => room.id);
 };
 
-// 房间选择及时间选择处理
 const handleRoomSelected = (room) => {
   selectedRoom.value = room;
 };
@@ -335,24 +302,15 @@ const handleRoomUnselected = () => {
   selectedDate.value = null;
   selectedSlots.value = [];
 };
-const handleTimeSelection = (date, slots) => {
+
+function handleTimeSelection(date, slots) {
   bookDate.value = date;
   selectedSlots.value = slots;
-};
+}
 
 // 日历和时间表逻辑
 const currentDate = ref(new Date());
-const bookings = ref({
-  '2025-03-07': new Array(12).fill(0),
-  '2025-03-08': new Array(12).fill(0),
-  '2025-03-09': [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-  '2025-03-10': new Array(12).fill(1),
-  '2025-03-11': [1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0],
-  '2025-03-12': new Array(12).fill(1),
-  '2025-03-13': new Array(12).fill(1),
-  '2025-03-14': new Array(12).fill(1),
-  '2025-03-15': new Array(12).fill(1),
-});
+const bookings = ref({});
 const timeSlots = ref(
     Array(12)
         .fill()
@@ -375,7 +333,6 @@ const daysInMonth = computed(() => {
   const days = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  // 上个月日期
   for (let i = firstDay.getDay(); i > 0; i--) {
     const date = new Date(year, month, -i + 1);
     days.push({
@@ -385,7 +342,6 @@ const daysInMonth = computed(() => {
       isPastDate: date < today
     });
   }
-  // 当前月
   for (let i = 1; i <= lastDay.getDate(); i++) {
     const date = new Date(year, month, i);
     days.push({
@@ -395,7 +351,6 @@ const daysInMonth = computed(() => {
       isPastDate: date < today
     });
   }
-  // 下个月日期
   const nextMonthDays = 7 - (days.length % 7);
   for (let i = 1; i <= nextMonthDays; i++) {
     const date = new Date(year, month + 1, i);
@@ -440,7 +395,7 @@ function isSelected(date) {
 
 function handleDateSelection() {
   if (!selectedDate.value) {
-    timeSlots.value = timeSlots.value.map(slot => ({...slot, status: 0}));
+    timeSlots.value = timeSlots.value.map(slot => ({...slot, status: 1}));
     return;
   }
   const dateKey = formatDate(selectedDate.value);
@@ -450,7 +405,7 @@ function handleDateSelection() {
       status: bookings.value[dateKey][index]
     }));
   } else {
-    timeSlots.value = timeSlots.value.map(slot => ({...slot, status: 0}));
+    timeSlots.value = timeSlots.value.map(slot => ({...slot, status: 1}));
   }
   emitSelection();
 }
@@ -458,9 +413,7 @@ function handleDateSelection() {
 function toggleSlot(index) {
   if (!selectedDate.value) return;
   const dateKey = formatDate(selectedDate.value);
-  if (!bookings.value[dateKey]) {
-    bookings.value[dateKey] = new Array(12).fill(0);
-  }
+  if (timeSlots.value[index].status === 0) return;
   if (timeSlots.value[index].status === 1) {
     timeSlots.value[index].status = 2;
   } else if (timeSlots.value[index].status === 2) {
@@ -574,10 +527,16 @@ function updateDateDisplay() {
 }
 
 function disabledDate(date) {
+  console.log('disabledDate check:', date);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  return date < today;
+  const target = new Date(date);
+  target.setHours(0, 0, 0, 0);
+  const result = target.getTime() < today.getTime();
+  console.log('Computed disabledDate:', result);
+  return result;
 }
+
 
 const combinedFilters = computed(() => {
   const filters = [];
@@ -598,13 +557,11 @@ const combinedFilters = computed(() => {
         slots: selectedTimeSlotMaps.value
       }
     });
-    console.log("selected date:", selectedDate.value);
   }
   return filters;
 });
 watch(combinedFilters, (newFilters) => {
   handleFilters(newFilters);
-  // selectedRoom.value = null;
 });
 
 function handleClickOutside(event) {
@@ -619,75 +576,70 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
 });
-const displayRooms = ref([
-  {
-    id: 1,
-    name: 'Informal Meeting Room',
-    image: new URL('@/assets/informal-meeting.png', import.meta.url).href,
-    capacity: '15-30',
-    equipment: ['Projector', 'Whiteboard', 'Power Outlets', 'Wi-Fi'],
-    access: 'All'
-  },
-  {
-    id: 2,
-    name: 'Formal Meeting Room',
-    image: new URL('@/assets/formal-meeting.png', import.meta.url).href,
-    capacity: '30-45',
-    equipment: ['Projector', 'Whiteboard', 'Computers', 'Wi-Fi'],
-    access: 'Staff Only'
-  },
-  {
-    id: 3,
-    name: 'Room 635',
-    image: new URL('@/assets/635.png', import.meta.url).href,
-    capacity: '15-30',
-    equipment: ['Whiteboard', 'Power Outlets', 'Wi-Fi'],
-    access: 'All'
-  },
-  {
-    id: 4,
-    name: 'English Corridor',
-    image: new URL('@/assets/corridor.png', import.meta.url).href,
-    capacity: '15-30',
-    equipment: ['Whiteboard', 'Power Outlets', 'Wi-Fi'],
-    access: 'All'
-  },
-  {
-    id: 5,
-    name: 'Seminar Room',
-    image: new URL('@/assets/seminar-room.png', import.meta.url).href,
-    capacity: '15-30',
-    equipment: ['Whiteboard', 'Power Outlets', 'Wi-Fi'],
-    access: 'All'
-  }
-]);
 const filteredRooms = computed(() => {
-  return displayRooms.value.filter(room => roomIds.value.includes(room.id));
+  return roomsData.value.filter(room => roomIds.value.includes(room.id));
 });
+
 
 function selectRoom(room) {
   if (selectedRoom.value && selectedRoom.value.id === room.id) {
     selectedRoom.value = null;
+    bookings.value = {};
+    selectedDate.value = null;
+    bookDate.value = null;
   } else {
     selectedRoom.value = room;
+    if (room.booking && room.booking.length > 0) {
+      room.booking.forEach(booking => {
+        if (booking.status === 'Confirmed') {
+          if (!bookings.value[booking.date]) {
+            bookings.value[booking.date] = new Array(12).fill(1);
+          }
+          booking.time.forEach(slotIndex => {
+            bookings.value[booking.date][slotIndex] = 0;
+          });
+        }
+      });
+    } else {
+      bookings.value = {};
+    }
   }
 }
 
+
+const isBookable = computed(() => {
+  return (
+      selectedRoom.value &&
+      bookDate.value &&
+      selectedSlots.value.length > 0 &&
+      bookingPurpose.value.trim() !== ''
+  );
+});
+
 async function handleBook() {
-  if (!selectedRoom.value || !bookDate.value || selectedSlots.value.length === 0) {
-    alert('Please select a room, date, and time slots.');
+  if (!isBookable.value) {
+    alert('Please select a room, date, time slots, and enter purpose.');
     return;
   }
   const bookingData = {
     roomId: selectedRoom.value.id,
     roomName: selectedRoom.value.name,
     date: formatDate(bookDate.value),
-    timeSlots: selectedSlots.value
+    timeSlots: selectedSlots.value.map(slot => slot.index),
+    purpose: bookingPurpose.value,
+    user_email: '2542884@dundee.ac.uk'
   };
   try {
-    const response = await axios.post('https://your-backend-api.com/bookings', bookingData);
-    if (response.data.success) {
+    const response = await axios.post('http://localhost:8080/bookRoom', bookingData, {
+      headers: {'Content-Type': 'application/json'}
+    });
+    if (response.data.code === '000') {
       alert('Booking successful!');
+      selectedRoom.value = null;
+      selectedDate.value = null;
+      bookDate.value = null;
+      selectedSlots.value = [];
+      bookingPurpose.value = '';
     } else {
       alert('Booking failed: ' + response.data.message);
     }
@@ -696,6 +648,7 @@ async function handleBook() {
     alert('An error occurred while booking the room.');
   }
 }
+
 </script>
 
 <style>
@@ -950,6 +903,12 @@ body {
   border-radius: 10px;
 }
 
+.vue3-datepicker .disabled,
+.vue3-datepicker .datepicker__cell--disabled {
+  color: #ccc;
+  pointer-events: none;
+}
+
 .time-picker {
   margin-left: 5%;
   position: relative;
@@ -992,6 +951,7 @@ body {
 }
 
 /* 房间展示样式 */
+
 .rooms-container {
   background: #eceef8;
   width: 100%;
@@ -1110,6 +1070,15 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.book-button.enabled {
+  background-color: #3155ef;
+  color: white;
+}
+
+.book-button:disabled {
+  cursor: not-allowed;
 }
 
 .book-button:active {
