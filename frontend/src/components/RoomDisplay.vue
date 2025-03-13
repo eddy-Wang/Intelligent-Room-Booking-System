@@ -52,8 +52,12 @@ const props = defineProps({
   }
 })
 const getImagePath = (name) => {
-  const fileName = name.toLowerCase().replace(/\s+/g, '-');
-  return new URL(`../assets/${fileName}.png`, import.meta.url).href;
+  if (name.startsWith("English Room")) {
+    return new URL(`../assets/english-room.png`, import.meta.url).href;
+  } else {
+    const fileName = name.toLowerCase().replace(/\s+/g, '-');
+    return new URL(`../assets/${fileName}.png`, import.meta.url).href;
+  }
 }
 const filteredRooms = computed(() => {
   return props.rooms.filter(room => props.roomIds.includes(room.id))
