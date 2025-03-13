@@ -150,7 +150,9 @@ def delete_booking_route(id):
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
 
-@bp.route('/modifyBooking', methods=['PUT'])
+@bp.route('/modifyBooking', methods=['PUT','OPTIONS'])
 def modify_booking():
+    if request.method == 'OPTIONS':
+        return '', 200
     booking_data = request.get_json()
     print(booking_data)

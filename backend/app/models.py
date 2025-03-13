@@ -227,7 +227,7 @@ def fetch_bookings():
             "status": row[6]
         }
         bookings.append(booking_data)
-
+    print(bookings)
     return bookings
 
 
@@ -255,3 +255,4 @@ def delete_booking(booking_id):
 
 if __name__ == '__main__':
     get_room_detailed(1)
+    fetch_bookings()
