@@ -10,7 +10,7 @@
             @click="handleRoomClick(room)"
         >
           <div class="room-image">
-            <img :src="room.image" :alt="room.name">
+            <img :src="getImagePath(room.name)" :alt="room.name" />
           </div>
           <div class="room-name"><strong>{{ room.name }}</strong></div>
         </div>
@@ -28,7 +28,7 @@
       >
         <h2>{{ selectedRoom.name }}</h2>
         <p>Capacity: {{ selectedRoom.capacity }}</p>
-        <p>Equipment: {{ selectedRoom.equipment.join(', ') }}</p>
+        <p>Equipment: {{ selectedRoom.equipment }}</p>
         <p>Access: {{ selectedRoom.access }}</p>
         <button class="close-btn" @click="resetSelection">×</button>
       </div>
@@ -44,58 +44,27 @@ const props = defineProps({
     type: Array,
     required: true,
     default: () => []
+  },
+  rooms: {
+    type: Array,
+    required: true,
+    default: () => []
   }
 })
-
+const getImagePath = (name) => {
+  if (name.startsWith("English Room")) {
+    return new URL(`../assets/english-room.png`, import.meta.url).href;
+  } else {
+    const fileName = name.toLowerCase().replace(/\s+/g, '-');
+    return new URL(`../assets/${fileName}.png`, import.meta.url).href;
+  }
+}
 const filteredRooms = computed(() => {
-  return rooms.value.filter(room => props.roomIds.includes(room.id))
+  return props.rooms.filter(room => props.roomIds.includes(room.id))
 })
 const shouldScroll = computed(() => {
   return filteredRooms.value.length > 3
 })
-
-
-const rooms = ref([
-  {
-    id: 1,
-    name: 'Informal Meeting Room',
-    image: new URL('@/assets/informal-meeting.png', import.meta.url).href,
-    capacity: '15-30',
-    equipment: ['Projector', 'Whiteboard', 'Power Outlets', 'Wi-Fi'],
-    access: 'All'
-  },
-  {
-    id: 2,
-    name: 'Formal Meeting Room',
-    image: new URL('@/assets/formal-meeting.png', import.meta.url).href,
-    capacity: '30-45',
-    equipment: ['Projector', 'Whiteboard', 'Computers', 'Wi-Fi'],
-    access: 'Staff Only'
-  },
-  {
-    id: 3,
-    name: 'Room 635',
-    image: new URL('@/assets/635.png', import.meta.url).href,
-    capacity: '15-30',
-    equipment: ['Whiteboard', 'Power Outlets', 'Wi-Fi'],
-    access: 'All'
-  },
-  {
-    id: 4,
-    name: 'English Corridor',
-    image: new URL('@/assets/corridor.png', import.meta.url).href,
-    capacity: '15-30',
-    equipment: ['Whiteboard', 'Power Outlets', 'Wi-Fi'],
-    access: 'All'
-  }, {
-    id: 5,
-    name: 'Seminar Room',
-    image: new URL('@/assets/seminar-room.png', import.meta.url).href,
-    capacity: '15-30',
-    equipment: ['Whiteboard', 'Power Outlets', 'Wi-Fi'],
-    access: 'All'
-  }
-])
 
 const scrollPosition = ref(0)
 const isScrolling = ref(false)
@@ -124,12 +93,12 @@ const handleMouseMove = (e) => {
 
   const distanceRatio = (mouseX - containerCenter) / containerCenter;
 
-  const sensitivity = 0.5;
-  const maxScrollSpeed = 4;
+  const sensitivity = 0.1;
+  const maxScrollSpeed = 0.2;
 
   scrollSpeed.value = -distanceRatio * sensitivity * maxScrollSpeed;
 
-  if (Math.abs(distanceRatio) > 0.2) {
+  if (Math.abs(distanceRatio) > 0.8) {
     isScrolling.value = true;
     updateScroll();
   } else {
@@ -141,7 +110,7 @@ const updateScroll = () => {
   if (!isScrolling.value) return
 
   scrollPosition.value += scrollSpeed.value
-  const cardWidthPercent = 35.5;
+  const cardWidthPercent = 37.2;
   const totalCardsWidthPercent = filteredRooms.value.length * (cardWidthPercent)
   const maxScrollPercent = 100 - totalCardsWidthPercent;
 

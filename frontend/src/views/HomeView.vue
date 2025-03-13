@@ -12,6 +12,7 @@
         <!--        <room-display :room-ids="roomIds"/>-->
         <room-display
             :room-ids="roomIds"
+            :rooms="roomsData"
             @room-selected="handleRoomSelected"
             @room-unselected="handleRoomUnselected"
         />
@@ -20,7 +21,6 @@
         <!--        <time-table/>-->
         <time-table
             @time-selected="handleTimeSelection"
-            :selected-room="selectedRoom"
             :is-enabled="isTableEnabled"
         />
       </div>
@@ -42,115 +42,45 @@
 </template>
 
 <script setup>
-import axios from "axios";
-import {ref, computed} from "vue";
+import {getCurrentInstance, onMounted, provide, ref} from "vue";
 import RoomSearch from "@/components/RoomSearch.vue";
 import TimeTable from '@/components/TimeTable.vue';
 import RoomDisplay from '@/components/RoomDisplay.vue';
 
 
-const roomIds = ref([1, 2, 3, 4, 5])
+const roomIds = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
 const isTableEnabled = ref(false);
 //room status
 const bookDate = ref(null)
 const selectedRoom = ref(null)
 const selectedDate = ref(null)
 const selectedSlots = ref([])
+const roomsData = ref([])
+const childData = ref([])
+provide('childData', childData)
 
-
-//TODO: test data. can be deleted after connecting to the back end
-const roomsData = [
-  {
-    id: 1,
-    capacity: 20,
-    equipment: "{'projector', 'whiteboard', 'powerOutlets', 'wifi'}",
-    access: 1,
-    location: "DIICSU Sixth Floor",
-    info: "",
-    booking: [
-      {
-        booking_id: "1",
-        user_email: "2542762@dundee.ac.uk",
-        room_id: 1,
-        date: "2025-03-19",
-        time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        purpose: "test1",
-        status: "Confirmed"
-      },
-      {
-        booking_id: "2",
-        user_email: "2542762@dundee.ac.uk",
-        room_id: 1,
-        date: "2025-03-14",
-        time: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-        purpose: "test2",
-        status: "Missed"
-      }
-    ]
-  },
-  {
-    id: 2,
-    capacity: 10,
-    equipment: "{'projector', 'whiteboard', 'computers', 'wifi'}",
-    access: 1,
-    location: "DIICSU Sixth Floor",
-    info: "",
-    booking: [
-      {
-        booking_id: "1",
-        user_email: "2542762@dundee.ac.uk",
-        room_id: 1,
-        date: "2025-03-19",
-        time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        purpose: "test1",
-        status: "Confirmed"
-      },
-      {
-        booking_id: "2",
-        user_email: "2542762@dundee.ac.uk",
-        room_id: 1,
-        date: "2025-03-13",
-        time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-        purpose: "test2",
-        status: "Missed"
-      }
-    ]
-  },
-  {
-    id: 3,
-    capacity: 60,
-    equipment: "{'whiteboard', 'powerOutlets', 'wifi'}",
-    access: 1,
-    location: "DIICSU Sixth Floor",
-    info: "",
-    booking: []
-  },
-  {
-    id: 4,
-    capacity: 15,
-    equipment: "{'whiteboard', 'outlets', 'wifi'}",
-    access: 1,
-    location: "DIICSU Sixth Floor",
-    info: "",
-    booking: []
-  },
-  {
-    id: 5,
-    capacity: 28,
-    equipment: "{'whiteboard', 'powerOutlets', 'wifi'}",
-    access: 1,
-    location: "DIICSU Sixth Floor",
-    info: "",
-    booking: []
+const fetchData = async () => {
+  try {
+    const instance = getCurrentInstance();
+    const userPermission = instance.appContext.config.globalProperties.$user.permission;
+    const url = `http://172.20.10.3:8080/allRoom?permission=${encodeURIComponent(userPermission)}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    roomsData.value = data.data;
+    console.log('Fetched data:', roomsData.value);
+  } catch (err) {
+    console.error('Failed to fetch data:', err);
   }
-];
-
+};
+onMounted(() => {
+  fetchData()
+})
 
 const handleFilters = (filters) => {
   console.log("当前过滤条件：", filters);
 
   // 执行过滤
-  const filteredRooms = roomsData.filter(room => {
+  const filteredRooms = roomsData.value.filter(room => {
     // 检查所有过滤器是否都满足
     return filters.every(filter => {
       switch (filter.type) {
@@ -158,11 +88,10 @@ const handleFilters = (filters) => {
           if (filter.value === 'all') {
             return true; // 显示全部房间
           } else {
-            return room.access === filter.value; // 严格匹配 access 值
+            return room.access === 1; // 严格匹配 access 值
           }
           // 容量过滤
         case 'capacity':
-          console.log("111");
           // 处理不同范围值
           switch (filter.value) {
             case '1-15':
@@ -189,25 +118,18 @@ const handleFilters = (filters) => {
           // 如果没有选择日期或时间段则不过滤
           if (!filter.value.date || filter.value.slots.length === 0) return true;
           console.log(filter.value.date)
-          console.log(filter.value.slots.length)
+          console.log(filter.value.slots)
           // 将用户选择的日期转换为YYYY-MM-DD格式
           const selectedDate = formatDate(filter.value.date);
 
-        function formatDate(date) {
-          if (!date) return '';
-          const d = new Date(date);
-          const year = d.getFullYear();
-          const month = String(d.getMonth() + 1).padStart(2, '0');
-          const day = String(d.getDate()).padStart(2, '0');
-          return `${year}-${month}-${day}`;
-        }
-
-          console.log(selectedDate)
+          console.log("date:", selectedDate)
           // 检查该房间在选定日期的预订情况
           const hasConflict = room.booking.some(booking => {
+            console.log("当前过滤条件：", filters);
             // 检查日期是否匹配
             if (booking.date === selectedDate) {
               // 检查用户选择的时间段是否与预订时间段有重叠
+              //TODO:class timetable filter
               return booking.time.some(bookedSlot => filter.value.slots.includes(bookedSlot));
             }
             return false;
@@ -227,11 +149,21 @@ const handleFilters = (filters) => {
   roomIds.value = filteredRooms.map(room => room.id)
 }
 
+function formatDate(date) {
+  if (!date) return '';
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 // 从RoomDisplay接收选中的房间
 const handleRoomSelected = (room) => {
   selectedRoom.value = room;
   isTableEnabled.value = true; // 启用 TimeTable
+  childData.value = selectedRoom.value.booking
+  console.log(childData.value)
 };
 
 const handleRoomUnselected = () => {
@@ -246,22 +178,6 @@ const handleTimeSelection = (date, slots) => {
   bookDate.value = date;
   selectedSlots.value = slots;
 };
-
-
-// TODO: connect to back end
-// const fetchRoomData = async () => {
-//   try {
-//     const response = await axios.get('https://backend-api.com/rooms');
-//     roomsData.value = response.data; // 将获取的数据存储到 roomsData 中
-//   } catch (error) {
-//     console.error("获取房间信息失败:", error);
-//   }
-// };
-//
-// // 在组件挂载时调用 fetchRoomData
-// onMounted(() => {
-//   fetchRoomData();
-// });
 </script>
 
 <style>
