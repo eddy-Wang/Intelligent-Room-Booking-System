@@ -10,7 +10,7 @@
             @click="handleRoomClick(room)"
         >
           <div class="room-image">
-            <img :src="image" :alt="room.name">
+            <img :src="getImagePath(room.name)" :alt="room.name" />
           </div>
           <div class="room-name"><strong>{{ room.name }}</strong></div>
         </div>
@@ -51,9 +51,10 @@ const props = defineProps({
     default: () => []
   }
 })
-const image = new URL('@/assets/seminar-room.png', import.meta.url).href
-
-
+const getImagePath = (name) => {
+  const fileName = name.toLowerCase().replace(/\s+/g, '-');
+  return new URL(`../assets/${fileName}.png`, import.meta.url).href;
+}
 const filteredRooms = computed(() => {
   return props.rooms.filter(room => props.roomIds.includes(room.id))
 })
@@ -88,12 +89,12 @@ const handleMouseMove = (e) => {
 
   const distanceRatio = (mouseX - containerCenter) / containerCenter;
 
-  const sensitivity = 0.5;
-  const maxScrollSpeed = 4;
+  const sensitivity = 0.1;
+  const maxScrollSpeed = 0.2;
 
   scrollSpeed.value = -distanceRatio * sensitivity * maxScrollSpeed;
 
-  if (Math.abs(distanceRatio) > 0.2) {
+  if (Math.abs(distanceRatio) > 0.8) {
     isScrolling.value = true;
     updateScroll();
   } else {
@@ -105,7 +106,7 @@ const updateScroll = () => {
   if (!isScrolling.value) return
 
   scrollPosition.value += scrollSpeed.value
-  const cardWidthPercent = 35.5;
+  const cardWidthPercent = 37.2;
   const totalCardsWidthPercent = filteredRooms.value.length * (cardWidthPercent)
   const maxScrollPercent = 100 - totalCardsWidthPercent;
 
