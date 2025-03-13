@@ -2,6 +2,8 @@ import random
 import string
 from flask_mail import Message
 from . import mail
+import socket
+socket.getfqdn = lambda name=None: "localhost"
 
 # stored the code
 verification_codes = {}
@@ -15,6 +17,7 @@ def send_verification_email(user_email, code):
     """send verification email"""
     msg = Message("Your Verification Code", recipients=[user_email])
     msg.body = f"Your verification code is: {code}"
+    msg.charset = 'utf-8'
     try:
         mail.send(msg)
         print("Verification email sent successfully.")

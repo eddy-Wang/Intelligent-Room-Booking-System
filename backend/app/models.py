@@ -71,9 +71,9 @@ def get_all_room_data_for_user(permission):
             info = row[6]
 
             # Filter based on permission
-            if permission == "student" and access != 0:
+            if permission == "Student" and access != 0:
                 continue
-            elif permission == "staff" and access not in [0, 1]:
+            elif permission == "Staff" and access not in [0, 1]:
                 continue
             # selected staff can access all rooms, no filter needed
 
@@ -216,7 +216,6 @@ def fetch_bookings():
     cursor.close()
     connection.close()
 
-
     bookings = []
     for row in result:
         booking_data = {
@@ -261,16 +260,10 @@ def modify_booking(booking_data):
 
     booking_id = booking_data["booking_id"]
     room_id = booking_data["room_id"]
-    raw_date = booking_data["date"]
+    date = booking_data["date"]
     time = booking_data["time"]
     purpose = booking_data["purpose"]
     status = booking_data["status"]
-
-
-    date_obj = datetime.strptime(raw_date, "%a, %d %b %Y %H:%M:%S GMT")
-    print(date_obj)
-    date = date_obj.strftime("%Y-%m-%d")
-    print(date)
 
     query = """
     UPDATE booking
@@ -288,17 +281,54 @@ def modify_booking(booking_data):
     connection.close()
 
 
+# Get user reservations by email
+def get_user_reservations(email):
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+    query = """
+        SELECT b.booking_id, b.date, b.time, b.purpose, b.status, r.name, r.capacity
+        FROM booking b
+        JOIN room r ON b.room_id = r.room_id
+        WHERE b.user_email = %s
+        ORDER BY b.date, b.time
+        """
+    cursor.execute(query, (email,))
+    reservations = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return reservations
+
+
+# Cancel reservation by booking ID
+def cancel_reservation(booking_id):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    query = "UPDATE booking SET status = 'Declined' WHERE booking_id = %s AND status = 'Confirmed'"
+    try:
+        cursor.execute(query, (booking_id,))
+        connection.commit()
+        if cursor.rowcount > 0:
+            return True
+        else:
+            return False
+    except Error as e:
+        print(f"Error cancelling reservation: {e}")
+        return False
+    finally:
+        cursor.close()
+        connection.close()
+
+
 if __name__ == '__main__':
     get_room_detailed(1)
     fetch_bookings()
 
-
     modify_booking({
-    "booking_id": "1710976683000",
-    "date": "Fri, 15 Feb 2025 00:00:00 GMT",
-    "purpose": "test11111",
-    "room_id": 15,
-    "status": "Confirmed",
-    "time": "10",
-    "user_email": "2542999@dundee.ac.uk"
-})
+        "booking_id": "1710976683000",
+        "date": "Fri, 15 Feb 2025 00:00:00 GMT",
+        "purpose": "test11111",
+        "room_id": 15,
+        "status": "Confirmed",
+        "time": "10",
+        "user_email": "2542999@dundee.ac.uk"
+    })
