@@ -131,6 +131,7 @@ def get_booking_record_of_a_room(room_id):
 def get_class_of_a_room(room_id):
     return ujson.dumps([], default=str)
 
+# Get booking details of a room
 def get_room_detailed(room_id):
     this_room = {"booking": ujson.loads(get_booking_record_of_a_room(room_id)),
                  "class": ujson.loads(get_class_of_a_room(room_id))}
