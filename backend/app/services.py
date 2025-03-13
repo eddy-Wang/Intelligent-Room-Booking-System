@@ -2,6 +2,8 @@ import random
 import string
 from flask_mail import Message
 from mysql.connector import Error
+import socket
+socket.getfqdn = lambda name=None: "localhost"
 
 from . import mail
 from .models import get_db_connection
