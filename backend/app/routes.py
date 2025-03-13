@@ -127,6 +127,7 @@ def get_bookings():
 # Update booking status route
 @bp.route('/bookings/<int:id>', methods=['PUT'])
 def update_booking(id):
+    print(request.json)
     status = request.json.get('status')
     if not status:
         return create_response('400', 'Status is required.')
@@ -145,3 +146,8 @@ def delete_booking_route(id):
         return create_response('000', 'Booking deleted successfully!')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
+
+@bp.route('/modifyBooking', methods=['PUT'])
+def modify_booking():
+    booking_data = request.get_json()
+    print(booking_data)

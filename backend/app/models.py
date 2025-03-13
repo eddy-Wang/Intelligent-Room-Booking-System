@@ -3,6 +3,7 @@ import ujson
 import ujson as json
 from mysql.connector import Error
 
+
 # Database connection setup
 def get_db_connection():
     connection = mysql.connector.connect(
@@ -14,6 +15,7 @@ def get_db_connection():
     )
     return connection
 
+
 # Check if the email exists
 def check_email_exists(email):
     connection = get_db_connection()
@@ -24,6 +26,7 @@ def check_email_exists(email):
     cursor.close()
     connection.close()
     return result is not None
+
 
 # Get user data by email
 def get_user_data_by_email(email):
@@ -38,6 +41,7 @@ def get_user_data_by_email(email):
     if result:
         return {'email': result[0], 'name': result[1], 'permission': result[2]}
     return None
+
 
 # Get all room data
 def get_all_room_data_for_user(permission):
@@ -127,9 +131,11 @@ def get_booking_record_of_a_room(room_id):
 
     return ujson.dumps(booking_records, default=str)
 
+
 # Get class of a room
 def get_class_of_a_room(room_id):
     return ujson.dumps([], default=str)
+
 
 # Get detailed room data
 def get_room_detailed(room_id):
@@ -151,16 +157,29 @@ def get_room_detailed(room_id):
 
     return None
 
+
 # Fetch users from the database
 def fetch_users():
     connection = get_db_connection()
     cursor = connection.cursor()
-    query = "SELECT email, permission FROM users"
+    query = "SELECT * FROM users"
     cursor.execute(query)
     result = cursor.fetchall()
     cursor.close()
     connection.close()
-    return result
+
+    # Format the result into a list of dictionaries for each user
+    users = []
+    for row in result:
+        user_data = {
+            "email": row[0],
+            "name": row[1],
+            "permission": row[2]
+        }
+        users.append(user_data)
+
+    return users
+
 
 # Fetch rooms from the database
 def fetch_rooms():
@@ -171,10 +190,22 @@ def fetch_rooms():
     result = cursor.fetchall()
     cursor.close()
     connection.close()
-    return result
+
+    # Format the result into a list of dictionaries for each room
+    rooms = []
+    for row in result:
+        room_data = {
+            "room_id": row[0],
+            "name": row[1]
+        }
+        rooms.append(room_data)
+
+    return rooms
+
 
 # Fetch all bookings from the database
 def fetch_bookings():
+    # Fetch all bookings from the database
     connection = get_db_connection()
     cursor = connection.cursor()
     query = "SELECT * FROM booking"
@@ -182,7 +213,23 @@ def fetch_bookings():
     result = cursor.fetchall()
     cursor.close()
     connection.close()
-    return result
+
+
+    bookings = []
+    for row in result:
+        booking_data = {
+            "booking_id": row[0],
+            "user_email": row[1],
+            "room_id": row[2],
+            "date": row[3],
+            "time": row[4],
+            "purpose": row[5],
+            "status": row[6]
+        }
+        bookings.append(booking_data)
+
+    return bookings
+
 
 # Update booking status
 def update_booking_status(booking_id, status):
@@ -194,6 +241,7 @@ def update_booking_status(booking_id, status):
     cursor.close()
     connection.close()
 
+
 # Delete a booking
 def delete_booking(booking_id):
     connection = get_db_connection()
@@ -204,6 +252,6 @@ def delete_booking(booking_id):
     cursor.close()
     connection.close()
 
+
 if __name__ == '__main__':
     get_room_detailed(1)
-
