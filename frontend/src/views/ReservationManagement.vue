@@ -260,15 +260,15 @@ const reverseTimeSlotMap = {
     10: '19:00-19:45',
     11: '19:55-20:40'
 };
-const timeSlots = Object.values(reverseTimeSlotMap); // 时间槽选项
-const processingStateOptions = ['unprocessed', 'processed', 'completed']; // 处理状态选项
+const timeSlots = Object.values(reverseTimeSlotMap);
+const processingStateOptions = ['unprocessed', 'processed', 'completed'];
 
 // Fetch rooms from backend API
 const fetchRooms = async () => {
     try {
-        const response = await fetch('http://192.168.110.50:8080/rooms'); // 调用后端API
+        const response = await fetch('http://192.168.110.50:8080/rooms');
         if (!response.ok) throw new Error('Failed to fetch rooms');
-        const data = await response.json(); // 更新 rooms 数据
+        const data = await response.json();
         rooms.value=data.data;
     } catch (error) {
         console.error('Error fetching rooms:', error);
@@ -291,7 +291,7 @@ const getUserDisplay = (email) => {
 };
 
 const sortDates = (dates) => {
-    // 对日期进行升序排列
+
     return dates.sort((a, b) => new Date(a) - new Date(b));
 };
 const queryUsers = (queryString, cb) => {
@@ -304,33 +304,33 @@ const queryUsers = (queryString, cb) => {
             );
         })
         .map(user => ({
-            value: `${user.name} (${user.permission}) - ${user.email}`, // 使用 email 作为唯一标识
-            label: `${user.name} (${user.permission}) - ${user.email}` // 显示 name (permission) - email
+            value: `${user.name} (${user.permission}) - ${user.email}`,
+            label: `${user.name} (${user.permission}) - ${user.email}`
         }));
 
-    cb(results); // 将结果传递给回调函数
+    cb(results);
 };
-const modifyDialogVisible = ref(false); // 控制弹窗显示
-const currentBooking = ref({}); // 当前编辑的预订信息
+const modifyDialogVisible = ref(false);
+const currentBooking = ref({});
 
-// 打开修改弹窗
+
 const openModifyDialog = (booking) => {
-    currentBooking.value = { ...booking }; // 复制当前预订信息
-    currentBooking.value.time = booking.time.split(','); // 将时间字符串转换为数组
+    currentBooking.value = { ...booking };
+    currentBooking.value.time = booking.time.split(',');
     modifyDialogVisible.value = true;
 };
 
-// 关闭弹窗
+
 const handleCloseModifyDialog = () => {
     modifyDialogVisible.value = false;
 };
 
-// 保存修改后的预订信息
+
 const saveModifiedBooking = async () => {
     try {
         const payload = {
             ...currentBooking.value,
-            time: currentBooking.value.time.join(','), // 将时间数组转换为字符串
+            time: currentBooking.value.time.join(','),
         };
 
         const response = await fetch(`http://192.168.110.50:8080/modifyBookings/${currentBooking.value.booking_id}`, {
@@ -342,14 +342,14 @@ const saveModifiedBooking = async () => {
         if (!response.ok) throw new Error('Failed to update booking');
         ElMessage.success('Booking updated successfully');
         modifyDialogVisible.value = false;
-        fetchBookings(); // 刷新数据
+        fetchBookings();
     } catch (error) {
         console.error('Error updating booking:', error);
         ElMessage.error('Failed to update booking');
     }
 };
 const handleUserSelect = (selected) => {
-    filters.value.userInput = selected.value; // 使用 email 作为筛选条件
+    filters.value.userInput = selected.value;
 };
 // Function to modify a booking
 const modifyBooking = async (booking_id) => {
@@ -475,10 +475,10 @@ const fetchBookings = async () => {
         const booking = await response.json();
         const data = booking.data;
         if (Array.isArray(data)) {
-            bookings.value = data; // 确保是数组
+            bookings.value = data;
         } else {
             console.error('Expected an array but got:', data);
-            bookings.value = []; // 设置为空数组
+            bookings.value = [];
         }
     } catch (error) {
         console.error('Error fetching bookings:', error);
@@ -487,7 +487,7 @@ const fetchBookings = async () => {
 const formatDate = (dateString) => {
     const date = new Date(dateString);
     console.log(dateString)
-    return date.toLocaleDateString('en-CA'); // 'en-CA' 格式为 YYYY-MM-DD
+    return date.toLocaleDateString('en-CA');
 };
 
 const filteredBookings = computed(() => {
@@ -501,12 +501,12 @@ const filteredBookings = computed(() => {
             const filterValue = filters.value[key];
 
             if (!filterValue || filterValue.length === 0) {
-                return true; // 如果筛选条件为空，则不过滤
+                return true;
             }
 
             if (key === 'userInput') {
                 const user = users.value.find(u => u.email === booking.user_email);
-                if (!user) return false; // 如果找不到用户，过滤掉
+                if (!user) return false;
                 return (
                     user.name.toLowerCase().includes(filterValue.toLowerCase()) ||
                     user.email.toLowerCase().includes(filterValue.toLowerCase()) ||
