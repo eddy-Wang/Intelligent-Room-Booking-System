@@ -82,10 +82,10 @@
           <div v-if="selectedRoom" class="booking-info">
             <p>Room: {{ selectedRoom.name }}</p>
             <p v-if="bookDate">Date: {{ formatDate(bookDate) }}</p>
-            <div v-if="selectedSlots.length > 0">
+            <div v-if="bookTimeSlots.length > 0">
               <p>Selected Time Slots:</p>
               <ul>
-                <li v-for="(slot, index) in selectedSlots" :key="index">
+                <li v-for="(slot, index) in bookTimeSlots" :key="index">
                   {{ formatTime(slot.start) }} - {{ formatTime(slot.end) }}
                 </li>
               </ul>
@@ -107,6 +107,7 @@
             placeholder="Enter purpose..."
             rows="3"
             style="max-height: 80px; overflow-y: auto;"
+            v-model="bookingPurpose"
         ></textarea>
       </div>
       <button class="book-button" @click="handleBook">Book</button>
@@ -122,12 +123,43 @@
 <script>
 import Vue3Datepicker from 'vue3-datepicker';
 import axios from 'axios';
+import {getCurrentInstance, inject} from "vue";
 
 export default {
   name: 'RoomSearch',
   components: {
     Vue3Datepicker
   },
+
+  setup() {
+    let instance = getCurrentInstance()
+    const user_email = instance.appContext.config.globalProperties.$user.email
+    // 注入父组件提供的数据
+    const bookDate = inject('bookDate');
+    const bookTimeSlots = inject('bookTimeSlots')
+
+    return {
+      bookDate, bookTimeSlots, user_email
+    };
+  },
+  watch: {
+    combinedFilters(newFilters) {
+      this.$emit('filters-updated', newFilters);
+    },
+    selectedDate(newDate) {
+      this.$emit('date-selected', newDate); // 将 selectedDate 传递给父组件
+    },
+
+    bookDate(newVal, oldVal) {
+      console.log("bookDate old:", oldVal);
+      console.log("bookDate new:", newVal);
+    },
+    bookTimeSlots(newVal, oldVal) {
+      console.log("bookDate old:", oldVal);
+      console.log("bookDate new:", newVal);
+    }
+  },
+
   data() {
     return {
       accessFilters: [
@@ -135,6 +167,7 @@ export default {
         {label: 'Staff Only', value: 'staff'}
       ],
       activeAccessFilter: 'all',
+      bookingPurpose: "",
 
       // Capacity
       capacityFilters: [
@@ -186,7 +219,7 @@ export default {
         '19:00-19:45': 10,
         '19:55-20:40': 11
       },
-      bookDate:null,
+      bookDate: null,
       selectedDate: null,
       selectedTimeSlots: [],
       selectedTimeSlotMaps: [],
@@ -220,7 +253,7 @@ export default {
             slots: this.selectedTimeSlotMaps
           }
         });
-        console.log("aaa",this.selectedDate)
+        console.log("aaa", this.selectedDate)
       }
 
       return filters;
@@ -236,15 +269,7 @@ export default {
     }
 
   },
-  watch: {
-    combinedFilters(newFilters) {
-      this.$emit('filters-updated', newFilters);
-    },
-    selectedDate(newDate) {
-      this.$emit('date-selected', newDate); // 将 selectedDate 传递给父组件
-    }
-  }
-  ,
+
   methods: {
     handleAccessFilter(filterValue) {
       this.activeAccessFilter = filterValue;
@@ -300,21 +325,24 @@ export default {
     },
 
     async handleBook() {
-      if (!this.selectedRoom || !this.bookDate || this.selectedTimeSlots.length === 0) {
+      if (!this.selectedRoom || !this.bookDate || this.bookTimeSlots.length === 0) {
         alert('Please select a room, date, and time slots.');
         return;
       }
-
+      console.log(this.selectedRoom, this.bookDate, this.bookTimeSlots)
       const bookingData = {
         roomId: this.selectedRoom.id,
         roomName: this.selectedRoom.name,
-        date: this.formatDate(this.selectedDate),
-        timeSlots: this.selectedTimeSlots
+        date: this.bookDate,
+        timeSlots: this.bookTimeSlots.map(slot => slot.index),
+        purpose: this.bookingPurpose,
+        user_email: this.user_email
       };
-
       try {
-        const response = await axios.post('https://your-backend-api.com/bookings', bookingData);
-        if (response.data.success) {
+        const response = await axios.post('http://127.0.0.1:8080/bookRoom', bookingData, {
+          headers: {'Content-Type': 'application/json'}
+        });
+        if (response.data.code === '000') {
           alert('Booking successful!');
         } else {
           alert('Booking failed: ' + response.data.message);
@@ -334,13 +362,11 @@ export default {
 
   props: {
     selectedRoom: Object,
-    bookDate:String,
+    bookDate: String,
     selectedSlots:
     Array
-  }
-  ,
+  },
 }
-;
 
 </script>
 
@@ -581,7 +607,6 @@ export default {
   font-size: 16px;
   border-radius: 10px;
 }
-
 
 
 </style>

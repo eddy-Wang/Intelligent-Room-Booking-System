@@ -53,13 +53,15 @@ const bookDate = ref(null)
 const selectedRoom = ref(null)
 const selectedDate = ref(null)
 const selectedSlots = ref([])
+const bookTimeSlots = ref([])
 const roomsData = ref([])
 const childData = ref([])
 const roomSelected = ref(0)
 provide('childData', childData)
 provide('roomSelected', roomSelected)
+
 provide('bookDate', bookDate)
-provide('selectedSlots',selectedSlots)
+provide('bookTimeSlots',bookTimeSlots)
 
 const fetchData = async () => {
   try {
@@ -188,13 +190,14 @@ const handleRoomUnselected = () => {
   selectedRoom.value = null;
   selectedDate.value = null;
   selectedSlots.value = [];
+  bookTimeSlots.value = [];
   roomSelected.value = 0
 };
 
 // 从TimeTable接收日期和时间段
 const handleTimeSelection = (date, slots) => {
   bookDate.value = date;
-  selectedSlots.value = slots;
+  bookTimeSlots.value = slots;
   console.log(date,slots)
 };
 </script>
