@@ -1,8 +1,9 @@
 import time
 from flask import Blueprint, request, jsonify
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code, \
-    get_user_reservations, cancel_reservation, fetch_users, fetch_rooms, fetch_bookings, update_booking_status, \
-    delete_booking, modify_booking
+    get_user_reservations, cancel_reservation, fetch_users, fetch_rooms_id_and_name, fetch_bookings, \
+    update_booking_status, \
+    delete_booking, modify_booking, add_room, modify_room, delete_room
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
     get_all_room_data_for_user
 
@@ -139,10 +140,10 @@ def get_users():
         return create_response('500', f'Error: {str(e)}')
 
 # Fetch rooms route
-@bp.route('/rooms', methods=['GET'])
+@bp.route('/rooms_id_and_name', methods=['GET'])
 def get_rooms():
     try:
-        rooms = fetch_rooms()
+        rooms = fetch_rooms_id_and_name()
         print(rooms)
         return create_response('000', 'Rooms fetched successfully!', rooms)
     except Exception as e:
@@ -255,3 +256,54 @@ def book_room():
         return create_response('000', 'Booking successful!')
     except Exception as e:
         return create_response('004', f'Booking failed: {str(e)}')
+
+
+@bp.route('/rooms', methods=['POST', 'OPTIONS'])
+def rooms():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.get_json()
+    required_fields = ['name', 'capacity', 'location', 'equipment', 'access', 'information']
+
+    for field in required_fields:
+        if field not in data:
+            return create_response('001', f'{field} is required!')
+
+    success, message = add_room(data)
+
+    if success:
+        return create_response('000', message)
+    else:
+        return create_response('002', message)
+
+@bp.route('/rooms/<int:room_id>', methods=['PUT'])
+def modify_room_route(room_id):
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.get_json()
+    required_fields = ['name', 'capacity', 'location', 'equipment', 'access', 'information']
+    for field in required_fields:
+        if field not in data:
+            return create_response('001', f'{field} is required!')
+
+    success, message = modify_room(room_id, data)
+
+    if success:
+        return create_response('000', message)
+    else:
+        return create_response('002', message)
+
+
+@bp.route('/rooms/<int:room_id>', methods=['DELETE'])
+def delete_room_route(room_id):
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    success, message = delete_room(room_id)
+    if success:
+        return create_response('000', message)
+    else:
+        return create_response('002', message)
+

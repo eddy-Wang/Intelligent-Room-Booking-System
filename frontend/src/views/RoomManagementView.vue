@@ -182,7 +182,7 @@ export default {
   methods: {
     async fetchRoomData() {
       try {
-        const response = await fetch('http://192.168.110.79:8080/allRoom?permission=all');
+        const response = await fetch('http://127.0.0.1:8080/allRoom?permission=all');
         const data = await response.json();
 
         this.rooms = data.data;
