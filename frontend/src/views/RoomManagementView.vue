@@ -15,7 +15,7 @@
                 class="room-item"
             >
               <div class="room-image">
-                <img :src="room.image" alt="Room Image" class="room-img"/>
+                <img :src="getImagePath(room.name)" alt="Room Image" class="room-img"/>
               </div>
               <div class="room-info">
                 <div class="room-name">{{ room.name }}</div>
@@ -142,8 +142,8 @@
     </div>
   </div>
 </template>
-
 <script>
+//TODO:delete
 import SeminarRoom from '@/assets/622---seminar-room.png';
 import PartyCommitee from '@/assets/634---party-committee-meeting-room.png';
 import MultipurposeTeachingRoom from '@/assets/635---multipurpose-teaching-room.png';
@@ -151,141 +151,11 @@ import EnglishRoom from '@/assets/english-room.png';
 import FormalMeetingRoom from '@/assets/formal-meeting-room.png';
 import InformMeetingRoom from '@/assets/informal-meeting-room.png';
 
-
 export default {
   name: 'RoomManagement',
   data() {
     return {
-      rooms: [
-        {
-          name: "622-Seminar Room",
-          capacity: 50,
-          location: "DIICSU Sixth Floor",
-          equipment: ["Projector", "Whiteboard", "Microphone", "Power Outlets", "Wi-Fi"],
-          access: "All",
-          image: SeminarRoom
-        },
-        {
-          name: "634-Party Committee Meeting Room",
-          capacity: 10,
-          location: "DIICSU Sixth Floor",
-          equipment: ["Projector", "Wi-Fi"],
-          access: "Selected Staff Only",
-          image: PartyCommitee
-        },
-        {
-          name: "635-Multipurpose Teaching Room",
-          capacity: 20,
-          location: "Building 3, Floor 3",
-          equipment: ["Projector", "Microphone", "Computer", "Power Outlets", "Wi-Fi"],
-          access: "All",
-          image: MultipurposeTeachingRoom
-        },
-        {
-          name: "English Room 101",
-          capacity: 30,
-          location: "DIICSU Groud Floor",
-          equipment: ["Projector", "Microphone", "Computer", "Wi-Fi"],
-          access: "All",
-          image: EnglishRoom,
-        },
-        {
-          name: "English Room 102",
-          capacity: 30,
-          location: "DIICSU Groud Floor",
-          equipment: ["Projector", "Microphone", "Computer", "Wi-Fi"],
-          access: "All",
-          image: EnglishRoom,
-        },
-        {
-          name: "English Room 103",
-          capacity: 30,
-          location: "DIICSU Groud Floor",
-          equipment: ["Projector", "Microphone", "Computer", "Wi-Fi"],
-          access: "All",
-          image: EnglishRoom,
-        }, {
-          name: "English Room 104",
-          capacity: 30,
-          location: "DIICSU Groud Floor",
-          equipment: ["Projector", "Microphone", "Computer", "Wi-Fi"],
-          access: "All",
-          image: EnglishRoom,
-        }, {
-          name: "English Room 105",
-          capacity: 30,
-          location: "DIICSU Groud Floor",
-          equipment: ["Projector", "Microphone", "Computer", "Wi-Fi"],
-          access: "All",
-          image: EnglishRoom,
-        }, {
-          name: "English Room 106",
-          capacity: 30,
-          location: "DIICSU Groud Floor",
-          equipment: ["Projector", "Microphone", "Computer", "Wi-Fi"],
-          access: "All",
-          image: EnglishRoom,
-        }, {
-          name: "English Room 107",
-          capacity: 30,
-          location: "DIICSU Groud Floor",
-          equipment: ["Projector", "Microphone", "Computer", "Wi-Fi"],
-          access: "All",
-          image: EnglishRoom,
-        }, {
-          name: "English Room 108",
-          capacity: 30,
-          location: "DIICSU Groud Floor",
-          equipment: ["Projector", "Microphone", "Computer", "Wi-Fi"],
-          access: "All",
-          image: EnglishRoom,
-        },
-        {
-          name: "English Room 116",
-          capacity: 30,
-          location: "DIICSU Groud Floor",
-          equipment: ["Projector", "Microphone", "Computer", "Wi-Fi"],
-          access: "All",
-          image: EnglishRoom,
-        }, {
-          name: "English Room 117",
-          capacity: 30,
-          location: "DIICSU Groud Floor",
-          equipment: ["Projector", "Microphone", "Computer", "Wi-Fi"],
-          access: "All",
-          image: EnglishRoom,
-        }, {
-          name: "English Room 118",
-          capacity: 30,
-          location: "DIICSU Groud Floor",
-          equipment: ["Projector", "Microphone", "Computer", "Wi-Fi"],
-          access: "All",
-          image: EnglishRoom,
-        }, {
-          name: "English Room 119",
-          capacity: 30,
-          location: "DIICSU Groud Floor",
-          equipment: ["Projector", "Microphone", "Computer", "Wi-Fi"],
-          access: "All",
-          image: EnglishRoom,
-        },
-        {
-          name: "Formal Meeting Room",
-          capacity: 14,
-          location: "DIICSU Groud Floor",
-          equipment: ["Power Outlets", "Wi-Fi"],
-          access: "Staff Only",
-          image: FormalMeetingRoom,
-        }, {
-          name: "Informal Meeting Room",
-          capacity: 14,
-          location: "DIICSU Groud Floor",
-          equipment: ["Wi-Fi"],
-          access: "Staff Only",
-          image: InformMeetingRoom,
-        },
-
-      ],
+      rooms: [],
       currentPage: 1,
       itemsPerPage: 3,
       showAddRoomModal: false,
@@ -319,6 +189,107 @@ export default {
     },
   },
   methods: {
+    async fetchRoomData() {
+      try {
+        const response = await fetch('http://127.0.0.1:8080/rooms');
+        const data = await response.json();
+        this.rooms = data.data;
+      } catch (err) {
+        console.error('Failed to fetch room data:', err);
+      }
+    },
+
+    async addRoom() {
+      const equipment = this.newRoom.equipmentInput.split(',').map(item => item.trim());
+      const room = {
+        name: this.newRoom.name,
+        capacity: this.newRoom.capacity,
+        location: this.newRoom.location,
+        equipment: equipment,
+        access: this.newRoom.access,
+        image: this.newRoom.image,
+        information: this.newRoom.information
+      };
+
+      try {
+        const response = await fetch('http://127.0.0.1:8080/rooms', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(room),
+        });
+        const data = await response.json();
+        if (data.success) {
+          this.rooms.push(room);
+          this.showAddRoomModal = false;
+          this.resetNewRoom();
+        }
+      } catch (err) {
+        console.error('Failed to add room:', err);
+      }
+    },
+
+    async modifyRoom(index) {
+      this.modifiedRoom = {
+        index: index,
+        name: this.rooms[index].name,
+        capacity: this.rooms[index].capacity,
+        location: this.rooms[index].location,
+        equipmentInput: this.rooms[index].equipment.join(', '),
+        access: this.rooms[index].access,
+        image: this.rooms[index].image,
+        information: this.rooms[index].information
+      };
+      this.showModifyRoomModal = true;
+    },
+
+    async saveModifiedRoom() {
+      const equipment = this.modifiedRoom.equipmentInput.split(',').map(item => item.trim());
+      const room = {
+        name: this.modifiedRoom.name,
+        capacity: this.modifiedRoom.capacity,
+        location: this.modifiedRoom.location,
+        equipment: equipment,
+        access: this.modifiedRoom.access,
+        image: this.modifiedRoom.image,
+        information: this.modifiedRoom.information
+      };
+
+      try {
+        const response = await fetch(`http://127.0.0.1:8080/rooms/${this.rooms[this.modifiedRoom.index].id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(room),
+        });
+        const data = await response.json();
+        if (data.success) {
+          this.rooms[this.modifiedRoom.index] = room;
+          this.showModifyRoomModal = false;
+        }
+      } catch (err) {
+        console.error('Failed to modify room:', err);
+      }
+    },
+
+    async deleteRoom(index) {
+      if (confirm("Are you sure you want to delete this room?")) {
+        const roomId = this.rooms[index].id;
+        try {
+          const response = await fetch(`http://127.0.0.1:8080/rooms/${roomId}`, {
+            method: 'DELETE',
+          });
+          const data = await response.json();
+          if (data.success) {
+            this.rooms.splice(index, 1);
+          }
+        } catch (err) {
+          console.error('Failed to delete room:', err);
+        }
+      }
+    },
 
     handleAddImageUpload(event) {
       const file = event.target.files[0];
@@ -352,51 +323,7 @@ export default {
         this.currentPage++;
       }
     },
-    addRoom() {
-      const equipment = this.newRoom.equipmentInput.split(',').map(item => item.trim());
-      this.rooms.push({
-        name: this.newRoom.name,
-        capacity: this.newRoom.capacity,
-        location: this.newRoom.location,
-        equipment: equipment,
-        access: this.newRoom.access,
-        image: this.newRoom.image || roomAImage,
-        information: this.newRoom.information
-      });
-      this.showAddRoomModal = false;
-      this.resetNewRoom();
-    },
-    modifyRoom(index) {
-      this.modifiedRoom = {
-        index: index,
-        name: this.rooms[index].name,
-        capacity: this.rooms[index].capacity,
-        location: this.rooms[index].location,
-        equipmentInput: this.rooms[index].equipment.join(', '),
-        access: this.rooms[index].access,
-        image: this.rooms[index].image,
-        information: this.rooms[index].information
-      };
-      this.showModifyRoomModal = true;
-    },
-    saveModifiedRoom() {
-      const equipment = this.modifiedRoom.equipmentInput.split(',').map(item => item.trim());
-      this.rooms[this.modifiedRoom.index] = {
-        name: this.modifiedRoom.name,
-        capacity: this.modifiedRoom.capacity,
-        location: this.modifiedRoom.location,
-        equipment: equipment,
-        access: this.modifiedRoom.access,
-        image: this.modifiedRoom.image,
-        information: this.modifiedRoom.information
-      };
-      this.showModifyRoomModal = false;
-    },
-    deleteRoom(index) {
-      if (confirm("Are you sure you want to delete this room?")) {
-        this.rooms.splice(index, 1);
-      }
-    },
+
     resetNewRoom() {
       this.newRoom = {
         name: "",
@@ -405,8 +332,28 @@ export default {
         equipmentInput: "",
       };
     },
+    getImagePath(name) {
+    if (name.startsWith("English Room")) {
+      return new URL(`../assets/english-room.png`, import.meta.url).href;
+    } else {
+      const fileName = name.toLowerCase().replace(/\s+/g, '-');
+      // 动态生成图片路径
+      try {
+        // 尝试动态加载图片
+        return new URL(`../assets/${fileName}.png`, import.meta.url).href;
+      } catch (error) {
+        // 如果图片不存在，返回默认图片路径
+        console.warn(`Image not found for room: ${name}, using default image.`);
+        return new URL(`../assets/default-room.png`, import.meta.url).href;
+      }
+    }
+  },
+  },
+  mounted() {
+    this.fetchRoomData();
   },
 };
+
 </script>
 
 <style scoped>
@@ -578,11 +525,7 @@ h1 {
   justify-content: center;
   gap: 15px;
   padding: 15px 0;
-  background: linear-gradient(to bottom,
-  rgba(236, 238, 248, 0) 0%,
-  rgba(236, 238, 248, 0.9) 30%,
-  rgba(236, 238, 248, 1) 100%
-  );
+  background: #eceef8;
   z-index: 2;
 }
 
