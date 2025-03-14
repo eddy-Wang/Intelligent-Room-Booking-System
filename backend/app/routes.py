@@ -1,13 +1,11 @@
 import time
 from flask import Blueprint, request, jsonify
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code, \
-    get_user_reservations, cancel_reservation, fetch_users, fetch_bookings, fetch_rooms, update_booking_status, \
-    modify_booking, delete_booking
+    get_user_reservations, cancel_reservation
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
     get_all_room_data_for_user
 
 bp = Blueprint('routes', __name__)
-
 
 def create_response(code, message, data=None):
     """Helper function to create a consistent response format."""
@@ -16,7 +14,6 @@ def create_response(code, message, data=None):
         'message': message,
         'data': data if data is not None else {}
     })
-
 
 @bp.route('/login', methods=['POST', 'OPTIONS'])
 def login():
@@ -37,7 +34,6 @@ def login():
     verification_codes[user_email] = {'code': code, 'timestamp': time.time()}  # Store code and timestamp
 
     return create_response('000', 'Verification code sent!')
-
 
 @bp.route('/verify-code', methods=['POST', 'OPTIONS'])
 def verify_code():
@@ -74,7 +70,6 @@ def verify_code():
     else:
         return create_response('007', 'No verification code sent. Please request a new code.')
 
-
 @bp.route('/allRoom', methods=['GET', 'OPTIONS'])
 def allRoom():
     if request.method == 'OPTIONS':
@@ -90,7 +85,6 @@ def allRoom():
     else:
         return create_response('002', 'No Rooms found!')
 
-
 @bp.route('/requestRoomDetails', methods=['GET', 'OPTIONS'])
 def requestRoomDetails():
     if request.method == 'OPTIONS':
@@ -105,7 +99,6 @@ def requestRoomDetails():
     else:
         return create_response('002', 'Room not found!')
 
-
 @bp.route('/get-reservations', methods=['POST', 'OPTIONS'])
 def get_reservations():
     if request.method == 'OPTIONS':
@@ -118,7 +111,6 @@ def get_reservations():
 
     reservations = get_user_reservations(user_email)
     return create_response('000', 'Reservations retrieved successfully!', reservations)
-
 
 @bp.route('/cancel-reservation', methods=['POST', 'OPTIONS'])
 def cancel_reservation_route():
@@ -135,8 +127,6 @@ def cancel_reservation_route():
         return create_response('000', 'Reservation cancelled successfully!')
     else:
         return create_response('002', 'Failed to cancel reservation. It may already be processed or does not exist.')
-
-
 
 # Fetch users route
 @bp.route('/users', methods=['GET'])
