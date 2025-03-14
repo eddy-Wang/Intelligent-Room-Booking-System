@@ -200,3 +200,67 @@ def modify_booking_route():
         return create_response('000', 'Booking updated successfully!')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
+
+@bp.route('/bookRoom', methods=['POST', 'OPTIONS'])
+def book_room():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.get_json()
+    required_fields = ['roomId', 'date', 'timeSlots', 'purpose']
+    for field in required_fields:
+        if field not in data or not data[field]:
+            return create_response('003', f'{field} is required.')
+
+    room_id = data.get('roomId')
+    room_name = data.get('roomName', '')
+    date = data.get('date')
+    time_slots = data.get('timeSlots')
+    purpose = data.get('purpose')
+    user_email = data.get('user_email', 'test@example.com')
+
+    try:
+        from .models import get_db_connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query_check = "SELECT time FROM booking WHERE room_id = %s AND date = %s"
+        cursor.execute(query_check, (room_id, date))
+        existing_bookings = cursor.fetchall()
+
+        requested_slots_set = set(time_slots)
+        for (existing_time_str,) in existing_bookings:
+            if existing_time_str.strip():
+                existing_slots = set(map(int, existing_time_str.split(',')))
+            else:
+                existing_slots = set()
+            if requested_slots_set.intersection(existing_slots):
+                cursor.close()
+                conn.close()
+                return create_response('005', 'Room already booked for one or more selected time slots.')
+
+        query_access = "SELECT access FROM room WHERE room_id = %s"
+        cursor.execute(query_access, (room_id,))
+        result = cursor.fetchone()
+        if result:
+            room_access = result[0]
+        else:
+            cursor.close()
+            conn.close()
+            return create_response('006', 'Room not found.')
+
+        status = "Confirmed" if room_access == 0 else "Pending"
+        time_str = ",".join(map(str, time_slots))
+        booking_id = str(int(time.time() * 1000))
+
+        query = """
+            INSERT INTO booking (booking_id, user_email, room_id, date, time, purpose, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(query, (booking_id, user_email, room_id, date, time_str, purpose, status))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return create_response('000', 'Booking successful!')
+    except Exception as e:
+        return create_response('004', f'Booking failed: {str(e)}')
