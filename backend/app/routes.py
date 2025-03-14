@@ -8,6 +8,7 @@ from .models import check_email_exists, get_user_data_by_email, get_room_detaile
 
 bp = Blueprint('routes', __name__)
 
+
 def create_response(code, message, data=None):
     """Helper function to create a consistent response format."""
     return jsonify({
@@ -15,6 +16,7 @@ def create_response(code, message, data=None):
         'message': message,
         'data': data if data is not None else {}
     })
+
 
 @bp.route('/login', methods=['POST', 'OPTIONS'])
 def login():
@@ -35,6 +37,7 @@ def login():
     verification_codes[user_email] = {'code': code, 'timestamp': time.time()}  # Store code and timestamp
 
     return create_response('000', 'Verification code sent!')
+
 
 @bp.route('/verify-code', methods=['POST', 'OPTIONS'])
 def verify_code():
@@ -71,6 +74,7 @@ def verify_code():
     else:
         return create_response('007', 'No verification code sent. Please request a new code.')
 
+
 @bp.route('/allRoom', methods=['GET', 'OPTIONS'])
 def allRoom():
     if request.method == 'OPTIONS':
@@ -86,6 +90,7 @@ def allRoom():
     else:
         return create_response('002', 'No Rooms found!')
 
+
 @bp.route('/requestRoomDetails', methods=['GET', 'OPTIONS'])
 def requestRoomDetails():
     if request.method == 'OPTIONS':
@@ -100,6 +105,7 @@ def requestRoomDetails():
     else:
         return create_response('002', 'Room not found!')
 
+
 @bp.route('/get-reservations', methods=['POST', 'OPTIONS'])
 def get_reservations():
     if request.method == 'OPTIONS':
@@ -112,6 +118,7 @@ def get_reservations():
 
     reservations = get_user_reservations(user_email)
     return create_response('000', 'Reservations retrieved successfully!', reservations)
+
 
 @bp.route('/cancel-reservation', methods=['POST', 'OPTIONS'])
 def cancel_reservation_route():
@@ -129,34 +136,6 @@ def cancel_reservation_route():
     else:
         return create_response('002', 'Failed to cancel reservation. It may already be processed or does not exist.')
 
-# Fetch users route
-@bp.route('/users', methods=['GET'])
-def get_users():
-    try:
-        users = fetch_users()
-        return create_response('000', 'Users fetched successfully!', users)
-    except Exception as e:
-        return create_response('500', f'Error: {str(e)}')
-
-# Fetch rooms route
-@bp.route('/rooms', methods=['GET'])
-def get_rooms():
-    try:
-        rooms = fetch_rooms()
-        print(rooms)
-        return create_response('000', 'Rooms fetched successfully!', rooms)
-    except Exception as e:
-        return create_response('500', f'Error: {str(e)}')
-
-# Fetch bookings route
-@bp.route('/bookings', methods=['GET'])
-def get_bookings():
-    try:
-        bookings = fetch_bookings()
-        print(bookings)
-        return create_response('000', 'Bookings fetched successfully!', bookings)
-    except Exception as e:
-        return create_response('500', f'Error: {str(e)}')
 
 # Update booking status route
 @bp.route('/bookings/<int:id>', methods=['PUT'])
@@ -172,6 +151,7 @@ def update_booking(id):
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
 
+
 # Delete booking route
 @bp.route('/bookings/<int:id>', methods=['DELETE'])
 def delete_booking_route(id):
@@ -181,7 +161,8 @@ def delete_booking_route(id):
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
 
-@bp.route('/modifyBooking', methods=['PUT','OPTIONS'])
+
+@bp.route('/modifyBooking', methods=['PUT', 'OPTIONS'])
 def modify_booking_route():
     if request.method == 'OPTIONS':
         return '', 200
@@ -191,6 +172,7 @@ def modify_booking_route():
         return create_response('000', 'Booking updated successfully!')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
+
 
 @bp.route('/bookRoom', methods=['POST', 'OPTIONS'])
 def book_room():
@@ -255,3 +237,35 @@ def book_room():
         return create_response('000', 'Booking successful!')
     except Exception as e:
         return create_response('004', f'Booking failed: {str(e)}')
+
+
+# Fetch users route
+@bp.route('/users', methods=['GET'])
+def get_users():
+    try:
+        users = fetch_users()
+        return create_response('000', 'Users fetched successfully!', users)
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
+
+
+# Fetch rooms route
+@bp.route('/rooms', methods=['GET'])
+def get_rooms():
+    try:
+        rooms = fetch_rooms()
+        print(rooms)
+        return create_response('000', 'Rooms fetched successfully!', rooms)
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
+
+
+# Fetch bookings route
+@bp.route('/bookings', methods=['GET'])
+def get_bookings():
+    try:
+        bookings = fetch_bookings()
+        print(bookings)
+        return create_response('000', 'Bookings fetched successfully!', bookings)
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
