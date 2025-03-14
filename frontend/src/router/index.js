@@ -4,12 +4,13 @@ import VerifyView from "@/views/VerifyView.vue";
 import Index from "@/Index.vue";
 import LoginView from "@/views/LoginView.vue";
 import AdminIndex from "@/AdminIndex.vue";
+import RoomManagementView from "@/views/RoomManagementView.vue";
 
 const routes = [
   {
     path: '/',
-    name: 'LoginView',
-    component: LoginView
+    name: 'RoomManagement',
+    component: RoomManagementView
   },
   {
     path: '/email',

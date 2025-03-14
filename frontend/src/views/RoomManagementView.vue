@@ -7,7 +7,6 @@
           <button @click="showAddRoomModal = true" class="add-button">Add Room</button>
         </div>
         <div class="room-list">
-          <!-- 房间项容器（带滚动条） -->
           <div class="room-items-container">
             <div
                 v-for="(room, index) in paginatedRooms"
@@ -21,7 +20,7 @@
                 <div class="room-name">{{ room.name }}</div>
                 <div class="room-capacity">Capacity: {{ room.capacity }}</div>
                 <div class="room-location">Location: {{ room.location }}</div>
-                <div class="room-equipment">Equipment: {{ room.equipment.join(', ') }}</div>
+                <div class="room-equipment">Equipment: {{ room.equipment }}</div>
                 <div class="room-access">Access: {{ room.access }}</div>
                 <div class="room-information">Information: {{ room.information || 'N/A' }}</div>
               </div>
@@ -51,7 +50,6 @@
         </div>
 
 
-        <!-- 弹窗：增加房间 -->
         <div v-if="showAddRoomModal" class="modal">
           <div class="modal-content">
             <h2>Add Room</h2>
@@ -94,7 +92,6 @@
           </div>
         </div>
 
-        <!-- 弹窗：修改房间 -->
         <div v-if="showModifyRoomModal" class="modal">
           <div class="modal-content">
             <h2>Modify Room</h2>
@@ -126,7 +123,6 @@
                   title="Select room image"
                   class="custom-file-input"
               >
-              <!-- 显示当前图片 -->
               <div v-if="modifiedRoom.image" class="image-preview">
                 <img :src="modifiedRoom.image" alt="Current Image" class="preview-img">
               </div>
@@ -143,14 +139,6 @@
   </div>
 </template>
 <script>
-//TODO:delete
-import SeminarRoom from '@/assets/622---seminar-room.png';
-import PartyCommitee from '@/assets/634---party-committee-meeting-room.png';
-import MultipurposeTeachingRoom from '@/assets/635---multipurpose-teaching-room.png';
-import EnglishRoom from '@/assets/english-room.png';
-import FormalMeetingRoom from '@/assets/formal-meeting-room.png';
-import InformMeetingRoom from '@/assets/informal-meeting-room.png';
-
 export default {
   name: 'RoomManagement',
   data() {
@@ -160,13 +148,14 @@ export default {
       itemsPerPage: 3,
       showAddRoomModal: false,
       showModifyRoomModal: false,
-
       newRoom: {
         name: "",
         capacity: 0,
         location: "",
         equipmentInput: "",
-        image: null
+        image: null,
+        access: "All",
+        information: ""
       },
       modifiedRoom: {
         index: null,
@@ -174,8 +163,10 @@ export default {
         capacity: 0,
         location: "",
         equipmentInput: "",
-        image: null
-      },
+        image: null,
+        access: "All",
+        information: ""
+      }
     };
   },
   computed: {
@@ -186,19 +177,20 @@ export default {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
       return this.rooms.slice(start, end);
-    },
+    }
   },
   methods: {
     async fetchRoomData() {
       try {
-        const response = await fetch('http://127.0.0.1:8080/rooms');
+        const response = await fetch('http://192.168.110.79:8080/allRoom?permission=all');
         const data = await response.json();
+
         this.rooms = data.data;
-      } catch (err) {
-        console.error('Failed to fetch room data:', err);
+        console.log("111",this.rooms)
+      } catch (error) {
+        console.error('Error fetching room data:', error);
       }
     },
-
     async addRoom() {
       const equipment = this.newRoom.equipmentInput.split(',').map(item => item.trim());
       const room = {
@@ -225,11 +217,10 @@ export default {
           this.showAddRoomModal = false;
           this.resetNewRoom();
         }
-      } catch (err) {
-        console.error('Failed to add room:', err);
+      } catch (error) {
+        console.error('Failed to add room:', error);
       }
     },
-
     async modifyRoom(index) {
       this.modifiedRoom = {
         index: index,
@@ -243,7 +234,6 @@ export default {
       };
       this.showModifyRoomModal = true;
     },
-
     async saveModifiedRoom() {
       const equipment = this.modifiedRoom.equipmentInput.split(',').map(item => item.trim());
       const room = {
@@ -269,11 +259,10 @@ export default {
           this.rooms[this.modifiedRoom.index] = room;
           this.showModifyRoomModal = false;
         }
-      } catch (err) {
-        console.error('Failed to modify room:', err);
+      } catch (error) {
+        console.error('Failed to modify room:', error);
       }
     },
-
     async deleteRoom(index) {
       if (confirm("Are you sure you want to delete this room?")) {
         const roomId = this.rooms[index].id;
@@ -285,12 +274,11 @@ export default {
           if (data.success) {
             this.rooms.splice(index, 1);
           }
-        } catch (err) {
-          console.error('Failed to delete room:', err);
+        } catch (error) {
+          console.error('Failed to delete room:', error);
         }
       }
     },
-
     handleAddImageUpload(event) {
       const file = event.target.files[0];
       if (file) {
@@ -301,7 +289,6 @@ export default {
         reader.readAsDataURL(file);
       }
     },
-
     handleModifyImageUpload(event) {
       const file = event.target.files[0];
       if (file) {
@@ -312,7 +299,6 @@ export default {
         reader.readAsDataURL(file);
       }
     },
-
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
@@ -323,37 +309,35 @@ export default {
         this.currentPage++;
       }
     },
-
     resetNewRoom() {
       this.newRoom = {
         name: "",
         capacity: 0,
         location: "",
         equipmentInput: "",
+        image: null,
+        access: "All",
+        information: ""
       };
     },
     getImagePath(name) {
-    if (name.startsWith("English Room")) {
-      return new URL(`../assets/english-room.png`, import.meta.url).href;
-    } else {
-      const fileName = name.toLowerCase().replace(/\s+/g, '-');
-      // 动态生成图片路径
-      try {
-        // 尝试动态加载图片
-        return new URL(`../assets/${fileName}.png`, import.meta.url).href;
-      } catch (error) {
-        // 如果图片不存在，返回默认图片路径
-        console.warn(`Image not found for room: ${name}, using default image.`);
-        return new URL(`../assets/default-room.png`, import.meta.url).href;
+      if (name.startsWith("English Room")) {
+        return new URL(`../assets/english-room.png`, import.meta.url).href;
+      } else {
+        const fileName = name.toLowerCase().replace(/\s+/g, '-');
+        try {
+          return new URL(`../assets/${fileName}.png`, import.meta.url).href;
+        } catch (error) {
+          console.warn(`Image not found for room: ${name}, using default image.`);
+          return new URL(`../assets/default-room.png`, import.meta.url).href;
+        }
       }
     }
   },
-  },
   mounted() {
     this.fetchRoomData();
-  },
+  }
 };
-
 </script>
 
 <style scoped>
