@@ -58,12 +58,14 @@ const childData = ref([])
 const roomSelected = ref(0)
 provide('childData', childData)
 provide('roomSelected', roomSelected)
+provide('bookDate', bookDate)
+provide('selectedSlots',selectedSlots)
 
 const fetchData = async () => {
   try {
     const instance = getCurrentInstance();
     const userPermission = instance.appContext.config.globalProperties.$user.permission;
-    const url = `http://192.168.110.122:8080/allRoom?permission=`+userPermission;
+    const url = `http://127.0.0.1:8080/allRoom?permission=`+userPermission;
     const response = await fetch(url);
     const data = await response.json();
     roomsData.value = data.data;
@@ -164,7 +166,7 @@ const handleRoomSelected = async (room) => {
   roomSelected.value = 1
   try {
     // 发送GET请求，假设后端需要room.id作为参数
-    const response = await fetch(`http://192.168.110.122:8080/requestRoomDetails?roomId=${room.id}`);
+    const response = await fetch(`http://127.0.0.1:8080/requestRoomDetails?roomId=${room.id}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -182,6 +184,7 @@ const handleRoomSelected = async (room) => {
 };
 
 const handleRoomUnselected = () => {
+  bookDate.value = null;
   selectedRoom.value = null;
   selectedDate.value = null;
   selectedSlots.value = [];
@@ -192,6 +195,7 @@ const handleRoomUnselected = () => {
 const handleTimeSelection = (date, slots) => {
   bookDate.value = date;
   selectedSlots.value = slots;
+  console.log(date,slots)
 };
 </script>
 

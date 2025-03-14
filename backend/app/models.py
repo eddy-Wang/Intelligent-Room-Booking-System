@@ -112,7 +112,8 @@ def get_booking_record_of_a_room(room_id):
     for row in results:
         time_str = row[4]
         time_points = time_str.split(",")
-        time_array = [int(point) for point in time_points]
+        time_array = [int(point) for point in time_points if point.strip()]
+
 
         booking_record = {
             "booking_id": row[0],
