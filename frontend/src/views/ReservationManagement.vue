@@ -122,7 +122,7 @@
                             <el-button class="el-button"
                                        v-if="getProcessingState(row.status) === 'processed'"
                                        size="small"
-                                       @click="modifyBooking(row.booking_id)">
+                                       @click="modifyBooking(row.booking_id,row)">
                                 Modify
                             </el-button>
                             <el-button class="el-button"
@@ -194,6 +194,7 @@
                         type="date"
                         placeholder="Select Date"
                         value-format="YYYY-MM-DD"
+                        @change="handleDateChange"
                     />
                 </el-form-item>
 
@@ -266,7 +267,7 @@ const processingStateOptions = ['unprocessed', 'processed', 'completed'];
 // Fetch rooms from backend API
 const fetchRooms = async () => {
     try {
-        const response = await fetch('http://127.0.0.1:8080/rooms');
+        const response = await fetch('http://192.168.110.54:8080/rooms');
         if (!response.ok) throw new Error('Failed to fetch rooms');
         const data = await response.json();
         rooms.value=data.data;
@@ -276,7 +277,7 @@ const fetchRooms = async () => {
 };
 const fetchUsers = async () => {
     try {
-        const response = await fetch('http://127.0.0.1:8080/users');
+        const response = await fetch('http://192.168.110.54:8080/users');
         if (!response.ok) throw new Error('Failed to fetch users');
         const data = await response.json();
         users.value = data.data;
@@ -295,17 +296,32 @@ const sortDates = (dates) => {
     return dates.sort((a, b) => new Date(a) - new Date(b));
 };
 const queryUsers = (queryString, cb) => {
+    const trimmedQuery = queryString.trim().toLowerCase().trim();
+
+    if (!trimmedQuery) {
+        cb([]);
+        return;
+    }
+
     const results = users.value
         .filter(user => {
+            const userName = user.name.replace(/\s+/g, '').toLowerCase();
+            const userEmail = user.email.replace(/\s+/g, '').toLowerCase();
+            const userPermission = user.permission.replace(/\s+/g, '').toLowerCase();
+
             return (
-                user.name.toLowerCase().includes(queryString.toLowerCase()) ||
-                user.email.toLowerCase().includes(queryString.toLowerCase()) ||
-                user.permission.toLowerCase().includes(queryString.toLowerCase())
+                userName.includes(trimmedQuery) ||
+                userEmail.includes(trimmedQuery) ||
+                userPermission.includes(trimmedQuery) ||
+                trimmedQuery.includes(userName) ||
+                trimmedQuery.includes(userEmail) ||
+                trimmedQuery.includes(userPermission)
             );
         })
         .map(user => ({
+            label: `${user.name} (${user.permission}) - ${user.email}`,
             value: `${user.name} (${user.permission}) - ${user.email}`,
-            label: `${user.name} (${user.permission}) - ${user.email}`
+            user
         }));
 
     cb(results);
@@ -314,11 +330,7 @@ const modifyDialogVisible = ref(false);
 const currentBooking = ref({});
 
 
-const openModifyDialog = (booking) => {
-    currentBooking.value = { ...booking };
-    currentBooking.value.time = booking.time.split(',');
-    modifyDialogVisible.value = true;
-};
+
 
 
 const handleCloseModifyDialog = () => {
@@ -328,17 +340,18 @@ const handleCloseModifyDialog = () => {
 
 const saveModifiedBooking = async () => {
     try {
+        console.log(currentBooking.value)
         const payload = {
             ...currentBooking.value,
             time: currentBooking.value.time.join(','),
         };
-
-        const response = await fetch(`http://127.0.0.1:8080/modifyBookings/${currentBooking.value.booking_id}`, {
+        console.log(3)
+        const response = await fetch(`http://192.168.110.54:8080/modifyBooking`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: payload,
+            body: JSON.stringify(payload),
         });
-        console.log(payload);
+        console.log(payload.date);
         if (!response.ok) throw new Error('Failed to update booking');
         ElMessage.success('Booking updated successfully');
         modifyDialogVisible.value = false;
@@ -349,20 +362,30 @@ const saveModifiedBooking = async () => {
     }
 };
 const handleUserSelect = (selected) => {
-    filters.value.userInput = selected.value;
+    filters.value.userInput = selected.value.split(' (')[0];
 };
 // Function to modify a booking
-const modifyBooking = async (booking_id) => {
-    const booking = bookings.value.find(b => b.booking_id === booking_id);
+const modifyBooking = async (booking_id, newbooking) => {
+    const booking = newbooking;
     if (booking) {
-        openModifyDialog(booking);
+        const formattedDate = formatDate(booking.date);
+        currentBooking.value = {
+            ...booking,
+            date: formattedDate,
+            time: booking.time.split(',')
+        };
+        console.log("Current Booking after initialization:", currentBooking.value);
+        modifyDialogVisible.value = true;
     }
 };
-
+const handleDateChange = (date) => {
+    console.log('Selected Date:', date);
+    console.log('Current Booking Date:', currentBooking.value.date);
+};
 // Function to cancel a booking
 const cancelBooking = async (booking_id) => {
     try {
-        const response = await fetch(`http://127.0.0.1:8080/bookings/${booking_id}`, {
+        const response = await fetch(`http://192.168.110.54:8080/bookings/${booking_id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: 'Declined' })
@@ -379,7 +402,7 @@ const cancelBooking = async (booking_id) => {
 // Function to approve a booking
 const approveBooking = async (booking_id) => {
     try {
-        const response = await fetch(`http://127.0.0.1:8080/bookings/${booking_id}`, {
+        const response = await fetch(`http://192.168.110.54:8080/bookings/${booking_id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: 'Confirmed' })
@@ -396,7 +419,7 @@ const approveBooking = async (booking_id) => {
 // Function to reject a booking
 const rejectBooking = async (booking_id) => {
     try {
-        const response = await fetch(`http://127.0.0.1:8080/bookings/${booking_id}`, {
+        const response = await fetch(`http://192.168.110.54:8080/bookings/${booking_id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: 'Declined' })
@@ -413,7 +436,7 @@ const rejectBooking = async (booking_id) => {
 // Function to delete a booking
 const deleteBooking = async (booking_id) => {
     try {
-        const response = await fetch(`http://127.0.0.1:8080/bookings/${booking_id}`, {
+        const response = await fetch(`http://192.168.110.54:8080/bookings/${booking_id}`, {
             method: 'DELETE'
         });
         if (!response.ok) throw new Error('Failed to delete booking');
@@ -470,7 +493,7 @@ const convertTimeStrToTimeSlots = (timeStr) => {
 };
 const fetchBookings = async () => {
     try {
-        const response = await fetch('http://127.0.0.1:8080/bookings');
+        const response = await fetch('http://192.168.110.54:8080/bookings');
         if (!response.ok) throw new Error('Failed to fetch bookings');
         const booking = await response.json();
         const data = booking.data;
@@ -486,7 +509,6 @@ const fetchBookings = async () => {
 };
 const formatDate = (dateString) => {
     const date = new Date(dateString);
-    console.log(dateString)
     return date.toLocaleDateString('en-CA');
 };
 
