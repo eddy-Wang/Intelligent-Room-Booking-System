@@ -3,7 +3,6 @@ import ujson
 import ujson as json
 from mysql.connector import Error
 
-
 # Database connection setup
 def get_db_connection():
     connection = mysql.connector.connect(
@@ -15,7 +14,6 @@ def get_db_connection():
     )
     return connection
 
-
 # Check if the email exists
 def check_email_exists(email):
     connection = get_db_connection()
@@ -26,7 +24,6 @@ def check_email_exists(email):
     cursor.close()
     connection.close()
     return result is not None
-
 
 # Get user data by email
 def get_user_data_by_email(email):
@@ -41,7 +38,6 @@ def get_user_data_by_email(email):
     if result:
         return {'email': result[0], 'name': result[1], 'permission': result[2]}
     return None
-
 
 # Get all room data
 def get_all_room_data_for_user(permission):
@@ -131,11 +127,9 @@ def get_booking_record_of_a_room(room_id):
 
     return ujson.dumps(booking_records, default=str)
 
-
 # Get class of a room
 def get_class_of_a_room(room_id):
     return ujson.dumps([], default=str)
-
 
 # Get booking details of a room
 def get_room_detailed(room_id):
@@ -148,3 +142,4 @@ def get_room_detailed(room_id):
 
 if __name__ == '__main__':
     get_room_detailed(1)
+
