@@ -42,9 +42,7 @@ export default {
       activeNav: 0, // 默认选中第一个导航项
       navItems: [
         { icon: 'mdiHomeOutline',  component: 'HomeView' },
-        { icon: 'mdiBellOutline',  component: 'NotificationView'},
         { icon: 'mdiAccountOutline', component: 'MyReservation'},
-        { icon: 'mdiCogOutline', component: 'SettingsView'}
       ]
     };
   },

@@ -221,7 +221,6 @@ export default {
   methods: {
     formatEquipment(equipment) {
       if (typeof equipment === 'string') {
-        // 去掉 { 和 }，并将单引号替换为双引号以便 JSON.parse 解析
         const cleanedString = equipment.replace(/[{}]/g, '').replace(/'/g, '"');
         try {
           return JSON.parse(`[${cleanedString}]`).join(', ');

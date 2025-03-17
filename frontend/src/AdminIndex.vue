@@ -47,8 +47,6 @@ export default {
         {icon: 'mdiApplicationEditOutline', component: 'ReservationManagement'},
         {icon: 'mdiClipboardTextOutline', component: 'RoomManagementView'},
         {icon: 'mdiBookAccountOutline', component: 'MyReservation'},
-
-
       ]
     };
   },
