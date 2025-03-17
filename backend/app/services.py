@@ -91,7 +91,7 @@ def fetch_users():
 
 
 # Fetch rooms from the database
-def fetch_rooms():
+def fetch_rooms_id_and_name():
     connection = get_db_connection()
     cursor = connection.cursor()
     query = "SELECT room_id, name FROM room"
@@ -207,3 +207,130 @@ def modify_booking(booking_data):
     cursor.close()
     connection.close()
     return "Booking successfully modified."
+
+def add_room(room_data):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    room_name = room_data["name"]
+    capacity = room_data["capacity"]
+    location = room_data["location"]
+    equipment = ",".join(room_data["equipment"]) if isinstance(room_data["equipment"], list) else room_data["equipment"]
+    access = room_data["access"]
+    information = room_data["information"]
+
+    try:
+        check_query = "SELECT room_id FROM room WHERE name = %s"
+        cursor.execute(check_query, (room_name,))
+        existing_room = cursor.fetchone()
+
+        if existing_room:
+            return False, 'Room with this name already exists!'
+
+        insert_query = """
+               INSERT INTO room (name, capacity, location, equipment, access, info)
+               VALUES (%s, %s, %s, %s, %s, %s)
+           """
+        cursor.execute(insert_query, (room_name, capacity, location, equipment, access, information))
+        connection.commit()
+
+        return True, 'Room added successfully!'
+    except Exception as e:
+        return False, str(e)
+    finally:
+        cursor.close()
+        connection.close()
+
+def modify_room(room_id, room_data):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    room_name = room_data["name"]
+    capacity = room_data["capacity"]
+    location = room_data["location"]
+    equipment = ",".join(room_data["equipment"]) if isinstance(room_data["equipment"], list) else room_data["equipment"]
+    access = room_data["access"]
+    information = room_data["information"]
+    try:
+        check_query = "SELECT room_id FROM room WHERE name = %s AND room_id != %s"
+        cursor.execute(check_query, (room_name, room_id))
+        existing_room = cursor.fetchone()
+
+        if existing_room:
+            return False, 'Another room with this name already exists!'
+
+        update_query = """
+                UPDATE room SET name=%s, capacity=%s, location=%s, equipment=%s, access=%s, info=%s
+                WHERE room_id = %s
+            """
+        cursor.execute(update_query, (room_name, capacity, location, equipment, access, information, room_id))
+        connection.commit()
+
+        return True, 'Room modified successfully!'
+    except Exception as e:
+        return False, str(e)
+    finally:
+        cursor.close()
+        connection.close()
+
+
+def delete_room(room_id):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    query = "DELETE FROM room WHERE room_id = %s"
+
+    try:
+        cursor.execute(query, (room_id,))
+        connection.commit()
+        return True, 'Room deleted successfully!'
+    except Exception as e:
+        return False, str(e)
+    finally:
+        cursor.close()
+        connection.close()
+
+
+def fetch_room():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "SELECT * FROM room"
+        cursor.execute(query)
+        result = cursor.fetchall()
+    finally:
+        cursor.close()
+        connection.close()
+
+    if result:
+        rooms = []
+
+        for row in result:
+            room_id = row[0]
+            room_name = str(row[1])
+            access = row[2]
+            capacity = row[3]
+            equipment = str(row[4])
+            location = row[5]
+            info = row[6]
+
+            room_data = {
+                "id": room_id,
+                "name": room_name,
+                "access": access,
+                "capacity": capacity,
+                "equipment": equipment,
+                "location": location,
+                "info": info if info else ""
+            }
+
+            rooms.append(room_data)
+
+        return True, rooms
+    return False, None
+
+
+
+
+
+
+
