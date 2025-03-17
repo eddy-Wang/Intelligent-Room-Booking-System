@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code, \
     get_user_reservations, cancel_reservation, fetch_users, fetch_rooms_id_and_name, fetch_bookings, \
     update_booking_status, \
-    delete_booking, modify_booking, add_room, modify_room, delete_room
+    delete_booking, modify_booking, add_room, modify_room, delete_room, fetch_room
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
     get_all_room_data_for_user
 
@@ -141,7 +141,7 @@ def get_users():
 
 # Fetch rooms route
 @bp.route('/rooms_id_and_name', methods=['GET'])
-def get_rooms():
+def get_rooms_id_and_name():
     try:
         rooms = fetch_rooms_id_and_name()
         print(rooms)
@@ -158,6 +158,9 @@ def get_bookings():
         return create_response('000', 'Bookings fetched successfully!', bookings)
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
+
+
+
 
 # Update booking status route
 @bp.route('/bookings/<int:id>', methods=['PUT'])
@@ -188,7 +191,6 @@ def modify_booking_route():
         return '', 200
     booking_data = request.get_json()
     try:
-        modify_booking(booking_data)
         return create_response('000', 'Booking updated successfully!')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
@@ -258,8 +260,22 @@ def book_room():
         return create_response('004', f'Booking failed: {str(e)}')
 
 
-@bp.route('/rooms', methods=['POST', 'OPTIONS'])
+@bp.route('/getRooms', methods=['GET', 'OPTIONS'])
 def rooms():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    success, data = fetch_room()
+
+    if success:
+        return create_response('000',"All room fetched!", data)
+    else:
+        return create_response('001', "No room fetched!", data)
+
+
+
+@bp.route('/rooms', methods=['POST', 'OPTIONS'])
+def getRooms():
     if request.method == 'OPTIONS':
         return '', 200
 

@@ -215,9 +215,8 @@ def add_room(room_data):
     room_name = room_data["name"]
     capacity = room_data["capacity"]
     location = room_data["location"]
-    equipment = room_data["equipment"]
+    equipment = ",".join(room_data["equipment"]) if isinstance(room_data["equipment"], list) else room_data["equipment"]
     access = room_data["access"]
-    image = room_data["image"]
     information = room_data["information"]
 
     try:
@@ -229,10 +228,10 @@ def add_room(room_data):
             return False, 'Room with this name already exists!'
 
         insert_query = """
-               INSERT INTO room (name, capacity, location, equipment, access, image, info)
-               VALUES (%s, %s, %s, %s, %s, %s, %s)
+               INSERT INTO room (name, capacity, location, equipment, access, info)
+               VALUES (%s, %s, %s, %s, %s, %s)
            """
-        cursor.execute(insert_query, (room_name, capacity, location, equipment, access, image, information))
+        cursor.execute(insert_query, (room_name, capacity, location, equipment, access, information))
         connection.commit()
 
         return True, 'Room added successfully!'
@@ -248,7 +247,7 @@ def modify_room(room_id, room_data):
     room_name = room_data["name"]
     capacity = room_data["capacity"]
     location = room_data["location"]
-    equipment = room_data["equipment"]
+    equipment = ",".join(room_data["equipment"]) if isinstance(room_data["equipment"], list) else room_data["equipment"]
     access = room_data["access"]
     information = room_data["information"]
     try:
@@ -288,6 +287,49 @@ def delete_room(room_id):
     finally:
         cursor.close()
         connection.close()
+
+
+def fetch_room():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "SELECT * FROM room"
+        cursor.execute(query)
+        result = cursor.fetchall()
+    finally:
+        cursor.close()
+        connection.close()
+
+    if result:
+        rooms = []
+
+        for row in result:
+            room_id = row[0]
+            room_name = str(row[1])
+            access = row[2]
+            capacity = row[3]
+            equipment = str(row[4])
+            location = row[5]
+            info = row[6]
+
+            room_data = {
+                "id": room_id,
+                "name": room_name,
+                "access": access,
+                "capacity": capacity,
+                "equipment": equipment,
+                "location": location,
+                "info": info if info else ""
+            }
+
+            rooms.append(room_data)
+
+        return True, rooms
+    return False, None
+
+
+
 
 
 
