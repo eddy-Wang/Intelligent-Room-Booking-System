@@ -16,21 +16,24 @@
         </div>
       </div>
       <!-- botton icon -->
-      <div class="bottom-icon"><svg-icon type="mdi" :path="$mdi.mdiExitToApp"></svg-icon></div>
+      <div class="bottom-icon">
+        <svg-icon type="mdi" :path="$mdi.mdiExitToApp"></svg-icon>
+      </div>
     </aside>
-    <component :is="activeComponent" />
+    <component :is="activeComponent"/>
   </div>
 </template>
 
 <script>
-import AdminHomeView from "@/views/AdminHomeView.vue";
+import HomeView from "@/views/HomeView.vue";
 import MyReservation from '@/views/MyReservation.vue';
 import ReservationManagement from '@/views/ReservationManagement.vue';
 import RoomManagementView from '@/views/RoomManagementView.vue';
+
 export default {
   name: 'Index',
-  components:{
-    AdminHomeView,
+  components: {
+    HomeView,
     MyReservation,
     ReservationManagement,
     RoomManagementView,
@@ -40,10 +43,11 @@ export default {
       activeTab: 1,
       activeNav: 0,
       navItems: [
-        { icon: 'mdiHomeOutline',  component: 'AdminHomeView' },
-        { icon: 'mdiApplicationEditOutline',  component: 'ReservationManagement'},
-        { icon: 'mdiClipboardTextOutline', component: 'RoomManagementView'},
-        { icon: 'mdiBookAccountOutline', component: 'MyReservation'},
+        {icon: 'mdiHomeOutline', component: 'HomeView'},
+        {icon: 'mdiApplicationEditOutline', component: 'ReservationManagement'},
+        {icon: 'mdiClipboardTextOutline', component: 'RoomManagementView'},
+        {icon: 'mdiBookAccountOutline', component: 'MyReservation'},
+
 
       ]
     };

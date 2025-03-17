@@ -20,8 +20,8 @@
                 <div class="room-name">{{ room.name }}</div>
                 <div class="room-capacity">Capacity: {{ room.capacity }}</div>
                 <div class="room-location">Location: {{ room.location }}</div>
-                <div class="room-equipment">Equipment: {{ room.equipment }}</div>
-                <div class="room-access">Access: {{ room.access }}</div>
+                <div class="room-equipment">Equipment: {{ formatEquipment(room.equipment) }}</div>
+                <div class="room-access">Access: {{ accessMap[room.access] }}</div>
                 <div class="room-information">Information: {{ room.information || 'N/A' }}</div>
               </div>
 
@@ -49,7 +49,7 @@
           </div>
         </div>
 
-
+        <!-- Add Room Modal -->
         <div v-if="showAddRoomModal" class="modal">
           <div class="modal-content">
             <h2>Add Room</h2>
@@ -63,8 +63,15 @@
               <label for="room-location">Location:</label>
               <input type="text" id="room-location" v-model="newRoom.location" required/>
 
-              <label for="room-equipment">Equipment (comma separated):</label>
-              <input type="text" id="room-equipment" v-model="newRoom.equipmentInput" required/>
+              <label>Equipment:</label>
+              <div class="equipment-checkboxes">
+                <label><input type="checkbox" v-model="newRoom.equipment.Projector"> Projector</label>
+                <label><input type="checkbox" v-model="newRoom.equipment.Whiteboard"> Whiteboard</label>
+                <label><input type="checkbox" v-model="newRoom.equipment.Microphone"> Microphone</label>
+                <label><input type="checkbox" v-model="newRoom.equipment.Computer"> Computer</label>
+                <label><input type="checkbox" v-model="newRoom.equipment.PowerOutlets"> Power Outlets</label>
+                <label><input type="checkbox" v-model="newRoom.equipment.WiFi"> Wi-Fi</label>
+              </div>
 
               <label for="room-access">Access:</label>
               <select id="room-access" v-model="newRoom.access" required>
@@ -72,6 +79,7 @@
                 <option value="Staff Only">Staff Only</option>
                 <option value="Selected Staff Only">Selected Staff Only</option>
               </select>
+
               <label for="room-image">Image:</label>
               <input
                   type="file"
@@ -92,6 +100,7 @@
           </div>
         </div>
 
+        <!-- Modify Room Modal -->
         <div v-if="showModifyRoomModal" class="modal">
           <div class="modal-content">
             <h2>Modify Room</h2>
@@ -105,15 +114,23 @@
               <label for="modify-room-location">Location:</label>
               <input type="text" id="modify-room-location" v-model="modifiedRoom.location" required/>
 
-              <label for="modify-room-equipment">Equipment (comma separated):</label>
-              <input type="text" id="modify-room-equipment" v-model="modifiedRoom.equipmentInput" required/>
+              <label>Equipment:</label>
+              <div class="equipment-checkboxes">
+                <label><input type="checkbox" v-model="modifiedRoom.equipment.Projector"> Projector</label>
+                <label><input type="checkbox" v-model="modifiedRoom.equipment.Whiteboard"> Whiteboard</label>
+                <label><input type="checkbox" v-model="modifiedRoom.equipment.Microphone"> Microphone</label>
+                <label><input type="checkbox" v-model="modifiedRoom.equipment.Computer"> Computer</label>
+                <label><input type="checkbox" v-model="modifiedRoom.equipment.PowerOutlets"> Power Outlets</label>
+                <label><input type="checkbox" v-model="modifiedRoom.equipment.WiFi"> Wi-Fi</label>
+              </div>
 
               <label for="modify-room-access">Access:</label>
               <select id="modify-room-access" v-model="modifiedRoom.access" required>
-                <option value="All">All</option>
-                <option value="Staff Only">Staff Only</option>
-                <option value="Selected Staff Only">Selected Staff Only</option>
+                <option value="0">All</option>
+                <option value="1">Staff Only</option>
+                <option value="2">Selected Staff Only</option>
               </select>
+
               <label for="modify-room-image">Image:</label>
               <input
                   type="file"
@@ -126,6 +143,7 @@
               <div v-if="modifiedRoom.image" class="image-preview">
                 <img :src="modifiedRoom.image" alt="Current Image" class="preview-img">
               </div>
+
               <label for="modify-room-information">Information (optional):</label>
               <textarea id="modify-room-information" v-model="modifiedRoom.information"></textarea>
 
@@ -143,6 +161,11 @@ export default {
   name: 'RoomManagement',
   data() {
     return {
+      accessMap: {
+        0: "All",
+        1: "Staff Only",
+        2: "Selected Staff"
+      },
       rooms: [],
       currentPage: 1,
       itemsPerPage: 3,
@@ -152,20 +175,36 @@ export default {
         name: "",
         capacity: 0,
         location: "",
-        equipmentInput: "",
+        equipment: {
+          Projector: false,
+          Whiteboard: false,
+          Microphone: false,
+          Computer: false,
+          PowerOutlets: false,
+          WiFi: false
+        },
         image: null,
         access: "All",
-        information: ""
+        information: null,
       },
+
+      //modifiedRoom
       modifiedRoom: {
         index: null,
         name: "",
         capacity: 0,
         location: "",
-        equipmentInput: "",
+        equipment: {
+          Projector: false,
+          Whiteboard: false,
+          Microphone: false,
+          Computer: false,
+          PowerOutlets: false,
+          WiFi: false
+        },
         image: null,
         access: "All",
-        information: ""
+        information: null,
       }
     };
   },
@@ -180,19 +219,39 @@ export default {
     }
   },
   methods: {
+    formatEquipment(equipment) {
+      if (typeof equipment === 'string') {
+        // 去掉 { 和 }，并将单引号替换为双引号以便 JSON.parse 解析
+        const cleanedString = equipment.replace(/[{}]/g, '').replace(/'/g, '"');
+        try {
+          return JSON.parse(`[${cleanedString}]`).join(', ');
+        } catch (error) {
+          console.error('Failed to parse equipment:', error);
+          return 'No equipment';
+        }
+      } else if (Array.isArray(equipment)) {
+        return equipment.join(', ');
+      } else {
+        return 'No equipment';
+      }
+    },
     async fetchRoomData() {
       try {
-        const response = await fetch('http://192.168.110.79:8080/allRoom?permission=all');
+        const response = await fetch('http://127.0.0.1:8080/getRooms');
         const data = await response.json();
-
         this.rooms = data.data;
-        console.log("111",this.rooms)
       } catch (error) {
         console.error('Error fetching room data:', error);
       }
     },
     async addRoom() {
-      const equipment = this.newRoom.equipmentInput.split(',').map(item => item.trim());
+      const equipment = Object.keys(this.newRoom.equipment)
+          .filter(key => this.newRoom.equipment[key])
+          .map(key => key.replace(/([A-Z])/g, ' $1').trim());
+
+
+      const information = this.newRoom.information ? this.newRoom.information : null;
+
       const room = {
         name: this.newRoom.name,
         capacity: this.newRoom.capacity,
@@ -200,7 +259,7 @@ export default {
         equipment: equipment,
         access: this.newRoom.access,
         image: this.newRoom.image,
-        information: this.newRoom.information
+        information: information
       };
 
       try {
@@ -212,7 +271,7 @@ export default {
           body: JSON.stringify(room),
         });
         const data = await response.json();
-        if (data.success) {
+        if (data.code === '000') {
           this.rooms.push(room);
           this.showAddRoomModal = false;
           this.resetNewRoom();
@@ -221,21 +280,34 @@ export default {
         console.error('Failed to add room:', error);
       }
     },
+
+
     async modifyRoom(index) {
+      const room = this.paginatedRooms[index];
       this.modifiedRoom = {
-        index: index,
-        name: this.rooms[index].name,
-        capacity: this.rooms[index].capacity,
-        location: this.rooms[index].location,
-        equipmentInput: this.rooms[index].equipment.join(', '),
-        access: this.rooms[index].access,
-        image: this.rooms[index].image,
-        information: this.rooms[index].information
+        id: room.id,
+        name: room.name,
+        capacity: room.capacity,
+        location: room.location,
+        equipment: {
+          Projector: room.equipment.includes("Projector"),
+          Whiteboard: room.equipment.includes("Whiteboard"),
+          Microphone: room.equipment.includes("Microphone"),
+          Computer: room.equipment.includes("Computer"),
+          PowerOutlets: room.equipment.includes("Power Outlets"),
+          WiFi: room.equipment.includes("Wi-Fi")
+        },
+        access: room.access,
+        image: room.image,
+        information: room.information
       };
       this.showModifyRoomModal = true;
     },
     async saveModifiedRoom() {
-      const equipment = this.modifiedRoom.equipmentInput.split(',').map(item => item.trim());
+      const equipment = Object.keys(this.modifiedRoom.equipment)
+          .filter(key => this.modifiedRoom.equipment[key])
+          .map(key => key.replace(/([A-Z])/g, ' $1').trim());
+
       const room = {
         name: this.modifiedRoom.name,
         capacity: this.modifiedRoom.capacity,
@@ -243,26 +315,30 @@ export default {
         equipment: equipment,
         access: this.modifiedRoom.access,
         image: this.modifiedRoom.image,
-        information: this.modifiedRoom.information
+        information: this.modifiedRoom.information || null
       };
 
       try {
-        const response = await fetch(`http://127.0.0.1:8080/rooms/${this.rooms[this.modifiedRoom.index].id}`, {
+        const response = await fetch(`http://127.0.0.1:8080/rooms/${this.modifiedRoom.id}`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(room),
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(room)
         });
+
         const data = await response.json();
-        if (data.success) {
-          this.rooms[this.modifiedRoom.index] = room;
+        if (data.code === '000') {
+          const index = this.rooms.findIndex(r => r.id === this.modifiedRoom.id);
+          if (index !== -1) {
+            this.rooms.splice(index, 1, {...this.rooms[index], ...room});
+          }
           this.showModifyRoomModal = false;
         }
       } catch (error) {
         console.error('Failed to modify room:', error);
       }
     },
+
+
     async deleteRoom(index) {
       if (confirm("Are you sure you want to delete this room?")) {
         const roomId = this.rooms[index].id;
@@ -314,10 +390,17 @@ export default {
         name: "",
         capacity: 0,
         location: "",
-        equipmentInput: "",
+        equipment: {
+          Projector: false,
+          Whiteboard: false,
+          Microphone: false,
+          Computer: false,
+          PowerOutlets: false,
+          WiFi: false
+        },
         image: null,
         access: "All",
-        information: ""
+        information: null,
       };
     },
     getImagePath(name) {
@@ -590,4 +673,23 @@ input[type="file"] {
   border-radius: 4px;
   background: #f8f9fa;
 }
+
+.equipment-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start; /* 左对齐 */
+  margin-bottom: 15px; /* 增加底部间距 */
+}
+
+/* 每个复选框的标签 */
+.equipment-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem; /* 调整字体大小 */
+  color: #444; /* 字体颜色 */
+  white-space: nowrap;
+}
+
 </style>
