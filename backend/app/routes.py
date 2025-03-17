@@ -1,8 +1,9 @@
 import time
 from flask import Blueprint, request, jsonify
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code, \
-    get_user_reservations, cancel_reservation, fetch_users, fetch_rooms, fetch_bookings, update_booking_status, \
-    delete_booking, modify_booking
+    get_user_reservations, cancel_reservation, fetch_users, fetch_rooms_id_and_name, fetch_bookings, \
+    update_booking_status, \
+    delete_booking, modify_booking, add_room, modify_room, delete_room, fetch_room
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
     get_all_room_data_for_user
 
@@ -137,6 +138,36 @@ def cancel_reservation_route():
         return create_response('002', 'Failed to cancel reservation. It may already be processed or does not exist.')
 
 
+# Fetch users route
+@bp.route('/users', methods=['GET'])
+def get_users():
+    try:
+        users = fetch_users()
+        return create_response('000', 'Users fetched successfully!', users)
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
+
+# Fetch rooms route
+@bp.route('/rooms_id_and_name', methods=['GET'])
+def get_rooms_id_and_name():
+    try:
+        rooms = fetch_rooms_id_and_name()
+        print(rooms)
+        return create_response('000', 'Rooms fetched successfully!', rooms)
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
+
+# Fetch bookings route
+@bp.route('/bookings', methods=['GET'])
+def get_bookings():
+    try:
+        bookings = fetch_bookings()
+        print(bookings)
+        return create_response('000', 'Bookings fetched successfully!', bookings)
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
+
+
 # Update booking status route
 @bp.route('/bookings/<int:id>', methods=['PUT'])
 def update_booking(id):
@@ -168,7 +199,6 @@ def modify_booking_route():
         return '', 200
     booking_data = request.get_json()
     try:
-        modify_booking(booking_data)
         return create_response('000', 'Booking updated successfully!')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
@@ -239,33 +269,66 @@ def book_room():
         return create_response('004', f'Booking failed: {str(e)}')
 
 
-# Fetch users route
-@bp.route('/users', methods=['GET'])
-def get_users():
-    try:
-        users = fetch_users()
-        return create_response('000', 'Users fetched successfully!', users)
-    except Exception as e:
-        return create_response('500', f'Error: {str(e)}')
+@bp.route('/getRooms', methods=['GET', 'OPTIONS'])
+def rooms():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    success, data = fetch_room()
+
+    if success:
+        return create_response('000',"All room fetched!", data)
+    else:
+        return create_response('001', "No room fetched!", data)
 
 
-# Fetch rooms route
-@bp.route('/rooms', methods=['GET'])
-def get_rooms():
-    try:
-        rooms = fetch_rooms()
-        print(rooms)
-        return create_response('000', 'Rooms fetched successfully!', rooms)
-    except Exception as e:
-        return create_response('500', f'Error: {str(e)}')
+
+@bp.route('/rooms', methods=['POST', 'OPTIONS'])
+def getRooms():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.get_json()
+    required_fields = ['name', 'capacity', 'location', 'equipment', 'access', 'information']
+
+    for field in required_fields:
+        if field not in data:
+            return create_response('001', f'{field} is required!')
+
+    success, message = add_room(data)
+
+    if success:
+        return create_response('000', message)
+    else:
+        return create_response('002', message)
+
+@bp.route('/rooms/<int:room_id>', methods=['PUT'])
+def modify_room_route(room_id):
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.get_json()
+    required_fields = ['name', 'capacity', 'location', 'equipment', 'access', 'information']
+    for field in required_fields:
+        if field not in data:
+            return create_response('001', f'{field} is required!')
+
+    success, message = modify_room(room_id, data)
+
+    if success:
+        return create_response('000', message)
+    else:
+        return create_response('002', message)
 
 
-# Fetch bookings route
-@bp.route('/bookings', methods=['GET'])
-def get_bookings():
-    try:
-        bookings = fetch_bookings()
-        print(bookings)
-        return create_response('000', 'Bookings fetched successfully!', bookings)
-    except Exception as e:
-        return create_response('500', f'Error: {str(e)}')
+@bp.route('/rooms/<int:room_id>', methods=['DELETE'])
+def delete_room_route(room_id):
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    success, message = delete_room(room_id)
+    if success:
+        return create_response('000', message)
+    else:
+        return create_response('002', message)
+

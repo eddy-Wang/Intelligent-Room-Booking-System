@@ -56,6 +56,7 @@ import {useRouter, useRoute} from 'vue-router'
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import {faArrowLeft} from '@fortawesome/free-solid-svg-icons'
 import {faBackward} from '@fortawesome/free-solid-svg-icons';
+import adminIndex from "@/AdminIndex.vue";
 
 const vueInstance = getCurrentInstance()
 
@@ -93,13 +94,21 @@ const handleVerify = async () => {
         console.log(data)
         vueInstance.appContext.config.globalProperties.$user.email = data.data.email
         vueInstance.appContext.config.globalProperties.$user.name = data.data.name
-        vueInstance.appContext.config.globalProperties.$user.permission = data.data.permission
+        const userPermission = vueInstance.appContext.config.globalProperties.$user.permission = data.data.permission
 
         console.log(vueInstance.appContext.config.globalProperties.$user)
 
-        await router.push({
-          path: "../index"
+        if(userPermission === "Admin"){
+          await router.push({
+          path: "../adminIndex"
         })
+        }
+        else {
+          await router.push({
+          path: "../Index"
+        })
+        }
+
       } else {
         alert(data.message)
       }

@@ -1,53 +1,56 @@
 <template>
   <div class="index-container">
-    <!-- 左侧导航栏（第一列） -->
+    <!-- left column -->
     <aside class="left-column">
       <div class="top-icon"></div>
 
       <div class="nav-items-container">
-        <div 
-          v-for="(item, index) in navItems" 
-          :key="index" 
-          class="nav-item"
-          :class="{ active: activeNav === index }" 
-          @click="setActiveNav(index)"
+        <div
+            v-for="(item, index) in navItems"
+            :key="index"
+            class="nav-item"
+            :class="{ active: activeNav === index }"
+            @click="setActiveNav(index)"
         >
-          <!-- <el-icon><component :is="item.icon" /></el-icon> -->
           <svg-icon type="mdi" :path="$mdi[item.icon]"></svg-icon>
         </div>
       </div>
-      <!-- 底部圆形图标 -->
-      <div class="bottom-icon"><svg-icon type="mdi" :path="$mdi.mdiExitToApp"></svg-icon></div>
+      <!-- botton icon -->
+      <div class="bottom-icon">
+        <svg-icon type="mdi" :path="$mdi.mdiExitToApp"></svg-icon>
+      </div>
     </aside>
-    <component :is="activeComponent" />
+    <component :is="activeComponent"/>
   </div>
 </template>
 
 <script>
-import HomeView from '@/views/HomeView.vue';
+import HomeView from "@/views/HomeView.vue";
 import MyReservation from '@/views/MyReservation.vue';
-import NotificationView from '@/views/NotificationView.vue';
-import SettingsView from '@/views/SettingsView.vue';
+import ReservationManagement from '@/views/ReservationManagement.vue';
+import RoomManagementView from '@/views/RoomManagementView.vue';
+
 export default {
   name: 'Index',
-  components:{
+  components: {
     HomeView,
     MyReservation,
-    NotificationView,
-    SettingsView,
+    ReservationManagement,
+    RoomManagementView,
   },
   data() {
     return {
-      activeTab: 1, // 默认选中第二个 Tab
-      activeNav: 0, // 默认选中第一个导航项
+      activeTab: 1,
+      activeNav: 0,
       navItems: [
-        { icon: 'mdiHomeOutline',  component: 'HomeView' },
-        { icon: 'mdiAccountOutline', component: 'MyReservation'},
+        {icon: 'mdiHomeOutline', component: 'HomeView'},
+        {icon: 'mdiApplicationEditOutline', component: 'ReservationManagement'},
+        {icon: 'mdiClipboardTextOutline', component: 'RoomManagementView'},
+        {icon: 'mdiBookAccountOutline', component: 'MyReservation'},
       ]
     };
   },
   computed: {
-    // 根据 activeNav 动态获取要显示的组件名
     activeComponent() {
       return this.navItems[this.activeNav].component
     }
@@ -64,13 +67,13 @@ export default {
 /* 整体布局 */
 .index-container {
   display: grid;
-  grid-template-columns: 80px 1fr;  /* 左 80px，中间自适应，右 300px */
+  grid-template-columns: 80px 1fr;
   height: 100vh;
   background-color: #eceef8;
   overflow: hidden;
 }
 
-/* ========== 左侧导航栏 ========== */
+/* ========== left navigator========== */
 .left-column {
   background-color: #3155ef;
   display: flex;
@@ -128,10 +131,9 @@ export default {
 }
 
 .nav-item svg {
-  color: #fff; /* 如果你的图标库基于 currentColor，图标就会显示为白色 */
+  color: #fff;
 }
 
-/* 活跃状态样式 */
 .nav-item.active {
   border-radius: 50% 0 0 50%;
   background-color: #eceef8;
@@ -141,11 +143,11 @@ export default {
   color: #000;
 }
 
-/* 使用伪元素创建向右延伸的连接部分 */
+
 .nav-item.active::after {
   content: "";
   position: absolute;
-  width: 20px;  /* 向右延伸的宽度 */
+  width: 20px;
   height: 40px;
   background-color: #eceef8;
   right: -20px;
