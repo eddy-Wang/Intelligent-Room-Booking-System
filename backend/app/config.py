@@ -1,5 +1,6 @@
 import os
 
+
 class Config:
     DEBUG = True
     MAIL_SERVER = 'smtp.163.com'

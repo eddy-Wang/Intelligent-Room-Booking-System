@@ -3,6 +3,7 @@ import string
 from flask_mail import Message
 from mysql.connector import Error
 import socket
+
 socket.getfqdn = lambda name=None: "localhost"
 
 from . import mail
@@ -11,10 +12,12 @@ from .models import get_db_connection
 # stored the code
 verification_codes = {}
 
+
 def generate_verification_code():
     """generate a random verification code"""
     characters = string.ascii_letters + string.digits
     return ''.join(random.choices(characters, k=6))
+
 
 def send_verification_email(user_email, code):
     """send verification email"""
@@ -26,10 +29,12 @@ def send_verification_email(user_email, code):
     except Exception as e:
         print("Error sending email:", e)
 
+
 def remove_verification_code(user_email):
     """Remove the verification code for the given email."""
     if user_email in verification_codes:
         del verification_codes[user_email]
+
 
 # Get user reservations by email
 def get_user_reservations(email):
@@ -47,6 +52,7 @@ def get_user_reservations(email):
     cursor.close()
     connection.close()
     return reservations
+
 
 # Cancel reservation by booking ID
 def cancel_reservation(booking_id):
@@ -66,6 +72,7 @@ def cancel_reservation(booking_id):
     finally:
         cursor.close()
         connection.close()
+
 
 # Fetch users from the database
 def fetch_users():
