@@ -1,17 +1,17 @@
 import mysql.connector
 import ujson
-import ujson as json
-from mysql.connector import Error
+from config import Config
+
 
 
 # Database connection setup
 def get_db_connection():
     connection = mysql.connector.connect(
-        host='diidrbs.mysql.polardb.rds.aliyuncs.com',
-        port=3306,
-        user='administrator',
-        password='!admin123',
-        database='diidrbs',
+        host=Config.DB_HOST,
+        port=Config.DB_PORT,
+        user=Config.DB_USER,
+        password=Config.DB_PASSWORD,
+        database=Config.DB_NAME,
     )
     return connection
 
