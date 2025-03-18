@@ -1,9 +1,12 @@
 import time
+from datetime import datetime
+
 from flask import Blueprint, request, jsonify
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code, \
     get_user_reservations, cancel_reservation, fetch_users, fetch_rooms_id_and_name, fetch_bookings, \
     update_booking_status, \
-    delete_booking, modify_booking, add_room, modify_room, delete_room, fetch_room
+    delete_booking, modify_booking, add_room, modify_room, delete_room, fetch_room, update_room_issue_report, \
+    create_room_issue_report, delete_room_issue_report, get_all_room_issue_reports
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
     get_all_room_data_for_user
 
@@ -289,7 +292,7 @@ def getRooms():
         return '', 200
 
     data = request.get_json()
-    required_fields = ['name', 'capacity', 'location', 'equipment', 'access', 'information']
+    required_fields = ['name', 'capacity', 'location', 'equipment', 'access', 'information', 'image_url']
 
     for field in required_fields:
         if field not in data:
@@ -308,7 +311,7 @@ def modify_room_route(room_id):
         return '', 200
 
     data = request.get_json()
-    required_fields = ['name', 'capacity', 'location', 'equipment', 'access', 'information']
+    required_fields = ['name', 'capacity', 'location', 'equipment', 'access', 'information', 'image_url']
     for field in required_fields:
         if field not in data:
             return create_response('001', f'{field} is required!')
@@ -332,62 +335,55 @@ def delete_room_route(room_id):
     else:
         return create_response('002', message)
 
-@db.route('/room_issue_reports', methods=['GET'])
+# Get all room issue reports
+@bp.route('/room_issue_reports', methods=['GET'])
 def get_reports():
-    reports = RoomIssueReport.query.all()
-    return jsonify([report.to_dict() for report in reports])
+    try:
+        reports = get_all_room_issue_reports()
+        return create_response('000', 'Reports fetched successfully!', reports)
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
 
-@db.route('/room_issue_reports', methods=['POST'])
+# Create a new room issue report
+@bp.route('/room_issue_reports', methods=['POST'])
 def create_report():
     data = request.json
     try:
-        new_report = RoomIssueReport(
-            timestamp=datetime.fromisoformat(data['timestamp']),
-            room_id=data['room_id'],
-            user_email=data['user_email'],
-            reportInfo=data['reportInfo'],
-            reviewed=data.get('reviewed', 'Pending'),
-        )
-        db.session.add(new_report)
-        db.session.commit()
-        return jsonify(new_report.to_dict()), 201
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 400
+        timestamp = str(int(time.time() * 1000))
+        room_id = data['room_id']
+        user_email = data['user_email']
+        reportInfo = data['reportInfo']
+        reviewed = data.get('reviewed', 'Unreviewed')
 
-@db.route('/room_issue_reports/<string:timestamp>', methods=['PUT'])
-def update_report(timestamp):
+        if create_room_issue_report(timestamp, room_id, user_email, reportInfo, reviewed):
+            return create_response('000', 'Report created successfully!')
+        else:
+            return create_response('400', 'Failed to create report.')
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
+
+# Update a room issue report
+@bp.route('/room_issue_reports/<string:report_id>', methods=['PUT'])
+def update_report(report_id):
     data = request.json
-    report = RoomIssueReport.query.get(timestamp)
-    if not report:
-        return jsonify({'error': 'Report not found'}), 404
-
     try:
-        if 'room_id' in data:
-            report.room_id = data['room_id']
-        if 'user_email' in data:
-            report.user_email = data['user_email']
-        if 'reportInfo' in data:
-            report.reportInfo = data['reportInfo']
-        if 'reviewed' in data:
-            report.reviewed = data['reviewed']
-        db.session.commit()
-        return jsonify(report.to_dict())
+        if update_room_issue_report(
+            report_id,
+            reviewed=data.get('reviewed'),
+        ):
+            return create_response('000', 'Report updated successfully!')
+        else:
+            return create_response('400', 'Failed to update report.')
     except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 400
+        return create_response('500', f'Error: {str(e)}')
 
-
-@db.route('/room_issue_reports/<string:timestamp>', methods=['DELETE'])
+# Delete a room issue report
+@bp.route('/room_issue_reports/<string:timestamp>', methods=['DELETE'])
 def delete_report(timestamp):
-    report = RoomIssueReport.query.get(timestamp)
-    if not report:
-        return jsonify({'error': 'Report not found'}), 404
-
     try:
-        db.session.delete(report)
-        db.session.commit()
-        return jsonify({'message': 'Report deleted successfully'})
+        if delete_room_issue_report(timestamp):
+            return create_response('000', 'Report deleted successfully!')
+        else:
+            return create_response('400', 'Failed to delete report.')
     except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 400
+        return create_response('500', f'Error: {str(e)}')
