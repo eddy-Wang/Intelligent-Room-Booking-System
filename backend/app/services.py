@@ -225,6 +225,7 @@ def add_room(room_data):
     equipment = ",".join(room_data["equipment"]) if isinstance(room_data["equipment"], list) else room_data["equipment"]
     access = room_data["access"]
     information = room_data["information"]
+    image_url = room_data["image_url"]
 
     try:
         check_query = "SELECT room_id FROM room WHERE name = %s"
@@ -235,10 +236,10 @@ def add_room(room_data):
             return False, 'Room with this name already exists!'
 
         insert_query = """
-               INSERT INTO room (name, capacity, location, equipment, access, info, deleted)
-               VALUES (%s, %s, %s, %s, %s, %s, %s)
+               INSERT INTO room (name, capacity, location, equipment, access, info, deleted, image_url)
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
            """
-        cursor.execute(insert_query, (room_name, capacity, location, equipment, access, information, 0))
+        cursor.execute(insert_query, (room_name, capacity, location, equipment, access, information, 0, image_url))
         connection.commit()
 
         return True, 'Room added successfully!'
@@ -257,6 +258,8 @@ def modify_room(room_id, room_data):
     equipment = ",".join(room_data["equipment"]) if isinstance(room_data["equipment"], list) else room_data["equipment"]
     access = room_data["access"]
     information = room_data["information"]
+    image_url = room_data["image_url"]
+
     try:
         check_query = "SELECT room_id FROM room WHERE name = %s AND room_id != %s"
         cursor.execute(check_query, (room_name, room_id))
@@ -266,10 +269,10 @@ def modify_room(room_id, room_data):
             return False, 'Another room with this name already exists!'
 
         update_query = """
-                UPDATE room SET name=%s, capacity=%s, location=%s, equipment=%s, access=%s, info=%s
+                UPDATE room SET name=%s, capacity=%s, location=%s, equipment=%s, access=%s, info=%s, image_url=%s
                 WHERE room_id = %s
             """
-        cursor.execute(update_query, (room_name, capacity, location, equipment, access, information, room_id))
+        cursor.execute(update_query, (room_name, capacity, location, equipment, access, information,image_url, room_id))
         connection.commit()
 
         return True, 'Room modified successfully!'
@@ -319,6 +322,11 @@ def fetch_room():
             equipment = str(row[4])
             location = row[5]
             info = row[6]
+            image_url = row[7]
+            deleted = row[8]
+
+            if deleted:
+                continue
 
             room_data = {
                 "id": room_id,
@@ -327,7 +335,8 @@ def fetch_room():
                 "capacity": capacity,
                 "equipment": equipment,
                 "location": location,
-                "info": info if info else ""
+                "info": info if info else "",
+                "image_url": image_url if image_url else "",
             }
 
             rooms.append(room_data)

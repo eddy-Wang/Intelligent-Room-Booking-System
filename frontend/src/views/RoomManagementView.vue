@@ -14,7 +14,7 @@
                 class="room-item"
             >
               <div class="room-image">
-                <img :src="getImagePath(room.name)" alt="Room Image" class="room-img"/>
+                <img :src="room.image_url" alt="Room Image" class="room-img"/>
               </div>
               <div class="room-info">
                 <div class="room-name">{{ room.name }}</div>
@@ -84,16 +84,18 @@
               <input
                   type="file"
                   id="room-image"
-                  @change="handleAddImageUpload"
+                  @change="handleImageUpload"
                   accept="image/*"
                   required
                   title="Select room image"
                   class="custom-file-input"
               >
+              <div v-if="newRoom.image_url" class="image-preview">
+                <img :src="newRoom.image_url" alt="Current Image" class="preview-img">
+              </div>
 
               <label for="room-information">Information (optional):</label>
               <textarea id="room-information" v-model="newRoom.information"></textarea>
-
               <button type="submit" class="action-button">Add</button>
               <button @click="showAddRoomModal = false" class="action-button">Cancel</button>
             </form>
@@ -135,13 +137,13 @@
               <input
                   type="file"
                   id="modify-room-image"
-                  @change="handleModifyImageUpload"
+                  @change="handleImageUpload"
                   accept="image/*"
                   title="Select room image"
                   class="custom-file-input"
               >
-              <div v-if="modifiedRoom.image" class="image-preview">
-                <img :src="modifiedRoom.image" alt="Current Image" class="preview-img">
+              <div v-if="modifiedRoom.image_url" class="image-preview">
+                <img :src="modifiedRoom.image_url" alt="Current Image" class="preview-img">
               </div>
 
               <label for="modify-room-information">Information (optional):</label>
@@ -161,6 +163,7 @@ export default {
   name: 'RoomManagement',
   data() {
     return {
+      isModifying: false,
       accessMap: {
         0: "All",
         1: "Staff Only",
@@ -183,7 +186,7 @@ export default {
           PowerOutlets: false,
           WiFi: false
         },
-        image: null,
+        image_url: null,
         access: "All",
         information: null,
       },
@@ -202,7 +205,7 @@ export default {
           PowerOutlets: false,
           WiFi: false
         },
-        image: null,
+        image_url: null,
         access: "All",
         information: null,
       }
@@ -236,7 +239,7 @@ export default {
     },
     async fetchRoomData() {
       try {
-        const response = await fetch('http://127.0.0.1:8080/getRooms');
+        const response = await fetch('http://172.20.10.3:8080/getRooms');
         const data = await response.json();
         this.rooms = data.data;
       } catch (error) {
@@ -250,19 +253,19 @@ export default {
 
 
       const information = this.newRoom.information ? this.newRoom.information : null;
-
+      const image_url = this.newRoom.image_url ? this.newRoom.image_url : null;
       const room = {
         name: this.newRoom.name,
         capacity: this.newRoom.capacity,
         location: this.newRoom.location,
         equipment: equipment,
         access: this.newRoom.access,
-        image: this.newRoom.image,
+        image_url: image_url,
         information: information
       };
 
       try {
-        const response = await fetch('http://127.0.0.1:8080/rooms', {
+        const response = await fetch('http://172.20.10.3:8080/rooms', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -278,6 +281,7 @@ export default {
       } catch (error) {
         console.error('Failed to add room:', error);
       }
+      this.isModifying = false;
     },
 
 
@@ -297,9 +301,10 @@ export default {
           WiFi: room.equipment.includes("Wi-Fi")
         },
         access: room.access,
-        image: room.image,
+        image_url: room.image_url,
         information: room.information
       };
+      this.isModifying = true;
       this.showModifyRoomModal = true;
     },
     async saveModifiedRoom() {
@@ -313,12 +318,12 @@ export default {
         location: this.modifiedRoom.location,
         equipment: equipment,
         access: this.modifiedRoom.access,
-        image: this.modifiedRoom.image,
+        image_url: this.modifiedRoom.image_url,
         information: this.modifiedRoom.information || null
       };
       console.log(this.modifiedRoom.id)
       try {
-        const response = await fetch(`http://127.0.0.1:8080/rooms/${this.modifiedRoom.id}`, {
+        const response = await fetch(`http://172.20.10.3:8080/rooms/${this.modifiedRoom.id}`, {
           method: 'PUT',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(room)
@@ -331,6 +336,7 @@ export default {
             this.rooms.splice(index, 1, {...this.rooms[index], ...room});
           }
           this.showModifyRoomModal = false;
+          this.resetNewRoom();
         }
       } catch (error) {
         console.error('Failed to modify room:', error);
@@ -344,11 +350,11 @@ export default {
         const roomId = this.rooms[globalIndex].id;
 
         try {
-          const response = await fetch(`http://127.0.0.1:8080/rooms/${roomId}`, {
+          const response = await fetch(`http://172.20.10.3:8080/rooms/${roomId}`, {
             method: 'DELETE',
           });
           const data = await response.json();
-          if (data.success) {
+          if (data.code === '000') {
             this.rooms.splice(index, 1);
           }
         } catch (error) {
@@ -356,26 +362,55 @@ export default {
         }
       }
     },
-    handleAddImageUpload(event) {
+    async handleImageUpload(event) {
       const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.newRoom.image = e.target.result;
-        };
-        reader.readAsDataURL(file);
+      if (!file) {
+        alert("Please select an image to upload");
+        return;
+      }
+      const maxFileSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxFileSize) {
+        alert("The max size is 5MB");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("uid", "af7c509daf8264c6f539e62ad1a63fbd"); // UID
+      formData.append("token", "0ee94f5bd8b1a55cddf0e1a5d5436785"); // Token
+      formData.append("file", file); // image file
+
+      try {
+        // post request
+        const response = await fetch("https://www.imgurl.org/api/v2/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        // response handling
+        const result = await response.json();
+        console.log(result)
+        console.log(result.code)
+        if (result.code === 200) {
+          const image_url = result.data.url;
+          if (this.isModifying) {
+            this.modifiedRoom.image_url = image_url; // 更新修改房间的图片
+          } else {
+            this.newRoom.image_url = image_url; // 更新新增房间的图片
+          }
+          alert("upload successfully");
+          this.newRoom.image_url = image_url;
+          console.log(this.newRoom.image_url)
+          alert("upload successfully");
+        } else {
+          // 上传失败
+          alert(`error：${result.message || "unknown error"}`);
+        }
+      } catch (error) {
+        console.error("上传失败：", error);
+        alert("上传失败，请检查网络连接");
       }
     },
-    handleModifyImageUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.modifiedRoom.image = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    },
+
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
@@ -399,29 +434,17 @@ export default {
           PowerOutlets: false,
           WiFi: false
         },
-        image: null,
+        image_url: null,
         access: "All",
         information: null,
       };
     },
-    getImagePath(name) {
-      if (name.startsWith("English Room")) {
-        return new URL(`../assets/english-room.png`, import.meta.url).href;
-      } else {
-        const fileName = name.toLowerCase().replace(/\s+/g, '-');
-        try {
-          return new URL(`../assets/${fileName}.png`, import.meta.url).href;
-        } catch (error) {
-          console.warn(`Image not found for room: ${name}, using default image.`);
-          return new URL(`../assets/default-room.png`, import.meta.url).href;
-        }
-      }
-    }
   },
   mounted() {
     this.fetchRoomData();
-  }
+  },
 };
+
 </script>
 
 <style scoped>

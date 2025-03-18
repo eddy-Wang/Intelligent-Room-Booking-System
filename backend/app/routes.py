@@ -289,7 +289,7 @@ def getRooms():
         return '', 200
 
     data = request.get_json()
-    required_fields = ['name', 'capacity', 'location', 'equipment', 'access', 'information']
+    required_fields = ['name', 'capacity', 'location', 'equipment', 'access', 'information', 'image_url']
 
     for field in required_fields:
         if field not in data:
@@ -308,7 +308,7 @@ def modify_room_route(room_id):
         return '', 200
 
     data = request.get_json()
-    required_fields = ['name', 'capacity', 'location', 'equipment', 'access', 'information']
+    required_fields = ['name', 'capacity', 'location', 'equipment', 'access', 'information', 'image_url']
     for field in required_fields:
         if field not in data:
             return create_response('001', f'{field} is required!')
