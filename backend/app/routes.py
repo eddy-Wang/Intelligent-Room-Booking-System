@@ -8,7 +8,7 @@ from .services import generate_verification_code, send_verification_email, verif
     delete_booking, modify_booking, add_room, modify_room, delete_room, fetch_room, update_room_issue_report, \
     create_room_issue_report, delete_room_issue_report, get_all_room_issue_reports
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
-    get_all_room_data_for_user
+    get_all_room_data_for_user, add_room_issue, set_room_issue_reviewed, set_room_issue_report_info
 
 bp = Blueprint('routes', __name__)
 
@@ -336,6 +336,63 @@ def delete_room_route(room_id):
     else:
         return create_response('002', message)
 
+
+@bp.route('/room_issue', methods=['PUT'])
+def put_room_issue():
+    if request.method == 'OPTIONS':
+        return '', 200
+    data = request.get_json()
+    required_fields = ['room_id','user_email','report_info','user_permission']
+
+    for field in required_fields:
+        if field not in data:
+            return create_response('001', f'{field} is required!')
+
+    success, message = add_room_issue(data['room_id'], data['user_email'], data['report_info'], data['user_permission'])
+
+    if success:
+        return create_response('000', message)
+    else:
+        return create_response('002', message)
+
+@bp.route('/room_issue/status', methods=['POST'])
+def modify_room_issue_status():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.get_json()
+    required_fields = ['report_id','value']
+
+    for field in required_fields:
+        if field not in data:
+            return create_response('001', f'{field} is required!')
+
+    success, message = set_room_issue_reviewed(data['report_id'], data['value'])
+
+    if success:
+        return create_response('000', message)
+    else:
+        return create_response('002', message)
+
+@bp.route('/room_issue/report_info', methods=['POST'])
+def modify_room_issue_report_info():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.get_json()
+    required_fields = ['report_id','value']
+
+    for field in required_fields:
+        if field not in data:
+            return create_response('001', f'{field} is required!')
+
+    success, message = set_room_issue_report_info(data['report_id'], data['value'])
+
+    if success:
+        return create_response('000', message)
+    else:
+        return create_response('002', message)
+=======
 # Get all room issue reports
 @bp.route('/room_issue_reports', methods=['GET'])
 def get_reports():
@@ -388,3 +445,4 @@ def delete_report(timestamp):
             return create_response('400', 'Failed to delete report.')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
+

@@ -1,7 +1,10 @@
+from datetime import datetime
+from uuid import uuid1
+
 import mysql.connector
 import ujson
 from .config import Config
-
+from mysql.connector import Error
 
 
 # Database connection setup
@@ -71,12 +74,7 @@ def get_all_room_data_for_user(permission):
             equipment = str(row[4])
             location = row[5]
             info = row[6]
-            image_url = row[7]
-            deleted = row[8]
 
-
-            if deleted:
-                continue
             # Filter based on permission
             if permission == "Student" and access != 0:
                 continue
@@ -91,9 +89,7 @@ def get_all_room_data_for_user(permission):
                 "capacity": capacity,
                 "equipment": equipment,
                 "location": location,
-                "info": info if info else "",
-                "image_url": image_url if image_url else "",
-
+                "info": info if info else ""
             }
 
             room_data["booking"] = booking_dict.get(room_id, [])
@@ -273,7 +269,58 @@ def get_room_detailed(room_id):
     print(this_room)
     return this_room
 
+def add_room_issue(room_id, user_email, report_info, user_permission):
+    if not report_info or report_info == "":
+        return False, "Empty report info."
+
+    report_id = int(round(datetime.now().timestamp() * 1000))
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    reviewed_status = "Approved" if user_permission == "Admin" else "Unreviewed"
+    try:
+        query = "INSERT INTO room_issue_report (report_id, room_id, user_email, reportInfo, reviewed) VALUES (%s, %s, %s, %s, %s)"
+        cursor.execute(query, (str(report_id), room_id, user_email, report_info, reviewed_status))
+        connection.commit()
+
+        return True, "Add room issue report successfully!"
+    except Error as e:
+        return False, str(e)
+    finally:
+        cursor.close()
+        connection.close()
+
+def set_room_issue_reviewed(report_id, value):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "UPDATE room_issue_report SET reviewed = %s WHERE report_id = %s"
+        cursor.execute(query, (value, report_id))
+        connection.commit()
+
+        return True, "Set the status of issue report successfully!"
+    except Error as e:
+        return False, str(e)
+    finally:
+        cursor.close()
+        connection.close()
+
+def set_room_issue_report_info(report_id, value):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "UPDATE room_issue_report SET reportInfo = %s WHERE report_id = %s"
+        cursor.execute(query, (value, report_id))
+        connection.commit()
+
+        return True, "Set the info of issue report successfully!"
+    except Error as e:
+        return False, str(e)
+    finally:
+        cursor.close()
+        connection.close()
 
 if __name__ == '__main__':
-    get_room_detailed(1)
-    get_all_room_data_for_user("permission")
+

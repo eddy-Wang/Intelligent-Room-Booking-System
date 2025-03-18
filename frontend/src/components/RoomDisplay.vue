@@ -10,12 +10,12 @@
             @click="handleRoomClick(room)"
         >
           <div class="room-image">
-            <img :src="getImagePath(room.name)" :alt="room.name" />
+            <img :src="getImagePath(room.name)" :alt="room.name"/>
           </div>
           <div class="room-name"><strong>{{ room.name }}</strong></div>
         </div>
       </template>
-      <div v-else class="placeholder" >
+      <div v-else class="placeholder">
         No rooms available.
       </div>
     </div>
@@ -30,6 +30,11 @@
         <p>Capacity: {{ selectedRoom.capacity }}</p>
         <p>Equipment: {{ selectedRoom.equipment }}</p>
         <p>Access: {{ selectedRoom.access }}</p>
+        <div v-if="selectedRoom.report && selectedRoom.report.length > 0" class="warning-messages">
+          <div class="warning-message" v-for="(warning, index) in selectedRoom.report.slice(0, 2)" :key="index">
+            Warning {{ index + 1 }}: {{ warning }}
+          </div>
+        </div>
         <button class="close-btn" @click="resetSelection">×</button>
       </div>
     </transition>
@@ -163,9 +168,23 @@ watch(filteredRooms, (newValue, oldValue) => {
   z-index: 2;
 }
 
+.warning-message {
+  color: red;
+  background-color: #ffe6e6;
+  padding: 10px;
+  border: 1px solid red;
+  border-radius: 5px;
+  margin-top: 10px;
+  max-height: 50%;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .room-display {
   width: 100%;
-  height: 100% ;
+  height: 100%;
   overflow: hidden;
   position: relative;
   background: #eceef8;
@@ -222,6 +241,7 @@ watch(filteredRooms, (newValue, oldValue) => {
   font-weight: 500;
   background: #d5ddff;
 }
+
 .placeholder {
   width: 100%;
   height: 100%;
