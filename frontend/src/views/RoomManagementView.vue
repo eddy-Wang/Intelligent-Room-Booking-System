@@ -345,9 +345,10 @@ export default {
 
 
     async deleteRoom(index) {
+      const room = this.paginatedRooms[index];
+
       if (confirm("Are you sure you want to delete this room?")) {
-        const globalIndex = (this.currentPage - 1) * this.itemsPerPage + index;
-        const roomId = this.rooms[globalIndex].id;
+        const roomId = room.id;
 
         try {
           const response = await fetch(`http://172.20.10.3:8080/rooms/${roomId}`, {
@@ -355,7 +356,17 @@ export default {
           });
           const data = await response.json();
           if (data.code === '000') {
-            this.rooms.splice(index, 1);
+            // 找到要删除的房间在 rooms 数组中的索引
+            const roomIndex = this.rooms.findIndex(r => r.id === roomId);
+            if (roomIndex !== -1) {
+              // 从 rooms 数组中删除该房间
+              this.rooms.splice(roomIndex, 1);
+            }
+
+            // 如果当前页没有房间了，并且当前页不是第一页，则回到上一页
+            if (this.paginatedRooms.length === 0 && this.currentPage > 1) {
+              this.currentPage--;
+            }
           }
         } catch (error) {
           console.error('Failed to delete room:', error);
