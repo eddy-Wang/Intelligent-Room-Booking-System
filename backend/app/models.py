@@ -15,6 +15,7 @@ def get_db_connection():
         user=Config.DB_USER,
         password=Config.DB_PASSWORD,
         database=Config.DB_NAME,
+
     )
     return connection
 
@@ -63,6 +64,7 @@ def get_all_room_data_for_user(permission):
         rooms = []
         booking_dict = get_all_booking_records()
         class_dict = get_all_classes()
+        report_dict = get_all_report()
 
         for row in result:
             room_id = row[0]
@@ -93,6 +95,7 @@ def get_all_room_data_for_user(permission):
             room_data["booking"] = booking_dict.get(room_id, [])
             # room_data["class"] = class_dict.get(room_id, [])
             room_data["class"] = []
+            room_data["report"] = report_dict.get(room_id, [])
 
             rooms.append(room_data)
 
@@ -170,6 +173,33 @@ def get_all_classes():
     return {}
 
 
+def get_all_report():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "SELECT room_id, reportInfo FROM room_issue_report WHERE reviewed = 'Approved'"
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    report_dict = {}
+
+    for row in results:
+        room_id = row[0]
+        report_info = str(row[1])
+
+        if room_id not in report_dict:
+            report_dict[room_id] = []
+
+        report_dict[room_id].append(report_info)
+
+    return report_dict
+
+
 # Get booking records of a room and return as JSON
 def get_booking_record_of_a_room(room_id):
     connection = get_db_connection()
@@ -209,10 +239,32 @@ def get_class_of_a_room(room_id):
     return ujson.dumps([], default=str)
 
 
+def get_room_report(room_id):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    try:
+        query = "SELECT reportInfo FROM room_issue_report WHERE room_id = %s AND reviewed = 'Approved'"
+        cursor.execute(query, (room_id,))
+
+        results = cursor.fetchall()
+        report = [str(row[0]) for row in results]
+
+    except Exception as e:
+        print(f"Error fetching room report: {e}")
+        report = []
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return ujson.dumps(report, default=str)
+
+
 # Get booking details of a room
 def get_room_detailed(room_id):
     this_room = {"booking": ujson.loads(get_booking_record_of_a_room(room_id)),
-                 "class": ujson.loads(get_class_of_a_room(room_id))}
+                 "class": ujson.loads(get_class_of_a_room(room_id)),
+                 "report": ujson.loads(get_room_report(room_id)),}
 
     print(this_room)
     return this_room
@@ -271,4 +323,4 @@ def set_room_issue_report_info(report_id, value):
         connection.close()
 
 if __name__ == '__main__':
-    print(add_room_issue(1, "2542699@dundee.ac.uk", "Broken Light."))
+
