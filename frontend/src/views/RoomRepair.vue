@@ -7,7 +7,7 @@
         <img :src="getImagePath(room.name)" alt="Room Image" class="room-image">
         <h2 class="room-name">{{ room.name }}</h2>
         <div class="button-container">
-          <button @click="openRepairDialog(room)" class="repair-button">Repair</button>
+          <button @click="openRepairDialog(room)" class="report-button">Report Issue</button>
         </div>
 
       </div>
@@ -36,6 +36,7 @@ const selectedRoom = ref(null);
 const reportInfo = ref("");
 const instance = getCurrentInstance();
 const userEmail = instance.appContext.config.globalProperties.$user.email;
+const userPermission = instance.appContext.config.globalProperties.$user.permission;
 
 const fetchRoomData = async () => {
   try {
@@ -63,36 +64,42 @@ const getImagePath = (name) => {
 }
 
 const submitRepair = async () => {
-  if (!reportInfo.value) {
-    alert("Please fill in report information!");
-    return;
-  }
+      if (!reportInfo.value) {
+        alert("Please fill in report information!");
+        return;
+      }
 
-  const repairData = {
-    room_id: selectedRoom.value.id,
-    user_email: userEmail,
-    report_info: reportInfo.value,
-  };
+      const repairData = {
+        room_id: selectedRoom.value.id,
+        user_email: userEmail,
+        report_info: reportInfo.value,
+        user_permission: userPermission,
+      };
 
-  console.log("Repair data:", repairData);
-  try {
-    const response = await fetch("http://127.0.0.1:8080/reportRepair", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(repairData),
-    });
-
-    if (response.ok) {
-      alert("Repair request submitted successfully!");
-      showDialog.value = false;
-    } else {
-      alert("Failed to submit repair request.");
+      console.log("Repair data:", repairData);
+      try {
+        const response = await fetch("http://127.0.0.1:8080/room_issue", {
+          method: "PUT",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(repairData),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.code === "000") {
+            alert("Repair request submitted successfully!");
+            showDialog.value = false;
+          } else {
+            alert("There is a problem with the network, please try again.");
+          }
+        } else {
+          alert("Failed to submit repair request.");
+        }
+      } catch (error) {
+        console.error("Error submitting repair:", error);
+        alert("An error occurred.");
+      }
     }
-  } catch (error) {
-    console.error("Error submitting repair:", error);
-    alert("An error occurred.");
-  }
-};
+;
 
 onMounted(fetchRoomData);
 </script>
@@ -166,9 +173,9 @@ onMounted(fetchRoomData);
   height: 16%;
 }
 
-.repair-button {
-  width: 100px;
-  font-size: 18px;
+.report-button {
+  width: 110px;
+  font-size: 16px;
   background-color: #4064fd;
   color: white;
   padding: 6px;
@@ -178,7 +185,7 @@ onMounted(fetchRoomData);
   transition: background 0.2s;
 }
 
-.repair-button:hover {
+.report-button:hover {
   background-color: #3155ef;
 }
 
