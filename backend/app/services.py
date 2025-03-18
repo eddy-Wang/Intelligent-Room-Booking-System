@@ -225,6 +225,7 @@ def add_room(room_data):
     equipment = ",".join(room_data["equipment"]) if isinstance(room_data["equipment"], list) else room_data["equipment"]
     access = room_data["access"]
     information = room_data["information"]
+    image_url = room_data["image_url"]
 
     try:
         check_query = "SELECT room_id FROM room WHERE name = %s"
@@ -235,10 +236,10 @@ def add_room(room_data):
             return False, 'Room with this name already exists!'
 
         insert_query = """
-               INSERT INTO room (name, capacity, location, equipment, access, info, deleted)
-               VALUES (%s, %s, %s, %s, %s, %s, %s)
+               INSERT INTO room (name, capacity, location, equipment, access, info, deleted, image_url)
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
            """
-        cursor.execute(insert_query, (room_name, capacity, location, equipment, access, information, 0))
+        cursor.execute(insert_query, (room_name, capacity, location, equipment, access, information, 0, image_url))
         connection.commit()
 
         return True, 'Room added successfully!'
@@ -257,6 +258,8 @@ def modify_room(room_id, room_data):
     equipment = ",".join(room_data["equipment"]) if isinstance(room_data["equipment"], list) else room_data["equipment"]
     access = room_data["access"]
     information = room_data["information"]
+    image_url = room_data["image_url"]
+
     try:
         check_query = "SELECT room_id FROM room WHERE name = %s AND room_id != %s"
         cursor.execute(check_query, (room_name, room_id))
@@ -266,10 +269,10 @@ def modify_room(room_id, room_data):
             return False, 'Another room with this name already exists!'
 
         update_query = """
-                UPDATE room SET name=%s, capacity=%s, location=%s, equipment=%s, access=%s, info=%s
+                UPDATE room SET name=%s, capacity=%s, location=%s, equipment=%s, access=%s, info=%s, image_url=%s
                 WHERE room_id = %s
             """
-        cursor.execute(update_query, (room_name, capacity, location, equipment, access, information, room_id))
+        cursor.execute(update_query, (room_name, capacity, location, equipment, access, information,image_url, room_id))
         connection.commit()
 
         return True, 'Room modified successfully!'
@@ -319,6 +322,11 @@ def fetch_room():
             equipment = str(row[4])
             location = row[5]
             info = row[6]
+            image_url = row[7]
+            deleted = row[8]
+
+            if deleted:
+                continue
 
             room_data = {
                 "id": room_id,
@@ -327,108 +335,14 @@ def fetch_room():
                 "capacity": capacity,
                 "equipment": equipment,
                 "location": location,
-                "info": info if info else ""
+                "info": info if info else "",
+                "image_url": image_url if image_url else "",
             }
 
             rooms.append(room_data)
 
         return True, rooms
     return False, None
-
-# Get all room issue reports
-def get_all_room_issue_reports():
-    connection = get_db_connection()
-    cursor = connection.cursor()
-
-    try:
-        query = "SELECT * FROM room_issue_report"
-        cursor.execute(query)
-        result = cursor.fetchall()
-    finally:
-        cursor.close()
-        connection.close()
-
-    reports = []
-    for row in result:
-        report = {
-            "timestamp": row[0],
-            "room_id": row[1],
-            "user_email": row[2],
-            "reportInfo": row[3],
-            "reviewed": row[4],
-        }
-        reports.append(report)
-
-    return reports
-
-# Create a new room issue report
-def create_room_issue_report(timestamp, room_id, user_email, reportInfo, reviewed="Unreviewed"):
-    connection = get_db_connection()
-    cursor = connection.cursor()
-
-    try:
-        query = """
-            INSERT INTO room_issue_report (timestamp, room_id, user_email, reportInfo, reviewed)
-            VALUES (%s, %s, %s, %s, %s)
-        """
-        cursor.execute(query, (timestamp, room_id, user_email, reportInfo, reviewed))
-        connection.commit()
-        return True
-    except Exception as e:
-        print(f"Error creating report: {e}")
-        connection.rollback()
-        return False
-    finally:
-        cursor.close()
-        connection.close()
-
-# Update a room issue report
-def update_room_issue_report(timestamp, reviewed=None):
-    connection = get_db_connection()
-    cursor = connection.cursor()
-
-    try:
-        query = "UPDATE room_issue_report SET "
-        updates = []
-        params = []
-
-        if reviewed is not None:
-            updates.append("reviewed = %s")
-            params.append(reviewed)
-
-        query += ", ".join(updates) + " WHERE report_id = %s"
-        params.append(timestamp)
-
-        cursor.execute(query, tuple(params))
-        connection.commit()
-        return True
-    except Exception as e:
-        print(f"Error updating report: {e}")
-        connection.rollback()
-        return False
-    finally:
-        cursor.close()
-        connection.close()
-
-# Delete a room issue report
-def delete_room_issue_report(timestamp):
-    connection = get_db_connection()
-    cursor = connection.cursor()
-    report_id = timestamp
-
-    try:
-        query = "DELETE FROM room_issue_report WHERE report_id = %s"
-        cursor.execute(query, (report_id,))
-        connection.commit()
-        return True
-    except Exception as e:
-        print(f"Error deleting report: {e}")
-        connection.rollback()
-        return False
-    finally:
-        cursor.close()
-        connection.close()
-
 
 
 
