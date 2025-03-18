@@ -58,6 +58,8 @@ def get_all_room_data_for_user(permission):
 
     if result:
         rooms = []
+        booking_dict = get_all_booking_records()
+        class_dict = get_all_classes()
 
         for row in result:
             room_id = row[0]
@@ -85,17 +87,84 @@ def get_all_room_data_for_user(permission):
                 "info": info if info else ""
             }
 
-            booking_records = ujson.loads(get_booking_record_of_a_room(room_id))
-            room_data["booking"] = booking_records
-
-            class_data = ujson.loads(get_class_of_a_room(room_id))
-            room_data["class"] = class_data
+            room_data["booking"] = booking_dict.get(room_id, [])
+            # room_data["class"] = class_dict.get(room_id, [])
+            room_data["class"] = []
 
             rooms.append(room_data)
 
         return rooms
 
     return None
+
+def get_all_booking_records():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "SELECT * FROM booking"
+        cursor.execute(query)
+        results = cursor.fetchall()
+    finally:
+        cursor.close()
+        connection.close()
+
+    booking_dict = {}
+
+    for row in results:
+        room_id = row[2]
+        time_str = row[4]
+        time_points = time_str.split(",")
+        time_array = [int(point) for point in time_points if point.strip()]
+
+        booking_record = {
+            "booking_id": row[0],
+            "user_email": row[1],
+            "room_id": room_id,
+            "date": row[3],
+            "time": time_array,
+            "purpose": row[5],
+            "status": row[6],
+        }
+
+        if room_id not in booking_dict:
+            booking_dict[room_id] = []
+        booking_dict[room_id].append(booking_record)
+
+    return booking_dict
+
+
+def get_all_classes():
+    # connection = get_db_connection()
+    # cursor = connection.cursor()
+    #
+    # try:
+    #     query = "SELECT * FROM class"
+    #     cursor.execute(query)
+    #     results = cursor.fetchall()
+    # finally:
+    #     cursor.close()
+    #     connection.close()
+    #
+    # class_dict = {}
+    #
+    # for row in results:
+    #     room_id = row[0]
+    #
+    #     class_record = {
+    #         "class_id": row[1],
+    #         "room_id": room_id,
+    #         "class_name": row[2],
+    #         "teacher": row[3],
+    #         "time": row[4],
+    #     }
+    #
+    #     if room_id not in class_dict:
+    #         class_dict[room_id] = []
+    #     class_dict[room_id].append(class_record)
+    #
+    # return class_dict
+    return {}
 
 
 # Get booking records of a room and return as JSON
