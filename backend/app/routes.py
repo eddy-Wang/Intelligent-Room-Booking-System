@@ -199,6 +199,7 @@ def modify_booking_route():
         return '', 200
     booking_data = request.get_json()
     try:
+        modify_booking(booking_data)
         return create_response('000', 'Booking updated successfully!')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
