@@ -62,7 +62,7 @@ const fetchData = async () => {
   try {
     const instance = getCurrentInstance();
     const userPermission = instance.appContext.config.globalProperties.$user.permission;
-    const url = `http://127.0.0.1:8080/allRoom?permission=`+userPermission;
+    const url = `http://192.168.1.6:8080/allRoom?permission=`+userPermission;
     const response = await fetch(url);
     const data = await response.json();
     roomsData.value = data.data;
