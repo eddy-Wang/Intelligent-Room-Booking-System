@@ -268,6 +268,7 @@ const processingStateOptions = ['unprocessed', 'processed', 'completed'];
 const fetchRooms = async () => {
     try {
         const response = await fetch('http://172.20.10.3:8080/rooms_id_and_name');
+
         if (!response.ok) throw new Error('Failed to fetch rooms');
         const data = await response.json();
         rooms.value=data.data;
