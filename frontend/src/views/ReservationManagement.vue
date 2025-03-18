@@ -267,7 +267,7 @@ const processingStateOptions = ['unprocessed', 'processed', 'completed'];
 // Fetch rooms from backend API
 const fetchRooms = async () => {
     try {
-        const response = await fetch('http://192.168.110.54:8080/rooms');
+        const response = await fetch('http://192.168.110.54:8080/rooms_id_and_name');
         if (!response.ok) throw new Error('Failed to fetch rooms');
         const data = await response.json();
         rooms.value=data.data;
