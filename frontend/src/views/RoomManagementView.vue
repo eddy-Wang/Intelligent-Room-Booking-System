@@ -14,7 +14,7 @@
                 class="room-item"
             >
               <div class="room-image">
-                <img :src="getImagePath(room.name)" alt="Room Image" class="room-img"/>
+                <img :src="room.image_url" alt="Room Image" class="room-img"/>
               </div>
               <div class="room-info">
                 <div class="room-name">{{ room.name }}</div>
