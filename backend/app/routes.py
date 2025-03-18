@@ -1,9 +1,12 @@
 import time
+from datetime import datetime
+
 from flask import Blueprint, request, jsonify
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code, \
     get_user_reservations, cancel_reservation, fetch_users, fetch_rooms_id_and_name, fetch_bookings, \
     update_booking_status, \
-    delete_booking, modify_booking, add_room, modify_room, delete_room, fetch_room
+    delete_booking, modify_booking, add_room, modify_room, delete_room, fetch_room, update_room_issue_report, \
+    create_room_issue_report, delete_room_issue_report, get_all_room_issue_reports
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
     get_all_room_data_for_user
 
@@ -333,3 +336,55 @@ def delete_room_route(room_id):
     else:
         return create_response('002', message)
 
+# Get all room issue reports
+@bp.route('/room_issue_reports', methods=['GET'])
+def get_reports():
+    try:
+        reports = get_all_room_issue_reports()
+        return create_response('000', 'Reports fetched successfully!', reports)
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
+
+# Create a new room issue report
+@bp.route('/room_issue_reports', methods=['POST'])
+def create_report():
+    data = request.json
+    try:
+        timestamp = str(int(time.time() * 1000))
+        room_id = data['room_id']
+        user_email = data['user_email']
+        reportInfo = data['reportInfo']
+        reviewed = data.get('reviewed', 'Unreviewed')
+
+        if create_room_issue_report(timestamp, room_id, user_email, reportInfo, reviewed):
+            return create_response('000', 'Report created successfully!')
+        else:
+            return create_response('400', 'Failed to create report.')
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
+
+# Update a room issue report
+@bp.route('/room_issue_reports/<string:report_id>', methods=['PUT'])
+def update_report(report_id):
+    data = request.json
+    try:
+        if update_room_issue_report(
+            report_id,
+            reviewed=data.get('reviewed'),
+        ):
+            return create_response('000', 'Report updated successfully!')
+        else:
+            return create_response('400', 'Failed to update report.')
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
+
+# Delete a room issue report
+@bp.route('/room_issue_reports/<string:timestamp>', methods=['DELETE'])
+def delete_report(timestamp):
+    try:
+        if delete_room_issue_report(timestamp):
+            return create_response('000', 'Report deleted successfully!')
+        else:
+            return create_response('400', 'Failed to delete report.')
+    except Exception as e:
+        return create_response('500', f'Error: {str(e)}')
