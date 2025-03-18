@@ -30,6 +30,9 @@
         <p>Capacity: {{ selectedRoom.capacity }}</p>
         <p>Equipment: {{ selectedRoom.equipment }}</p>
         <p>Access: {{ selectedRoom.access }}</p>
+        <div v-if="selectedRoom.report_info" class="warning-message">
+          Warning: {{ selectedRoom.report_info }}
+        </div>
         <button class="close-btn" @click="resetSelection">×</button>
       </div>
     </transition>
@@ -161,6 +164,19 @@ watch(filteredRooms, (newValue, oldValue) => {
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 2;
+}
+
+.warning-message {
+  color: red;
+  background-color: #ffe6e6;
+  padding: 10px;
+  border: 1px solid red;
+  border-radius: 5px;
+  margin-top: 10px;
+  max-height: 50%;
+  overflow-y: auto;
+  word-wrap: break-word;
+  white-space: pre-line;
 }
 
 .room-display {
