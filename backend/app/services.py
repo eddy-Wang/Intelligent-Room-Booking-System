@@ -341,7 +341,7 @@ def get_all_room_issue_reports():
     cursor = connection.cursor()
 
     try:
-        query = "SELECT * FROM room_issue_reports"
+        query = "SELECT * FROM room_issue_report"
         cursor.execute(query)
         result = cursor.fetchall()
     finally:
@@ -362,13 +362,13 @@ def get_all_room_issue_reports():
     return reports
 
 # Create a new room issue report
-def create_room_issue_report(timestamp, room_id, user_email, reportInfo, reviewed="Pending"):
+def create_room_issue_report(timestamp, room_id, user_email, reportInfo, reviewed="Unreviewed"):
     connection = get_db_connection()
     cursor = connection.cursor()
 
     try:
         query = """
-            INSERT INTO room_issue_reports (timestamp, room_id, user_email, reportInfo, reviewed)
+            INSERT INTO room_issue_report (timestamp, room_id, user_email, reportInfo, reviewed)
             VALUES (%s, %s, %s, %s, %s)
         """
         cursor.execute(query, (timestamp, room_id, user_email, reportInfo, reviewed))
@@ -383,29 +383,20 @@ def create_room_issue_report(timestamp, room_id, user_email, reportInfo, reviewe
         connection.close()
 
 # Update a room issue report
-def update_room_issue_report(timestamp, room_id=None, user_email=None, reportInfo=None, reviewed=None):
+def update_room_issue_report(timestamp, reviewed=None):
     connection = get_db_connection()
     cursor = connection.cursor()
 
     try:
-        query = "UPDATE room_issue_reports SET "
+        query = "UPDATE room_issue_report SET "
         updates = []
         params = []
 
-        if room_id is not None:
-            updates.append("room_id = %s")
-            params.append(room_id)
-        if user_email is not None:
-            updates.append("user_email = %s")
-            params.append(user_email)
-        if reportInfo is not None:
-            updates.append("reportInfo = %s")
-            params.append(reportInfo)
         if reviewed is not None:
             updates.append("reviewed = %s")
             params.append(reviewed)
 
-        query += ", ".join(updates) + " WHERE timestamp = %s"
+        query += ", ".join(updates) + " WHERE report_id = %s"
         params.append(timestamp)
 
         cursor.execute(query, tuple(params))
@@ -423,10 +414,11 @@ def update_room_issue_report(timestamp, room_id=None, user_email=None, reportInf
 def delete_room_issue_report(timestamp):
     connection = get_db_connection()
     cursor = connection.cursor()
+    report_id = timestamp
 
     try:
-        query = "DELETE FROM room_issue_reports WHERE timestamp = %s"
-        cursor.execute(query, (timestamp,))
+        query = "DELETE FROM room_issue_report WHERE report_id = %s"
+        cursor.execute(query, (report_id,))
         connection.commit()
         return True
     except Exception as e:

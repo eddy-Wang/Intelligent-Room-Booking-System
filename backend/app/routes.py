@@ -353,7 +353,7 @@ def create_report():
         room_id = data['room_id']
         user_email = data['user_email']
         reportInfo = data['reportInfo']
-        reviewed = data.get('reviewed', 'Pending')
+        reviewed = data.get('reviewed', 'Unreviewed')
 
         if create_room_issue_report(timestamp, room_id, user_email, reportInfo, reviewed):
             return create_response('000', 'Report created successfully!')
@@ -369,9 +369,6 @@ def update_report(timestamp):
     try:
         if update_room_issue_report(
             timestamp,
-            room_id=data.get('room_id'),
-            user_email=data.get('user_email'),
-            reportInfo=data.get('reportInfo'),
             reviewed=data.get('reviewed'),
         ):
             return create_response('000', 'Report updated successfully!')
