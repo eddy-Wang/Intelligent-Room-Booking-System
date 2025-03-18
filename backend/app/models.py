@@ -1,7 +1,10 @@
+from datetime import datetime
+from uuid import uuid1
+
 import mysql.connector
 import ujson
-from config import Config
-
+from .config import Config
+from mysql.connector import Error
 
 
 # Database connection setup
@@ -214,6 +217,57 @@ def get_room_detailed(room_id):
     print(this_room)
     return this_room
 
+def add_room_issue(room_id, user_email, report_info):
+    if not report_info or report_info == "":
+        return False, "Empty report info."
+
+    report_id = int(round(datetime.now().timestamp() * 1000))
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    try:
+        query = "INSERT INTO room_issue_report (report_id, room_id, user_email, reportInfo, reviewed) VALUES (%s, %s, %s, %s, %s)"
+        cursor.execute(query, (str(report_id), room_id, user_email, report_info, "Unreviewed"))
+        connection.commit()
+
+        return True, "Add room issue report successfully!"
+    except Error as e:
+        return False, str(e)
+    finally:
+        cursor.close()
+        connection.close()
+
+def set_room_issue_reviewed(report_id, value):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "UPDATE room_issue_report SET reviewed = %s WHERE report_id = %s"
+        cursor.execute(query, (value, report_id))
+        connection.commit()
+
+        return True, "Set the status of issue report successfully!"
+    except Error as e:
+        return False, str(e)
+    finally:
+        cursor.close()
+        connection.close()
+
+def set_room_issue_report_info(report_id, value):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "UPDATE room_issue_report SET reportInfo = %s WHERE report_id = %s"
+        cursor.execute(query, (value, report_id))
+        connection.commit()
+
+        return True, "Set the info of issue report successfully!"
+    except Error as e:
+        return False, str(e)
+    finally:
+        cursor.close()
+        connection.close()
 
 if __name__ == '__main__':
-    get_room_detailed(1)
+    print(add_room_issue(1, "2542699@dundee.ac.uk", "Broken Light."))
