@@ -1,14 +1,11 @@
 <template>
   <div class="home-container">
     <main class="middle-column">
-      <!-- 上排：标题 + 房间分类按钮 -->
       <div class="top-row">
         <h1><strong>DIICSU</strong></h1>
         <h2><strong>Room Booking System</strong></h2>
       </div>
-      <!-- 下排：房间卡片 + 底部“Rooms”栏 -->
       <div class="middle-row">
-        <!-- 房间卡片 -->
         <!--        <room-display :room-ids="roomIds"/>-->
         <room-display
             :room-ids="roomIds"
@@ -26,9 +23,7 @@
 
     </main>
 
-    <!-- 右侧区域（第三列） -->
     <div class="right-column">
-      <!--      <room-search @filters-updated="handleFilters"/>-->
       <room-search
           @filters-updated="handleFilters"
           :selected-room="selectedRoom"
@@ -81,26 +76,20 @@ onMounted(() => {
 })
 
 const handleFilters = (filters) => {
-  console.log("当前过滤条件：", filters);
-
-  // 执行过滤
   const filteredRooms = roomsData.value.filter(room => {
-    // 检查所有过滤器是否都满足
     return filters.every(filter => {
       switch (filter.type) {
         case 'access':
           if (filter.value === 'all') {
-            return true; // 显示全部房间
+            return true;
           } else {
-            return room.access === 1; // 严格匹配 access 值
+            return room.access === 1;
           }
-          // 容量过滤
         case 'capacity':
-          // 处理不同范围值
           switch (filter.value) {
             case '1-15':
               return room.capacity >= 1 && room.capacity <= 15
-            case '16-30': // 你关注的案例
+            case '16-30':
               return room.capacity >= 16 && room.capacity <= 30
             case '31-45':
               return room.capacity >= 31 && room.capacity <= 45
@@ -110,46 +99,34 @@ const handleFilters = (filters) => {
               return true
           }
         case 'equipment':
-          // 当没有选择任何设备时不进行过滤
           if (filter.value.length === 0) return true;
 
-          // 房间必须包含所有选中的设备（使用every）
           return filter.value.every(equip => {
             const roomEquipments = room.equipment || [];
             return roomEquipments.includes(equip);
           });
         case 'date-time':
-          // 如果没有选择日期或时间段则不过滤
           if (!filter.value.date || filter.value.slots.length === 0) return true;
           console.log(filter.value.date)
           console.log(filter.value.slots)
-          // 将用户选择的日期转换为YYYY-MM-DD格式
           const selectedDate = formatDate(filter.value.date);
 
           console.log("date:", selectedDate)
-          // 检查该房间在选定日期的预订情况
           const hasConflict = room.booking.some(booking => {
-            console.log("当前过滤条件：", filters);
-            // 检查日期是否匹配
             if (booking.date === selectedDate) {
-              // 检查用户选择的时间段是否与预订时间段有重叠
               //TODO:class timetable filter
               return booking.time.some(bookedSlot => filter.value.slots.includes(bookedSlot));
             }
             return false;
           });
 
-          // 如果有冲突，过滤掉该房间
           return !hasConflict;
-
-
         default:
           return true
       }
     })
   })
 
-  // 提取过滤后的ID
   roomIds.value = filteredRooms.map(room => room.id)
 }
 
@@ -162,12 +139,10 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
-// 从RoomDisplay接收选中的房间
 const handleRoomSelected = async (room) => {
   selectedRoom.value = room;
   roomSelected.value = 1
   try {
-    // 发送GET请求，假设后端需要room.id作为参数
     const response = await fetch(`http://127.0.0.1:8080/requestRoomDetails?roomId=${room.id}`);
 
     if (!response.ok) {
@@ -175,12 +150,11 @@ const handleRoomSelected = async (room) => {
     }
 
     const data = await response.json();
-    childData.value = data.data.booking; // 将获取的数据存入响应式变量
+    childData.value = data.data.booking;
     console.log("Received room details:", childData.value);
 
   } catch (error) {
     console.error("Error fetching room details:", error);
-    // 可以选择重置数据或显示错误信息
     childData.value = null;
   }
 };
@@ -194,7 +168,6 @@ const handleRoomUnselected = () => {
   roomSelected.value = 0
 };
 
-// 从TimeTable接收日期和时间段
 const handleTimeSelection = (date, slots) => {
   bookDate.value = date;
   bookTimeSlots.value = slots;
@@ -214,7 +187,6 @@ body {
   height: 100%;
 }
 
-/* ========== 中间列：上下两排 ========== */
 .middle-column {
   flex: 1;
   display: grid;
@@ -223,7 +195,6 @@ body {
   padding: 20px;
 }
 
-/* ----- 上排：标题 + Tab ----- */
 .top-row {
   margin-bottom: 0;
 }
@@ -240,21 +211,18 @@ body {
   color: #555;
 }
 
-/* ----- 中间（房间卡片）----- */
 .middle-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
 }
 
-/* ----- 下排（TimeTable）----- */
 .bottom-row {
   display: block;
   width: 100%;
   gap: 20px;
 }
 
-/* ========== 右侧列 ========== */
 .right-column {
   background-color: #eceef8;
   padding: 10px;

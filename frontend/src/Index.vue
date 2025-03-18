@@ -1,22 +1,19 @@
 <template>
   <div class="index-container">
-    <!-- 左侧导航栏（第一列） -->
     <aside class="left-column">
       <div class="top-icon"></div>
 
       <div class="nav-items-container">
-        <div 
-          v-for="(item, index) in navItems" 
-          :key="index" 
+        <div
+          v-for="(item, index) in navItems"
+          :key="index"
           class="nav-item"
-          :class="{ active: activeNav === index }" 
+          :class="{ active: activeNav === index }"
           @click="setActiveNav(index)"
         >
-          <!-- <el-icon><component :is="item.icon" /></el-icon> -->
           <svg-icon type="mdi" :path="$mdi[item.icon]"></svg-icon>
         </div>
       </div>
-      <!-- 底部圆形图标 -->
       <div class="bottom-icon"><svg-icon type="mdi" :path="$mdi.mdiExitToApp"></svg-icon></div>
     </aside>
     <component :is="activeComponent" />
@@ -26,28 +23,30 @@
 <script>
 import HomeView from '@/views/HomeView.vue';
 import MyReservation from '@/views/MyReservation.vue';
-import NotificationView from '@/views/NotificationView.vue';
-import SettingsView from '@/views/SettingsView.vue';
+import * as $mdi from "@mdi/js";
+import RoomRepair from "@/views/RoomRepair.vue";
 export default {
   name: 'Index',
   components:{
     HomeView,
     MyReservation,
-    NotificationView,
-    SettingsView,
+    RoomRepair,
   },
   data() {
     return {
-      activeTab: 1, // 默认选中第二个 Tab
-      activeNav: 0, // 默认选中第一个导航项
+      activeTab: 1,
+      activeNav: 0,
       navItems: [
         { icon: 'mdiHomeOutline',  component: 'HomeView' },
         { icon: 'mdiAccountOutline', component: 'MyReservation'},
+          { icon: 'mdiBellOutline', component: 'RoomRepair' },
       ]
     };
   },
   computed: {
-    // 根据 activeNav 动态获取要显示的组件名
+    $mdi() {
+      return $mdi
+    },
     activeComponent() {
       return this.navItems[this.activeNav].component
     }
@@ -55,27 +54,27 @@ export default {
   methods: {
     setActiveNav(index) {
       this.activeNav = index;
+      console.log(index)
     }
   },
 };
 </script>
 
 <style scoped>
-/* 整体布局 */
+
 .index-container {
   display: grid;
-  grid-template-columns: 80px 1fr;  /* 左 80px，中间自适应，右 300px */
+  grid-template-columns: 80px 1fr;
   height: 100vh;
   background-color: #eceef8;
-  overflow: hidden;
 }
 
-/* ========== 左侧导航栏 ========== */
 .left-column {
   background-color: #3155ef;
   display: flex;
   flex-direction: column;
   align-items: center;
+  border-radius: 20px;
   padding: 10px 0;
   height: 100vh;
   border-right: 1px solid #ddd;
@@ -128,10 +127,9 @@ export default {
 }
 
 .nav-item svg {
-  color: #fff; /* 如果你的图标库基于 currentColor，图标就会显示为白色 */
+  color: #fff;
 }
 
-/* 活跃状态样式 */
 .nav-item.active {
   border-radius: 50% 0 0 50%;
   background-color: #eceef8;
@@ -141,11 +139,10 @@ export default {
   color: #000;
 }
 
-/* 使用伪元素创建向右延伸的连接部分 */
 .nav-item.active::after {
   content: "";
   position: absolute;
-  width: 20px;  /* 向右延伸的宽度 */
+  width: 20px;
   height: 40px;
   background-color: #eceef8;
   right: -20px;
