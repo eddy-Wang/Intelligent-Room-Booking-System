@@ -335,6 +335,109 @@ def fetch_room():
         return True, rooms
     return False, None
 
+# Get all room issue reports
+def get_all_room_issue_reports():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "SELECT * FROM room_issue_reports"
+        cursor.execute(query)
+        result = cursor.fetchall()
+    finally:
+        cursor.close()
+        connection.close()
+
+    reports = []
+    for row in result:
+        report = {
+            "timestamp": row[0],
+            "room_id": row[1],
+            "user_email": row[2],
+            "reportInfo": row[3],
+            "reviewed": row[4],
+        }
+        reports.append(report)
+
+    return reports
+
+# Create a new room issue report
+def create_room_issue_report(timestamp, room_id, user_email, reportInfo, reviewed="Pending"):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = """
+            INSERT INTO room_issue_reports (timestamp, room_id, user_email, reportInfo, reviewed)
+            VALUES (%s, %s, %s, %s, %s)
+        """
+        cursor.execute(query, (timestamp, room_id, user_email, reportInfo, reviewed))
+        connection.commit()
+        return True
+    except Exception as e:
+        print(f"Error creating report: {e}")
+        connection.rollback()
+        return False
+    finally:
+        cursor.close()
+        connection.close()
+
+# Update a room issue report
+def update_room_issue_report(timestamp, room_id=None, user_email=None, reportInfo=None, reviewed=None):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "UPDATE room_issue_reports SET "
+        updates = []
+        params = []
+
+        if room_id is not None:
+            updates.append("room_id = %s")
+            params.append(room_id)
+        if user_email is not None:
+            updates.append("user_email = %s")
+            params.append(user_email)
+        if reportInfo is not None:
+            updates.append("reportInfo = %s")
+            params.append(reportInfo)
+        if reviewed is not None:
+            updates.append("reviewed = %s")
+            params.append(reviewed)
+
+        query += ", ".join(updates) + " WHERE timestamp = %s"
+        params.append(timestamp)
+
+        cursor.execute(query, tuple(params))
+        connection.commit()
+        return True
+    except Exception as e:
+        print(f"Error updating report: {e}")
+        connection.rollback()
+        return False
+    finally:
+        cursor.close()
+        connection.close()
+
+# Delete a room issue report
+def delete_room_issue_report(timestamp):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "DELETE FROM room_issue_reports WHERE timestamp = %s"
+        cursor.execute(query, (timestamp,))
+        connection.commit()
+        return True
+    except Exception as e:
+        print(f"Error deleting report: {e}")
+        connection.rollback()
+        return False
+    finally:
+        cursor.close()
+        connection.close()
+
+
 
 
 
