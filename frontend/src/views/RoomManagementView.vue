@@ -316,7 +316,7 @@ export default {
         image: this.modifiedRoom.image,
         information: this.modifiedRoom.information || null
       };
-
+      console.log(this.modifiedRoom.id)
       try {
         const response = await fetch(`http://127.0.0.1:8080/rooms/${this.modifiedRoom.id}`, {
           method: 'PUT',
@@ -340,7 +340,9 @@ export default {
 
     async deleteRoom(index) {
       if (confirm("Are you sure you want to delete this room?")) {
-        const roomId = this.rooms[index].id;
+        const globalIndex = (this.currentPage - 1) * this.itemsPerPage + index;
+        const roomId = this.rooms[globalIndex].id;
+
         try {
           const response = await fetch(`http://127.0.0.1:8080/rooms/${roomId}`, {
             method: 'DELETE',

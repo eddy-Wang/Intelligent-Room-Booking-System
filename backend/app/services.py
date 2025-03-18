@@ -101,7 +101,7 @@ def fetch_users():
 def fetch_rooms_id_and_name():
     connection = get_db_connection()
     cursor = connection.cursor()
-    query = "SELECT room_id, name FROM room"
+    query = "SELECT room_id, name FROM room where deleted = 0"
     cursor.execute(query)
     result = cursor.fetchall()
     cursor.close()
@@ -235,10 +235,10 @@ def add_room(room_data):
             return False, 'Room with this name already exists!'
 
         insert_query = """
-               INSERT INTO room (name, capacity, location, equipment, access, info)
-               VALUES (%s, %s, %s, %s, %s, %s)
+               INSERT INTO room (name, capacity, location, equipment, access, info, deleted)
+               VALUES (%s, %s, %s, %s, %s, %s, %s)
            """
-        cursor.execute(insert_query, (room_name, capacity, location, equipment, access, information))
+        cursor.execute(insert_query, (room_name, capacity, location, equipment, access, information, 0))
         connection.commit()
 
         return True, 'Room added successfully!'
@@ -283,7 +283,7 @@ def modify_room(room_id, room_data):
 def delete_room(room_id):
     connection = get_db_connection()
     cursor = connection.cursor()
-    query = "DELETE FROM room WHERE room_id = %s"
+    query = "UPDATE room SET deleted = 1 WHERE room_id = %s"
 
     try:
         cursor.execute(query, (room_id,))
@@ -301,7 +301,7 @@ def fetch_room():
     cursor = connection.cursor()
 
     try:
-        query = "SELECT * FROM room"
+        query = "SELECT * FROM room where deleted = 0"
         cursor.execute(query)
         result = cursor.fetchall()
     finally:
