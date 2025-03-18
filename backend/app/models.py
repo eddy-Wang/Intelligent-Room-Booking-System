@@ -323,4 +323,4 @@ def set_room_issue_report_info(report_id, value):
         connection.close()
 
 if __name__ == '__main__':
-
+    get_room_detailed(1)
