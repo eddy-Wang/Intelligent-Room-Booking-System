@@ -1,6 +1,37 @@
 <template>
     <div class="room-repair-handling">
-        <h2 class="page-title">Room Repair Handling</h2>
+        <div class="header">
+            <h2 class="page-title">Room Repair Handling</h2>
+            <el-button class="new-button" type="primary" @click="dialogVisible = true">Report New Issue</el-button>
+        </div>
+        <el-dialog v-model="dialogVisible" title="Report New Issue" width="30%">
+            <el-form :model="newReportForm" label-width="120px">
+                <el-form-item label="Room Name">
+                    <el-select v-model="newReportForm.room_id" placeholder="Select Room">
+                        <el-option
+                            v-for="room in rooms"
+                            :key="room.room_id"
+                            :label="room.name"
+                            :value="room.room_id"
+                        />
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="User Email">
+                    <el-input v-model="newReportForm.user_email" placeholder="Enter your email" />
+                </el-form-item>
+                <el-form-item label="Report Info">
+                    <el-input
+                        v-model="newReportForm.reportInfo"
+                        type="textarea"
+                        placeholder="Describe the issue"
+                    />
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <el-button @click="dialogVisible = false">Cancel</el-button>
+                <el-button type="primary" @click="submitNewReport">Submit</el-button>
+            </template>
+        </el-dialog>
         <el-card class="custom-card">
             <el-table :data="filteredReports" border stripe style="width: 100%" class="el-table">
                 <!-- Room Name Column -->
@@ -73,36 +104,29 @@
                 <el-table-column class="el-table-column" label="Actions" width="250">
                     <template #default="{ row }">
                         <div class="action-buttons">
-                            <!-- Pending: Show Approve and Reject buttons -->
+                            <!-- Unreviewed: Show Approve and Reject buttons -->
                             <el-button
-                                    v-if="row.reviewed === 'Pending'"
+                                    v-if="row.reviewed === 'Unreviewed'"
                                     size="small"
                                     @click="approveReport(row)"
                             >
                                 Approve
                             </el-button>
                             <el-button
-                                    v-if="row.reviewed === 'Pending'"
+                                    v-if="row.reviewed === 'Unreviewed'"
                                     size="small"
                                     @click="rejectReport(row)"
                             >
                                 Reject
                             </el-button>
 
-                            <!-- Approved: Show Complete and Modify buttons -->
+                            <!-- Approved: Show Complete buttons -->
                             <el-button
                                     v-if="row.reviewed === 'Approved'"
                                     size="small"
                                     @click="completeReport(row)"
                             >
                                 Complete
-                            </el-button>
-                            <el-button
-                                    v-if="row.reviewed === 'Approved'"
-                                    size="small"
-                                    @click="modifyReport(row)"
-                            >
-                                Modify
                             </el-button>
 
                             <!-- Rejected or Completed: Show Delete button -->
@@ -135,14 +159,19 @@ const filters = ref({
     user_email: '',
     status: [],
 });
-
+const dialogVisible = ref(false);
+const newReportForm = ref({
+    room_id: '',
+    user_email: '',
+    reportInfo: '',
+});
 // Status options
-const statusOptions = ['Pending', 'Approved', 'Rejected', 'Completed'];
+const statusOptions = ['Unreviewed', 'Approved', 'Rejected', 'Completed'];
 
 // Fetch rooms from backend API
 const fetchRooms = async () => {
     try {
-        const response = await fetch('http://192.168.110.54:8080/rooms');
+        const response = await fetch('http://172.20.10.3:8080/rooms_id_and_name');
         if (!response.ok) throw new Error('Failed to fetch rooms');
         const data = await response.json();
         rooms.value = data.data;
@@ -154,7 +183,7 @@ const fetchRooms = async () => {
 // Fetch users from backend API
 const fetchUsers = async () => {
     try {
-        const response = await fetch('http://192.168.110.54:8080/users');
+        const response = await fetch('http://172.20.10.3:8080/users');
         if (!response.ok) throw new Error('Failed to fetch users');
         const data = await response.json();
         users.value = data.data;
@@ -166,14 +195,17 @@ const fetchUsers = async () => {
 // Fetch reports from backend API
 const fetchReports = async () => {
     try {
-        const response = await fetch('http://192.168.110.54:8080/room_issue_reports');
+        const response = await fetch('http://172.20.10.3:8080/room_issue_reports');
         if (!response.ok) throw new Error('Failed to fetch reports');
         const data = await response.json();
-        reports.value = data.data;
+        console.log('Fetched reports:', data); // 调试输出
+        reports.value = Array.isArray(data.data) ? data.data : []; // 确保是数组
     } catch (error) {
         console.error('Error fetching reports:', error);
+        reports.value = []; // 遇到错误时设置为空数组
     }
 };
+
 
 // Get room name by room_id
 const getRoomName = (room_id) => {
@@ -208,7 +240,7 @@ const filteredReports = computed(() => {
 // Approve report
 const approveReport = async (report) => {
     try {
-        const response = await fetch(`http://192.168.110.54:8080/room_issue_reports/${report.timestamp}`, {
+        const response = await fetch(`http://172.20.10.3:8080/room_issue_reports/${report.timestamp}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ reviewed: 'Approved' }),
@@ -225,7 +257,7 @@ const approveReport = async (report) => {
 // Reject report
 const rejectReport = async (report) => {
     try {
-        const response = await fetch(`http://192.168.110.54:8080/room_issue_reports/${report.timestamp}`, {
+        const response = await fetch(`http://172.20.10.3:8080/room_issue_reports/${report.timestamp}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ reviewed: 'Rejected' }),
@@ -242,7 +274,7 @@ const rejectReport = async (report) => {
 // Complete report
 const completeReport = async (report) => {
     try {
-        const response = await fetch(`http://192.168.110.54:8080/room_issue_reports/${report.timestamp}`, {
+        const response = await fetch(`http://172.20.10.3:8080/room_issue_reports/${report.timestamp}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ reviewed: 'Completed' }),
@@ -259,7 +291,7 @@ const completeReport = async (report) => {
 // Delete report
 const deleteReport = async (report) => {
     try {
-        const response = await fetch(`http://192.168.110.54:8080/room_issue_reports/${report.timestamp}`, {
+        const response = await fetch(`http://172.20.10.3:8080/room_issue_reports/${report.timestamp}`, {
             method: 'DELETE',
         });
         if (!response.ok) throw new Error('Failed to delete report');
@@ -271,7 +303,29 @@ const deleteReport = async (report) => {
     }
 };
 
-// Fetch data on component mount
+// Submit new report
+const submitNewReport = async () => {
+    try {
+        const response = await fetch('http://172.20.10.3:8080/room_issue_reports', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                timestamp: new Date().toISOString(),
+                room_id: newReportForm.value.room_id,
+                user_email: newReportForm.value.user_email,
+                reportInfo: newReportForm.value.reportInfo,
+                reviewed: 'Unreviewed',
+            }),
+        });
+        if (!response.ok) throw new Error('Failed to submit report');
+        ElMessage.success('Report submitted successfully');
+        dialogVisible.value = false;
+        fetchReports();
+    } catch (error) {
+        console.error('Error submitting report:', error);
+        ElMessage.error('Failed to submit report');
+    }
+};// Fetch data on component mount
 onMounted(() => {
     fetchRooms();
     fetchUsers();
@@ -280,6 +334,13 @@ onMounted(() => {
 </script>
 
 <style>
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
 .page-title {
     font-size: 40px;
     font-weight: bold;
@@ -344,5 +405,10 @@ onMounted(() => {
 
 .el-table-column {
     width: 5%;
+}
+
+.new-button{
+    width:10%;
+    height:50%;
 }
 </style>
