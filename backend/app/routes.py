@@ -332,3 +332,62 @@ def delete_room_route(room_id):
     else:
         return create_response('002', message)
 
+@db.route('/room_issue_reports', methods=['GET'])
+def get_reports():
+    reports = RoomIssueReport.query.all()
+    return jsonify([report.to_dict() for report in reports])
+
+@db.route('/room_issue_reports', methods=['POST'])
+def create_report():
+    data = request.json
+    try:
+        new_report = RoomIssueReport(
+            timestamp=datetime.fromisoformat(data['timestamp']),
+            room_id=data['room_id'],
+            user_email=data['user_email'],
+            reportInfo=data['reportInfo'],
+            reviewed=data.get('reviewed', 'Pending'),
+        )
+        db.session.add(new_report)
+        db.session.commit()
+        return jsonify(new_report.to_dict()), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
+
+@db.route('/room_issue_reports/<string:timestamp>', methods=['PUT'])
+def update_report(timestamp):
+    data = request.json
+    report = RoomIssueReport.query.get(timestamp)
+    if not report:
+        return jsonify({'error': 'Report not found'}), 404
+
+    try:
+        if 'room_id' in data:
+            report.room_id = data['room_id']
+        if 'user_email' in data:
+            report.user_email = data['user_email']
+        if 'reportInfo' in data:
+            report.reportInfo = data['reportInfo']
+        if 'reviewed' in data:
+            report.reviewed = data['reviewed']
+        db.session.commit()
+        return jsonify(report.to_dict())
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
+
+
+@db.route('/room_issue_reports/<string:timestamp>', methods=['DELETE'])
+def delete_report(timestamp):
+    report = RoomIssueReport.query.get(timestamp)
+    if not report:
+        return jsonify({'error': 'Report not found'}), 404
+
+    try:
+        db.session.delete(report)
+        db.session.commit()
+        return jsonify({'message': 'Report deleted successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
