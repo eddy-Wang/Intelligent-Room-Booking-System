@@ -155,8 +155,8 @@ watch(filteredRooms, (newValue, oldValue) => {
 
 .room-info {
   position: absolute;
-  left: 34.5%;
-  width: 65%;
+  left: 34%;
+  width: 66%;
   height: 90%;
   background: white;
   border-radius: 12px;

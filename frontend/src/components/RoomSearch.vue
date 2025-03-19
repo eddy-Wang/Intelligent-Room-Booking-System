@@ -109,7 +109,7 @@
           <textarea
               class="input-box"
               placeholder="Enter purpose..."
-              rows="4"
+              rows="3"
               style="max-height: 10%; overflow-y: auto;"
               v-model="bookingPurpose"
           ></textarea>
@@ -441,7 +441,7 @@ export default {
 
 .panel-content {
   border: none;
-  padding: 15px;
+  padding: 14px;
   flex-grow: 1;
   overflow-y: auto;
   height: 91%;
