@@ -6,7 +6,7 @@ from .services import generate_verification_code, send_verification_email, verif
     get_user_reservations, cancel_reservation, fetch_users, fetch_rooms_id_and_name, fetch_bookings, \
     update_booking_status, \
     delete_booking, modify_booking, add_room, modify_room, delete_room, fetch_room, update_room_issue_report, \
-    create_room_issue_report, delete_room_issue_report, get_all_room_issue_reports
+    create_room_issue_report, delete_room_issue_report, get_all_room_issue_reports, sending_booking_email
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
     get_all_room_data_for_user, add_room_issue, set_room_issue_reviewed, set_room_issue_report_info
 
@@ -268,6 +268,7 @@ def book_room():
         conn.commit()
         cursor.close()
         conn.close()
+        sending_booking_email(user_email, room_id, date, time_str, status)
         return create_response('000', 'Booking successful!')
     except Exception as e:
         return create_response('004', f'Booking failed: {str(e)}')

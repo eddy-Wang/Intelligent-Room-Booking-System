@@ -3,6 +3,7 @@ import string
 from flask_mail import Message
 from mysql.connector import Error
 import socket
+from datetime import datetime
 
 socket.getfqdn = lambda name=None: "localhost"
 
@@ -26,6 +27,92 @@ def send_verification_email(user_email, code):
     try:
         mail.send(msg)
         print("Verification email sent successfully.")
+    except Exception as e:
+        print("Error sending email:", e)
+
+
+def sending_booking_email(user_email, room_id, date, time, status):
+    """send booking email based on status"""
+    subject = "Room Booking Status"
+    room_name = fetch_name_by_id(room_id)
+
+    time_mapping = {
+        0: '08:00-08:45',
+        1: '08:55-09:40',
+        2: '10:00-10:45',
+        3: '10:55-11:40',
+        4: '12:00-12:45',
+        5: '12:55-13:40',
+        6: '14:00-14:45',
+        7: '14:55-15:40',
+        8: '16:00-16:45',
+        9: '16:55-17:40',
+        10: '19:00-19:45',
+        11: '19:55-20:40',
+    }
+    time = list(map(int, time.split(','))) if isinstance(time, str) else time
+    sorted_times = sorted(time)
+    time_slots = [time_mapping[time_idx] for time_idx in sorted_times]
+
+    formatted_time = ', '.join(time_slots)
+
+    try:
+        date_obj = datetime.fromisoformat(date.replace("Z", "+00:00"))
+        formatted_date = date_obj.strftime('%Y-%m-%d')
+    except ValueError:
+        formatted_date = date
+
+    if status == "Confirmed":
+        body = f"""
+        Dear User,
+
+        Your room booking has been successfully confirmed.
+
+        Booking Details:
+        Room: {room_name}
+        Date: {formatted_date}
+        Time: {formatted_time}
+
+        Thank you for using booking service.
+
+        Best regards,
+        DIICSU Room Booking Service
+        """
+    elif status == "Pending":
+        body = f"""
+        Dear User,
+
+        We have received your room booking request, and it is currently pending approval.
+
+        Booking Details:
+        Room ID: {room_name}
+        Date: {formatted_date}
+        Time: {formatted_time}
+
+        Please wait for the administrator's approval.
+
+        Best regards,
+        DIICSU Room Booking Service
+        """
+    else:
+        body = f"""
+        Dear User,
+        
+        There is an error happened with your booking request.
+        
+        Please contact support for assistance.
+
+        Best regards,
+        DIICSU Room Booking Service
+        
+        """
+
+    msg = Message(subject, recipients=[user_email])
+    msg.body = body
+
+    try:
+        mail.send(msg)
+        print("Booking email sent successfully.")
     except Exception as e:
         print("Error sending email:", e)
 
@@ -117,6 +204,17 @@ def fetch_rooms_id_and_name():
         rooms.append(room_data)
 
     return rooms
+
+def fetch_name_by_id(room_id):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    query = "SELECT name FROM room where room_id = %s"
+    cursor.execute(query, (room_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    if result is not None:
+        return result[0]
 
 
 # Fetch all bookings from the database
