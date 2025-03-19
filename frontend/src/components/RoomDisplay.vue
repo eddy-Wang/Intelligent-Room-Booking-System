@@ -31,7 +31,7 @@
         <p>Equipment: {{ selectedRoom.equipment }}</p>
         <p>Access: {{  accessMap[selectedRoom.access] }}</p>
         <div v-if="selectedRoom.report && selectedRoom.report.length > 0" class="warning-messages">
-          <div class="warning-message" v-for="(warning, index) in selectedRoom.report.slice(0, 2)" :key="index">
+          <div class="warning-message" v-for="(warning, index) in selectedRoom.report" :key="index">
             Warning {{ index + 1 }}: {{ warning }}
           </div>
         </div>
@@ -144,7 +144,7 @@ watch(filteredRooms, (newValue, oldValue) => {
 <style scoped>
 .close-btn {
   position: absolute;
-  top: 100px;
+  top: 43%;
   right: 15px;
   font-size: 24px;
   background: none;
@@ -160,9 +160,10 @@ watch(filteredRooms, (newValue, oldValue) => {
   height: 90%;
   background: white;
   border-radius: 12px;
-  padding: 20px;
+  padding: 10px 20px 10px 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 2;
+  overflow-y: auto;
 }
 
 .warning-message {
@@ -171,8 +172,8 @@ watch(filteredRooms, (newValue, oldValue) => {
   padding: 10px;
   border: 1px solid red;
   border-radius: 5px;
-  margin-top: 10px;
-  max-height: 50%;
+  margin-top: 0.8%;
+  height: 20%;
   max-width: 90%;
   overflow: hidden;
   text-overflow: ellipsis;
