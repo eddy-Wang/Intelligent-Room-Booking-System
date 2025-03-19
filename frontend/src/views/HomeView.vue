@@ -233,7 +233,6 @@ body {
 }
 .middle-column, .right-column {
   min-height: 100vh; /* 让内容至少和视口一样高 */
-  overflow-y: auto; /* 允许垂直滚动 */
 }
 html, body {
   height: 100%;
