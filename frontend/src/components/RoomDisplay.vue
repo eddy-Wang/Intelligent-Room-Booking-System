@@ -10,8 +10,9 @@
             @click="handleRoomClick(room)"
         >
           <div class="room-image">
-            <img :src="getImagePath(room.name)" :alt="room.name"/>
+            <img :src="room.image_url" :alt="room.name"/>
           </div>
+
           <div class="room-name"><strong>{{ room.name }}</strong></div>
         </div>
       </template>
@@ -56,14 +57,7 @@ const props = defineProps({
     default: () => []
   }
 })
-const getImagePath = (name) => {
-  if (name.startsWith("English Room")) {
-    return new URL(`../assets/english-room.png`, import.meta.url).href;
-  } else {
-    const fileName = name.toLowerCase().replace(/\s+/g, '-');
-    return new URL(`../assets/${fileName}.png`, import.meta.url).href;
-  }
-}
+
 const filteredRooms = computed(() => {
   return props.rooms.filter(room => props.roomIds.includes(room.id))
 })
