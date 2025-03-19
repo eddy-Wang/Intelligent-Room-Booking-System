@@ -109,22 +109,21 @@ onMounted(fetchRoomData);
   padding: 20px;
   background-color: #F5F6FA;
   height: 100vh;
-  overflow: hidden;
 }
 
 .title {
   font-size: 58px;
   font-weight: bold;
   text-align: left;
-  margin-bottom: 20px;
   color: #222;
+  height: 12%;
 }
 
 .room-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 50px;
-  height: calc(100vh - 80px);
+  height: 88%;
   overflow-y: auto;
   padding-right: 20px;
   margin: 30px;
