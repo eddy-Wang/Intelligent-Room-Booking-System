@@ -1,6 +1,5 @@
 <template>
   <div class="room-search-container">
-    <!-- 第一个 Panel：筛选条件 -->
     <div class="panel1">
       <div class="panel-content">
         <!-- Capacity  -->
@@ -74,13 +73,11 @@
         </div>
       </div>
 
-      <!-- 第一个 Panel 的蓝色底边 -->
-      <div class="panel-footer">
+      <div class="panel-footer1">
         Room Search
       </div>
     </div>
 
-    <!-- 第二个 Panel：预订信息 -->
     <div class="panel2">
       <div class="panel-content">
         <div class="input-section">
@@ -112,7 +109,7 @@
           <textarea
               class="input-box"
               placeholder="Enter purpose..."
-              rows="2"
+              rows="4"
               style="max-height: 10%; overflow-y: auto;"
               v-model="bookingPurpose"
           ></textarea>
@@ -120,8 +117,7 @@
         <button class="book-button" @click="handleBook">Book</button>
       </div>
 
-      <!-- 第二个 Panel 的蓝色底边 -->
-      <div class="panel-footer">
+      <div class="panel-footer2">
         Booking Details
       </div>
     </div>
@@ -141,7 +137,6 @@ export default {
   setup() {
     let instance = getCurrentInstance()
     const user_email = instance.appContext.config.globalProperties.$user.email
-    // 注入父组件提供的数据
     const bookDate = inject('bookDate');
     const bookTimeSlots = inject('bookTimeSlots')
 
@@ -388,7 +383,21 @@ export default {
   height: 100%;
 }
 
-.panel1, .panel2 {
+.panel1{
+  font-family: 'Cambridge', sans-serif;
+  border: none;
+  border-radius: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 20px;
+  height: 53%;
+}
+.panel2 {
   font-family: 'Cambridge', sans-serif;
   border: none;
   border-radius: 20px;
@@ -399,12 +408,25 @@ export default {
   flex-direction: column;
   width: 100%;
   max-width: 400px;
-  margin-bottom: 20px;
+  height: 47%;
 }
-
-.panel-footer {
+.panel-footer1 {
   border: none;
-  height: 20%;
+  height: 10%;
+  background-color: #3155ef;
+  color: white;
+  text-align: center;
+  font-size: 25px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 0 20px 20px;
+  width: 100%;
+}
+.panel-footer2 {
+  border: none;
+  height: 12%;
   background-color: #3155ef;
   color: white;
   text-align: center;
@@ -421,6 +443,8 @@ export default {
   border: none;
   padding: 15px;
   flex-grow: 1;
+  overflow-y: auto;
+  height: 91%;
 }
 
 .filter-section h2 {
@@ -485,7 +509,7 @@ export default {
   outline: none;
   resize: vertical;
   width: 100%;
-  max-height: 150px;
+  max-height: 170px;
   overflow-y: auto;
 }
 

@@ -12,7 +12,6 @@
           <div class="room-image">
             <img :src="room.image_url" :alt="room.name"/>
           </div>
-
           <div class="room-name"><strong>{{ room.name }}</strong></div>
         </div>
       </template>
@@ -30,7 +29,7 @@
         <h2>{{ selectedRoom.name }}</h2>
         <p>Capacity: {{ selectedRoom.capacity }}</p>
         <p>Equipment: {{ selectedRoom.equipment }}</p>
-        <p>Access: {{ selectedRoom.access }}</p>
+        <p>Access: {{  accessMap[selectedRoom.access] }}</p>
         <div v-if="selectedRoom.report && selectedRoom.report.length > 0" class="warning-messages">
           <div class="warning-message" v-for="(warning, index) in selectedRoom.report.slice(0, 2)" :key="index">
             Warning {{ index + 1 }}: {{ warning }}
@@ -57,7 +56,11 @@ const props = defineProps({
     default: () => []
   }
 })
-
+const accessMap = ref({
+      0: "All",
+      1: "Staff Only",
+      2: "Selected Staff"
+    });
 const filteredRooms = computed(() => {
   return props.rooms.filter(room => props.roomIds.includes(room.id))
 })
@@ -183,7 +186,7 @@ watch(filteredRooms, (newValue, oldValue) => {
   position: relative;
   background: #eceef8;
   display: flex;
-  padding: 16px;
+  padding: 16px 0 16px 0;
 }
 
 .rooms-container {
@@ -217,7 +220,7 @@ watch(filteredRooms, (newValue, oldValue) => {
 
 .room-image {
   width: 100%;
-  height: 200px;
+  height: 80%;
   overflow: hidden;
 }
 
@@ -229,6 +232,7 @@ watch(filteredRooms, (newValue, oldValue) => {
 
 .room-name {
   padding: 10px;
+  height: 100%;
   text-align: center;
   font-size: 16px;
   color: #333;

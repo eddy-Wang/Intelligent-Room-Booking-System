@@ -74,6 +74,7 @@ def get_all_room_data_for_user(permission):
             equipment = str(row[4])
             location = row[5]
             info = row[6]
+            image_url = row[7]
 
             # Filter based on permission
             if permission == "Student" and access != 0:
@@ -89,7 +90,8 @@ def get_all_room_data_for_user(permission):
                 "capacity": capacity,
                 "equipment": equipment,
                 "location": location,
-                "info": info if info else ""
+                "info": info if info else "",
+                "image_url": image_url if image_url else ""
             }
 
             room_data["booking"] = booking_dict.get(room_id, [])

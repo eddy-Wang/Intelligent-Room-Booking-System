@@ -183,20 +183,21 @@ body {
 .home-container {
   display: flex;
   width: 100%;
-  height: 100vh; /* 确保高度占满视口 */
-  overflow: auto; /* 允许滚动 */
+  height: 100%;
+  overflow: auto;
 }
 
 
 .middle-column {
   flex: 1;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
   background-color: #eceef8;
-  padding: 20px;
+  padding: 10px 20px 10px 20px;
 }
 
 .top-row {
+  height: 17%;
   margin-bottom: 0;
 }
 
@@ -213,26 +214,27 @@ body {
 }
 
 .middle-row {
+  height: 29%;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
 }
 
 .bottom-row {
+  height: 54%;
   display: block;
   width: 100%;
   gap: 20px;
 }
 
 .right-column {
-  margin-top: 0.8%;
   background-color: #eceef8;
   padding: 10px;
   width: 28%;
   height: 100%;
 }
 .middle-column, .right-column {
-  min-height: 100vh; /* 让内容至少和视口一样高 */
+  min-height: 100%;
 }
 html, body {
   height: 100%;
