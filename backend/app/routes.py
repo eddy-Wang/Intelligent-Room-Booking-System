@@ -37,6 +37,7 @@ def login():
         return create_response('002', 'Email does not exist!')
 
     code = generate_verification_code()
+    print(code)
     send_verification_email(user_email, code)
     verification_codes[user_email] = {'code': code, 'timestamp': time.time()}  # Store code and timestamp
 
@@ -150,6 +151,7 @@ def get_users():
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
 
+
 # Fetch rooms route
 @bp.route('/rooms_id_and_name', methods=['GET'])
 def get_rooms_id_and_name():
@@ -159,6 +161,7 @@ def get_rooms_id_and_name():
         return create_response('000', 'Rooms fetched successfully!', rooms)
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
+
 
 # Fetch bookings route
 @bp.route('/bookings', methods=['GET'])
@@ -281,10 +284,9 @@ def rooms():
     success, data = fetch_room()
 
     if success:
-        return create_response('000',"All room fetched!", data)
+        return create_response('000', "All room fetched!", data)
     else:
         return create_response('001', "No room fetched!", data)
-
 
 
 @bp.route('/rooms', methods=['POST', 'OPTIONS'])
@@ -305,6 +307,7 @@ def getRooms():
         return create_response('000', message)
     else:
         return create_response('002', message)
+
 
 @bp.route('/rooms/<int:room_id>', methods=['PUT'])
 def modify_room_route(room_id):
@@ -342,7 +345,7 @@ def put_room_issue():
     if request.method == 'OPTIONS':
         return '', 200
     data = request.get_json()
-    required_fields = ['room_id','user_email','report_info','user_permission']
+    required_fields = ['room_id', 'user_email', 'report_info', 'user_permission']
 
     for field in required_fields:
         if field not in data:
@@ -355,13 +358,14 @@ def put_room_issue():
     else:
         return create_response('002', message)
 
+
 @bp.route('/room_issue/status', methods=['POST'])
 def modify_room_issue_status():
     if request.method == 'OPTIONS':
         return '', 200
 
     data = request.get_json()
-    required_fields = ['report_id','value']
+    required_fields = ['report_id', 'value']
 
     for field in required_fields:
         if field not in data:
@@ -374,13 +378,14 @@ def modify_room_issue_status():
     else:
         return create_response('002', message)
 
+
 @bp.route('/room_issue/report_info', methods=['POST'])
 def modify_room_issue_report_info():
     if request.method == 'OPTIONS':
         return '', 200
 
     data = request.get_json()
-    required_fields = ['report_id','value']
+    required_fields = ['report_id', 'value']
 
     for field in required_fields:
         if field not in data:
@@ -393,6 +398,7 @@ def modify_room_issue_report_info():
     else:
         return create_response('002', message)
 
+
 # Get all room issue reports
 @bp.route('/room_issue_reports', methods=['GET'])
 def get_reports():
@@ -401,6 +407,7 @@ def get_reports():
         return create_response('000', 'Reports fetched successfully!', reports)
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
+
 
 # Create a new room issue report
 @bp.route('/room_issue_reports', methods=['POST'])
@@ -420,20 +427,22 @@ def create_report():
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
 
+
 # Update a room issue report
 @bp.route('/room_issue_reports/<string:report_id>', methods=['PUT'])
 def update_report(report_id):
     data = request.json
     try:
         if update_room_issue_report(
-            report_id,
-            reviewed=data.get('reviewed'),
+                report_id,
+                reviewed=data.get('reviewed'),
         ):
             return create_response('000', 'Report updated successfully!')
         else:
             return create_response('400', 'Failed to update report.')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
+
 
 # Delete a room issue report
 @bp.route('/room_issue_reports/<string:timestamp>', methods=['DELETE'])
@@ -445,4 +454,3 @@ def delete_report(timestamp):
             return create_response('400', 'Failed to delete report.')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
-

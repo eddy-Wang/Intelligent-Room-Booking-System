@@ -4,11 +4,11 @@
     <div class="nav-container">
       <nav class="bottom-nav">
         <div
-          v-for="(item, index) in navItems"
-          :key="index"
-          class="nav-item"
-          :class="{ active: activeNav === index }"
-          @click="setActiveNav(index)">
+            v-for="(item, index) in navItems"
+            :key="index"
+            class="nav-item"
+            :class="{ active: activeNav === index }"
+            @click="setActiveNav(index)">
           <svg-icon type="mdi" :path="$mdi[item.icon]"></svg-icon>
         </div>
       </nav>
@@ -17,27 +17,24 @@
 </template>
 
 <script>
-import HomeViewMobile from './views/HomeViewMobile.vue';
-import MyReservationMobile from './views/MyReservationMobile.vue';
-import NotificationViewMobile from './views/NotificationViewMobile.vue';
-import SettingsViewMobile from './views/SettingsViewMobile.vue';
+import HomeViewMobile from '@/views/HomeViewMobile.vue';
+import MyReservationMobile from '@/views/MyReservation.vue';
+import RoomRepairMobile from '@/views/RoomRepairMobile.vue';
 
 export default {
   name: 'IndexMobile',
   components: {
     HomeViewMobile,
     MyReservationMobile,
-    NotificationViewMobile,
-    SettingsViewMobile,
+    RoomRepairMobile,
   },
   data() {
     return {
       activeNav: 0,
       navItems: [
-        { icon: 'mdiHomeOutline', component: 'HomeViewMobile' },
-        { icon: 'mdiBellOutline', component: 'NotificationViewMobile' },
-        { icon: 'mdiAccountOutline', component: 'MyReservationMobile' },
-        { icon: 'mdiCogOutline', component: 'SettingsViewMobile' }
+        {icon: 'mdiHomeOutline', component: 'HomeViewMobile'},
+        {icon: 'mdiAccountOutline', component: 'MyReservationMobile'},
+        {icon: 'mdiTools', component: 'RoomRepairMobile'}
       ]
     };
   },
@@ -74,7 +71,6 @@ export default {
   z-index: 1000;
 }
 
-/* 底部导航栏样式 */
 .bottom-nav {
   width: 100%;
   height: 50px;
@@ -85,7 +81,6 @@ export default {
   align-items: center;
 }
 
-/* 导航项 */
 .nav-item {
   height: 100%;
   width: 25%;
@@ -95,7 +90,6 @@ export default {
   transition: all 0.3s ease;
 }
 
-/* 图标大小等比缩放 */
 .nav-item svg {
   padding-top: 10px;
   padding-bottom: 10px;
@@ -104,7 +98,6 @@ export default {
   color: #fff;
 }
 
-/* 活跃状态 */
 .nav-item.active svg {
   color: #000;
   background: url('assets/nav-icon-selected.svg') no-repeat center bottom;

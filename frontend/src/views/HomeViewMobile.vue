@@ -1,11 +1,9 @@
 <template>
   <div class="home-container">
-    <!-- 标题部分 -->
     <div class="title-container">
       <h1><strong>DIICSU</strong></h1>
       <h2><strong>Room Booking System</strong></h2>
     </div>
-    <!-- filter部分 -->
     <div class="filter-container">
       <div class="filter-header">
         Filter
@@ -75,7 +73,6 @@
         </div>
       </div>
     </div>
-    <!-- 房间&信息部分 -->
     <div class="rooms-container">
       <template v-if="filteredRooms.length > 0">
         <div
@@ -101,13 +98,11 @@
         No rooms available.
       </div>
     </div>
-    <!-- time table部分 -->
     <div class="time-table-container" @time-selected="handleTimeSelection">
       <div class="time-table-header">
         Time
       </div>
       <div class="time-table-content">
-        <!-- 日历部分 -->
         <div class="calendar-container">
           <div class="calendar-header">
             <button @click="prevMonth" class="calendar-nav-button">‹</button>
@@ -127,7 +122,6 @@
             </div>
           </div>
         </div>
-        <!-- 时间槽部分 -->
         <div class="time-slots-container">
           <div class="time-slots-grid">
             <button
@@ -143,7 +137,6 @@
       </div>
     </div>
     <hr class="divider-line">
-    <!-- 预定信息部分 -->
     <div class="book-information-container">
       <div class="book-information-content">
         <h2>Book Information</h2>
@@ -180,7 +173,6 @@
         ></textarea>
       </div>
     </div>
-    <!-- Book 按钮：当条件满足时按钮可点击，并应用不同样式 -->
     <button
         class="book-button"
         :class="{ enabled: isBookable }"
@@ -193,9 +185,10 @@
 </template>
 
 <script setup>
-import {ref, computed, watch, onMounted, onBeforeUnmount} from 'vue';
+import {ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance} from 'vue';
 import Vue3Datepicker from 'vue3-datepicker';
 import axios from 'axios';
+
 
 const roomIds = ref([]);
 const bookDate = ref(null);
@@ -204,10 +197,11 @@ const selectedDate = ref(null);
 const selectedSlots = ref([]);
 const roomsData = ref([]);
 const bookingPurpose = ref('');
+const instance = getCurrentInstance();
 onMounted(async () => {
   try {
     const response = await axios.get('http://localhost:8080/allRoom', {
-      params: {permission: 'Student'}
+      params: {permission: instance.appContext.config.globalProperties.$user.permission}
     });
     if (response.data.code === '001') {
       roomsData.value = response.data.data.map(room => {
@@ -293,21 +287,12 @@ const handleFilters = (filters) => {
   roomIds.value = filteredRooms.map(room => room.id);
 };
 
-const handleRoomSelected = (room) => {
-  selectedRoom.value = room;
-};
-const handleRoomUnselected = () => {
-  selectedRoom.value = null;
-  selectedDate.value = null;
-  selectedSlots.value = [];
-};
 
 function handleTimeSelection(date, slots) {
   bookDate.value = date;
   selectedSlots.value = slots;
 }
 
-// 日历和时间表逻辑
 const currentDate = ref(new Date());
 const bookings = ref({});
 const timeSlots = ref(
@@ -626,7 +611,7 @@ async function handleBook() {
     date: formatDate(bookDate.value),
     timeSlots: selectedSlots.value.map(slot => slot.index),
     purpose: bookingPurpose.value,
-    user_email: '2542884@dundee.ac.uk'
+    user_email: instance.appContext.config.globalProperties.$user.email
   };
   try {
     const response = await axios.post('http://localhost:8080/bookRoom', bookingData, {
@@ -650,7 +635,7 @@ async function handleBook() {
 
 </script>
 
-<style>
+<style scoped>
 body {
   font-family: Cambria, serif;
   font-size: 0.9rem;
@@ -949,7 +934,7 @@ body {
   margin-right: 8px;
 }
 
-/* 房间展示样式 */
+
 
 .rooms-container {
   background: #eceef8;

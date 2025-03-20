@@ -43,7 +43,6 @@ import RoomDisplay from '@/components/RoomDisplay.vue';
 
 
 const roomIds = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
-//room status
 const bookDate = ref(null)
 const selectedRoom = ref(null)
 const selectedDate = ref(null)
@@ -56,13 +55,13 @@ provide('childData', childData)
 provide('roomSelected', roomSelected)
 
 provide('bookDate', bookDate)
-provide('bookTimeSlots',bookTimeSlots)
+provide('bookTimeSlots', bookTimeSlots)
 
 const fetchData = async () => {
   try {
     const instance = getCurrentInstance();
     const userPermission = instance.appContext.config.globalProperties.$user.permission;
-    const url = `http://192.168.1.6:8080/allRoom?permission=`+userPermission;
+    const url = `http://192.168.1.6:8080/allRoom?permission=` + userPermission;
     const response = await fetch(url);
     const data = await response.json();
     roomsData.value = data.data;
@@ -171,7 +170,7 @@ const handleRoomUnselected = () => {
 const handleTimeSelection = (date, slots) => {
   bookDate.value = date;
   bookTimeSlots.value = slots;
-  console.log(date,slots)
+  console.log(date, slots)
 };
 </script>
 
