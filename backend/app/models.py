@@ -1,5 +1,4 @@
 from datetime import datetime
-from uuid import uuid1
 
 import mysql.connector
 import ujson
@@ -63,7 +62,7 @@ def get_all_room_data_for_user(permission):
     if result:
         rooms = []
         booking_dict = get_all_booking_records()
-        class_dict = get_all_classes()
+        lesson_dict = get_all_lessons()
         report_dict = get_all_report()
 
         for row in result:
@@ -93,8 +92,7 @@ def get_all_room_data_for_user(permission):
             }
 
             room_data["booking"] = booking_dict.get(room_id, [])
-            # room_data["class"] = class_dict.get(room_id, [])
-            room_data["class"] = []
+            room_data["lesson"] = lesson_dict.get(room_id, [])
             room_data["report"] = report_dict.get(room_id, [])
 
             rooms.append(room_data)
@@ -140,37 +138,35 @@ def get_all_booking_records():
     return booking_dict
 
 
-def get_all_classes():
-    # connection = get_db_connection()
-    # cursor = connection.cursor()
-    #
-    # try:
-    #     query = "SELECT * FROM class"
-    #     cursor.execute(query)
-    #     results = cursor.fetchall()
-    # finally:
-    #     cursor.close()
-    #     connection.close()
-    #
-    # class_dict = {}
-    #
-    # for row in results:
-    #     room_id = row[0]
-    #
-    #     class_record = {
-    #         "class_id": row[1],
-    #         "room_id": room_id,
-    #         "class_name": row[2],
-    #         "teacher": row[3],
-    #         "time": row[4],
-    #     }
-    #
-    #     if room_id not in class_dict:
-    #         class_dict[room_id] = []
-    #     class_dict[room_id].append(class_record)
-    #
-    # return class_dict
-    return {}
+def get_all_lessons():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "SELECT * FROM lesson"
+        cursor.execute(query)
+        results = cursor.fetchall()
+    finally:
+        cursor.close()
+        connection.close()
+
+    lesson_dict = {}
+
+    for row in results:
+        room_id = row[1]
+
+        lesson_record = {
+            "lesson_id": row[0],
+            "room_id": row[1],
+            "date": row[2],
+            "time": row[3],
+        }
+
+        if room_id not in lesson_dict:
+            lesson_dict[room_id] = []
+        lesson_dict[room_id].append(lesson_record)
+
+    return lesson_dict
 
 
 def get_all_report():
@@ -234,9 +230,38 @@ def get_booking_record_of_a_room(room_id):
     return ujson.dumps(booking_records, default=str)
 
 
-# Get class of a room
-def get_class_of_a_room(room_id):
-    return ujson.dumps([], default=str)
+# Get lesson of a room
+def get_lesson_of_a_room(room_id):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "SELECT * FROM lesson WHERE room_id = %s"
+        cursor.execute(query, (room_id,))
+        results = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    class_records = []
+
+    for row in results:
+        lesson_id = row[0]
+        room_id = row[1]
+        date = row[2]
+        time = row[3]
+
+        lesson_record = {
+            "lesson_id": lesson_id,
+            "room_id": room_id,
+            "date": date,
+            "time": time,
+        }
+
+        class_records.append(lesson_record)
+
+    return ujson.dumps(class_records, default=str)
 
 
 def get_room_report(room_id):
@@ -263,7 +288,7 @@ def get_room_report(room_id):
 # Get booking details of a room
 def get_room_detailed(room_id):
     this_room = {"booking": ujson.loads(get_booking_record_of_a_room(room_id)),
-                 "class": ujson.loads(get_class_of_a_room(room_id)),
+                 "lesson": ujson.loads(get_lesson_of_a_room(room_id)),
                  "report": ujson.loads(get_room_report(room_id)),}
 
     print(this_room)
