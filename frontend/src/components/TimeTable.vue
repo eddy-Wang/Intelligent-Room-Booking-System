@@ -2,7 +2,6 @@
   <div class="container">
     <div class="card">
       <div class="card-content">
-        <!-- 日历部分 -->
         <div class="calendar-container">
           <div class="calendar-header">
             <button @click="prevMonth" class="nav-button">‹</button>
@@ -26,7 +25,6 @@
           </div>
         </div>
 
-        <!-- 时间槽部分 -->
         <div class="time-slots-container">
           <div class="time-slots-grid">
             <button
@@ -54,7 +52,6 @@ import {inject} from "vue";
 export default {
   emits: ['time-selected'],
   setup() {
-    // 注入父组件提供的数据
     const childData = inject('childData');
     const lessonData = inject('lessonData');
     const roomSelected = inject('roomSelected')
@@ -68,12 +65,14 @@ export default {
       console.log("old:", oldVal);
       console.log("new:", newVal);
 
+
       // 合并 lessonData 和 childData
       const combinedData = [...newVal, ...this.lessonData];
       console.log("combined:",combinedData)
       this.updateBookings(combinedData);
 
       this.handleDateSelection(); // 更新时间槽状态
+
     },
     roomSelected(newVal, oldVal) {
       console.log("newVal:",newVal)
@@ -87,26 +86,24 @@ export default {
   data() {
     return {
       selectedDate: null,
-      currentDate: new Date(), // 当前显示的月份
-      bookings: {}, // 初始化为空对象，等待 childData 注入
+      currentDate: new Date(),
+      bookings: {},
       timeSlots: Array(12).fill().map((_, index) => ({
         start: ['08:00', '08:55', '10:00', '10:55', '12:00', '12:55', '14:00', '14:55', '16:00', '16:55', '19:00', '19:55'][index],
         end: ['08:45', '09:40', '10:45', '11:40', '12:45', '13:40', '14:45', '15:40', '16:45', '17:40', '19:45', '20:40'][index],
         status: 0
       })),
-      weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] // 英文星期缩写
+      weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     };
   },
 
   computed: {
-    // 当前月份和年份
     currentMonth() {
-      return this.currentDate.toLocaleString('en-US', {month: 'long'}); // 英文月份
+      return this.currentDate.toLocaleString('en-US', {month: 'long'});
     },
     currentYear() {
       return this.currentDate.getFullYear();
     },
-    // 生成当前月份的日期
     daysInMonth() {
       const year = this.currentDate.getFullYear();
       const month = this.currentDate.getMonth();
@@ -117,7 +114,6 @@ export default {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // 填充上个月的日期
       for (let i = firstDay.getDay(); i > 0; i--) {
         const date = new Date(year, month, -i + 1);
         days.push({
@@ -126,7 +122,6 @@ export default {
         });
       }
 
-      // 填充当前月的日期
       for (let i = 1; i <= lastDay.getDate(); i++) {
         const date = new Date(year, month, i);
         days.push({
@@ -135,7 +130,6 @@ export default {
         });
       }
 
-      // 填充下个月的日期
       const nextMonthDays = 7 - (days.length % 7);
       for (let i = 1; i <= nextMonthDays; i++) {
         const date = new Date(year, month + 1, i);
@@ -150,15 +144,12 @@ export default {
   },
 
   methods: {
-    // 上个月
     prevMonth() {
       this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() - 1, 1);
     },
-    // 下个月
     nextMonth() {
       this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 1);
     },
-    // 选择日期
     selectDate(date) {
       const selectedDate = new Date(date);
       const today = new Date();
@@ -171,11 +162,9 @@ export default {
       this.selectedDate = selectedDate;
       this.handleDateSelection();
     },
-    // 判断日期是否被选中
     isSelected(date) {
       return this.selectedDate && this.formatDate(this.selectedDate) === date;
     },
-    // 处理日期选择
     handleDateSelection() {
       if (!this.selectedDate) {
         this.timeSlots = this.timeSlots.map(slot => ({...slot, status: 1}));
@@ -195,7 +184,6 @@ export default {
 
       this.emitSelection();
     },
-    // 切换时间槽状态
     toggleSlot(index) {
       if (!this.selectedDate) return;
 
@@ -213,44 +201,38 @@ export default {
 
       this.emitSelection();
     },
-    // 触发事件
     emitSelection() {
       const selectedSlots = this.timeSlots
           .map((slot, idx) => ({...slot, index: idx}))
           .filter(slot => slot.status === 2);
       this.$emit('time-selected', this.selectedDate, selectedSlots);
     },
-    // 格式化时间
     formatTime(time) {
       const [hours, minutes] = time.split(':');
       return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
     },
-    // 格式化日期
     formatDate(date) {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     },
-    // 将 childData 转换为 bookings 对象
     updateBookings(bookingsArray) {
-      this.bookings = {}; // 清空旧的 bookings
+      this.bookings = {};
 
       bookingsArray.forEach(booking => {
         const date = new Date(booking.date);
-        const timeSlots = booking.time; // 例如 [3, 7]
+        const timeSlots = booking.time;
 
         const dateKey = this.formatDate(date);
 
-        // 初始化当前日期的时间槽，默认全部可用
         if (!this.bookings[dateKey]) {
-          this.bookings[dateKey] = new Array(12).fill(1); // 默认全部可用
+          this.bookings[dateKey] = new Array(12).fill(1);
         }
 
-        // 标记不可用的时间槽
         timeSlots.forEach(slot => {
           if (slot >= 0 && slot < 12) {
-            this.bookings[dateKey][slot] = 0; // 标记为不可用
+            this.bookings[dateKey][slot] = 0;
           }
         });
       });
@@ -260,15 +242,14 @@ export default {
 </script>
 
 <style scoped>
-/* 全局字体 */
 body {
   font-family: 'Cambria', serif;
 }
 
 .container {
-  min-height: 100%;
+  height: 100%;
   width: 100%;
-  padding: 10px;
+  overflow: hidden;
 }
 
 .card {
@@ -283,15 +264,14 @@ body {
 .card-content {
   display: flex;
   flex-grow: 1;
-  height: 100%;
+  height: 90%;
 }
 
-/* 日历部分 */
 .calendar-container {
   max-height: 95%;
   margin-top: 2%;
   width: 50%;
-  padding: 10px;
+  padding: 12px;
 }
 
 .calendar-header {
@@ -342,8 +322,6 @@ body {
   pointer-events: none;
 }
 
-
-/* 时间槽部分 */
 .time-slots-container {
   margin-top: 8%;
   width: 50%;
@@ -389,7 +367,7 @@ body {
   font-size: 25px;
   background-color: #3155ef;
   color: white;
-  height: 20%;
+  height: 10%;
   line-height: 40px;
   text-align: center;
   border-radius: 0 0 8px 8px;

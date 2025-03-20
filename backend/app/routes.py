@@ -6,9 +6,9 @@ from .services import generate_verification_code, send_verification_email, verif
     get_user_reservations, cancel_reservation, fetch_users, fetch_rooms_id_and_name, fetch_bookings, \
     update_booking_status, \
     delete_booking, modify_booking, add_room, modify_room, delete_room, fetch_room, update_room_issue_report, \
-    create_room_issue_report, delete_room_issue_report, get_all_room_issue_reports
+    create_room_issue_report, delete_room_issue_report, get_all_room_issue_reports, sending_booking_email
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
-    get_all_room_data_for_user, add_room_issue, set_room_issue_reviewed, set_room_issue_report_info
+    get_all_room_data_for_user, add_room_issue, set_room_issue_reviewed, set_room_issue_report_info, get_booking_by_id
 
 bp = Blueprint('routes', __name__)
 
@@ -37,6 +37,7 @@ def login():
         return create_response('002', 'Email does not exist!')
 
     code = generate_verification_code()
+    print(code)
     send_verification_email(user_email, code)
     verification_codes[user_email] = {'code': code, 'timestamp': time.time()}  # Store code and timestamp
 
@@ -136,6 +137,14 @@ def cancel_reservation_route():
         return create_response('001', 'Booking ID is required!')
 
     if cancel_reservation(booking_id):
+        this_booking = get_booking_by_id(booking_id)
+        user_email = this_booking.get('user_email')
+        room_id = this_booking.get('room_id')
+        date = this_booking.get('date')
+        booking_time = this_booking.get('time')
+        purpose = this_booking.get('purpose')
+
+        sending_booking_email(user_email, room_id, date, booking_time, 'CancelByUser', purpose)
         return create_response('000', 'Reservation cancelled successfully!')
     else:
         return create_response('002', 'Failed to cancel reservation. It may already be processed or does not exist.')
@@ -150,6 +159,7 @@ def get_users():
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
 
+
 # Fetch rooms route
 @bp.route('/rooms_id_and_name', methods=['GET'])
 def get_rooms_id_and_name():
@@ -159,6 +169,7 @@ def get_rooms_id_and_name():
         return create_response('000', 'Rooms fetched successfully!', rooms)
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
+
 
 # Fetch bookings route
 @bp.route('/bookings', methods=['GET'])
@@ -174,13 +185,20 @@ def get_bookings():
 # Update booking status route
 @bp.route('/bookings/<int:id>', methods=['PUT'])
 def update_booking(id):
-    print(request.json)
     status = request.json.get('status')
     if not status:
         return create_response('400', 'Status is required.')
 
     try:
         update_booking_status(id, status)
+        this_booking = get_booking_by_id(id)
+        user_email = this_booking.get('user_email')
+        room_id = this_booking.get('room_id')
+        date = this_booking.get('date')
+        time = this_booking.get('time')
+        purpose = this_booking.get('purpose')
+
+        sending_booking_email(user_email, room_id, date, time, status, purpose)
         return create_response('000', 'Booking updated successfully!')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
@@ -203,6 +221,13 @@ def modify_booking_route():
     booking_data = request.get_json()
     try:
         modify_booking(booking_data)
+        room_id = booking_data.get('room_id')
+        date = booking_data.get('date')
+        time_slots = booking_data.get('time')
+        purpose = booking_data.get('purpose')
+        user_email = booking_data.get('user_email', 'test@example.com')
+        time_str = ",".join(map(str, time_slots))
+        sending_booking_email(user_email, room_id, date, time_str, 'Modify',purpose)
         return create_response('000', 'Booking updated successfully!')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
@@ -268,6 +293,7 @@ def book_room():
         conn.commit()
         cursor.close()
         conn.close()
+        sending_booking_email(user_email, room_id, date, time_str, status, purpose)
         return create_response('000', 'Booking successful!')
     except Exception as e:
         return create_response('004', f'Booking failed: {str(e)}')
@@ -281,10 +307,9 @@ def rooms():
     success, data = fetch_room()
 
     if success:
-        return create_response('000',"All room fetched!", data)
+        return create_response('000', "All room fetched!", data)
     else:
         return create_response('001', "No room fetched!", data)
-
 
 
 @bp.route('/rooms', methods=['POST', 'OPTIONS'])
@@ -305,6 +330,7 @@ def getRooms():
         return create_response('000', message)
     else:
         return create_response('002', message)
+
 
 @bp.route('/rooms/<int:room_id>', methods=['PUT'])
 def modify_room_route(room_id):
@@ -342,7 +368,7 @@ def put_room_issue():
     if request.method == 'OPTIONS':
         return '', 200
     data = request.get_json()
-    required_fields = ['room_id','user_email','report_info','user_permission']
+    required_fields = ['room_id', 'user_email', 'report_info', 'user_permission']
 
     for field in required_fields:
         if field not in data:
@@ -355,13 +381,14 @@ def put_room_issue():
     else:
         return create_response('002', message)
 
+
 @bp.route('/room_issue/status', methods=['POST'])
 def modify_room_issue_status():
     if request.method == 'OPTIONS':
         return '', 200
 
     data = request.get_json()
-    required_fields = ['report_id','value']
+    required_fields = ['report_id', 'value']
 
     for field in required_fields:
         if field not in data:
@@ -374,13 +401,14 @@ def modify_room_issue_status():
     else:
         return create_response('002', message)
 
+
 @bp.route('/room_issue/report_info', methods=['POST'])
 def modify_room_issue_report_info():
     if request.method == 'OPTIONS':
         return '', 200
 
     data = request.get_json()
-    required_fields = ['report_id','value']
+    required_fields = ['report_id', 'value']
 
     for field in required_fields:
         if field not in data:
@@ -393,6 +421,7 @@ def modify_room_issue_report_info():
     else:
         return create_response('002', message)
 
+
 # Get all room issue reports
 @bp.route('/room_issue_reports', methods=['GET'])
 def get_reports():
@@ -401,6 +430,7 @@ def get_reports():
         return create_response('000', 'Reports fetched successfully!', reports)
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
+
 
 # Create a new room issue report
 @bp.route('/room_issue_reports', methods=['POST'])
@@ -420,20 +450,22 @@ def create_report():
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
 
+
 # Update a room issue report
 @bp.route('/room_issue_reports/<string:report_id>', methods=['PUT'])
 def update_report(report_id):
     data = request.json
     try:
         if update_room_issue_report(
-            report_id,
-            reviewed=data.get('reviewed'),
+                report_id,
+                reviewed=data.get('reviewed'),
         ):
             return create_response('000', 'Report updated successfully!')
         else:
             return create_response('400', 'Failed to update report.')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
+
 
 # Delete a room issue report
 @bp.route('/room_issue_reports/<string:timestamp>', methods=['DELETE'])
@@ -445,4 +477,3 @@ def delete_report(timestamp):
             return create_response('400', 'Failed to delete report.')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
-

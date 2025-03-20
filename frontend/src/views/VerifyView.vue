@@ -29,15 +29,12 @@
               <span class="button-text">VERIFY</span>
             </button>
           </div>
-
-
         </div>
         <div class="back-button-container">
           <button
               @click="handleBack"
               class="back-button"
           >
-            <!--            <FontAwesomeIcon :icon="faArrowLeft" class="back-icon"/>-->
             <FontAwesomeIcon :icon="faBackward" class="back-icon"/>
           </button>
         </div>
@@ -51,12 +48,10 @@
 </template>
 
 <script setup>
-import {ref, computed, onMounted, getCurrentInstance} from 'vue'
+import {ref, computed, getCurrentInstance} from 'vue'
 import {useRouter, useRoute} from 'vue-router'
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
-import {faArrowLeft} from '@fortawesome/free-solid-svg-icons'
 import {faBackward} from '@fortawesome/free-solid-svg-icons';
-import adminIndex from "@/AdminIndex.vue";
 
 const vueInstance = getCurrentInstance()
 
@@ -90,7 +85,7 @@ const handleVerify = async () => {
       }
 
       const data = await response.json();
-      if (data.code==="000") {
+      if (data.code === "000") {
         console.log(data)
         vueInstance.appContext.config.globalProperties.$user.email = data.data.email
         vueInstance.appContext.config.globalProperties.$user.name = data.data.name
@@ -98,16 +93,20 @@ const handleVerify = async () => {
 
         console.log(vueInstance.appContext.config.globalProperties.$user)
 
-        if(userPermission === "Admin"){
-          await router.push({
-          path: "../adminIndex"
-        })
+        if (window.innerWidth <= 768) {
+          if (userPermission === "Admin") {
+            await router.push({path: "../adminIndexMobile"})
+          } else {
+            await router.push({path: "../IndexMobile"})
+          }
+        } else {
+          if (userPermission === "Admin") {
+            await router.push({path: "../adminIndex"})
+          } else {
+            await router.push({path: "../Index"})
+          }
         }
-        else {
-          await router.push({
-          path: "../Index"
-        })
-        }
+
 
       } else {
         alert(data.message)
@@ -136,6 +135,7 @@ body {
 
 
 .app-container {
+  font-family: 'Cambria', serif;
   background: #3155ef;
   display: flex;
   justify-content: space-between;
@@ -151,13 +151,12 @@ body {
 
 .left-content {
   flex: 0 0 50%;
-  padding: 0 4rem;
   position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding-top: 40px;
+  padding: 40px 4rem 0;
 
   .header {
     max-width: 400px;
@@ -229,22 +228,22 @@ body {
     bottom: 1rem;
     margin-left: 20px;
     margin-bottom: 20px;
-    background: none; /* 移除背景 */
-    border: none; /* 移除边框 */
-    padding: 0; /* 移除内边距 */
+    background: none;
+    border: none;
+    padding: 0;
     cursor: pointer;
-    width: auto; /* 自动宽度 */
-    height: auto; /* 自动高度 */
+    width: auto;
+    height: auto;
   }
 
   .back-icon {
-    font-size: 4rem; /* 调整箭头大小 */
-    color: white; /* 箭头颜色 */
+    font-size: 4rem;
+    color: white;
     transition: color 0.3s ease;
   }
 
   .back-button:hover .back-icon {
-    color: rgba(255, 255, 255, 0.8); /* 鼠标悬停时箭头颜色变浅 */
+    color: rgba(255, 255, 255, 0.8);
   }
 
   .button-container {
@@ -276,9 +275,8 @@ body {
     &:before {
       content: '';
       display: block;
-      background: linear-gradient(to left, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.4) 50%);
       background-size: 210% 100%;
-      background-position: right bottom;
+      background: linear-gradient(to left, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.4) 50%) right bottom;
       height: 100%;
       width: 100%;
       position: absolute;
@@ -339,36 +337,17 @@ body {
     position: relative;
   }
 
-  /* 背景图片铺满页面并半透明 */
-  .right-content {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    padding: 0;
-    margin: 0;
-  }
-
-  .diicsu-picture {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.7;
-    border-radius: 0;
-  }
   .header {
     position: static;
     padding: 1rem;
     margin-bottom: 0;
     text-align: center;
   }
-  /* 登录框居中覆盖 */
+
+  /* 将登录框层级调至最高 */
   .left-content {
     position: relative;
-    z-index: 2;
-    //background: rgba(255, 255, 255, 0.9); /* 登录框背景颜色，稍微透明 */
+    z-index: 3;
     padding: 2rem;
     border-radius: 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -378,7 +357,6 @@ body {
     text-align: center;
     top: 50%;
     transform: translateY(-50%);
-
 
     .input-button-container {
       padding: 2rem 2.5rem 2.5rem 2rem;
@@ -396,9 +374,6 @@ body {
       margin-bottom: 2rem;
     }
 
-
-
-
     .input-group {
       margin: 0 auto 1rem;
       width: 100%;
@@ -408,7 +383,6 @@ body {
 
     .verification-input {
       font-size: 0.95rem;
-      //padding: 0.6rem;
       padding: 0.3rem 0 0.3rem 0.3rem;
       width: 60%;
     }
@@ -426,15 +400,15 @@ body {
       height: 30px;
       padding: 1rem 2rem;
       font-size: 1rem;
-      display: flex; /* 使用 flex 布局 */
-      justify-content: center; /* 水平居中 */
-      align-items: center; /* 垂直居中 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .button-disabled {
       opacity: 1;
       cursor: not-allowed;
-      background: rgba(213, 221, 255, 0.8); /* 禁用状态按钮颜色 */
+      background: rgba(213, 221, 255, 0.8);
     }
 
     .back-button-container {
@@ -456,11 +430,42 @@ body {
     }
 
     .back-button:hover .back-icon {
-      color: rgba(49, 85, 239, 0.8); /* 鼠标悬停时箭头颜色变浅 */
+      color: rgba(49, 85, 239, 0.8);
     }
   }
 
+  /* 背景图片铺满页面，并添加黑色半透明蒙版 */
+  .right-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    padding: 0;
+    margin: 0;
+  }
+
+  .right-content::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 2;
+  }
+
+  .diicsu-picture {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.7;
+    border-radius: 0;
+  }
 }
+
 .input-button-container {
   transition: transform 0.5s ease-in-out;
 }

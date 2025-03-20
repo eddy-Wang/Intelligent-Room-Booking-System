@@ -43,7 +43,6 @@ import RoomDisplay from '@/components/RoomDisplay.vue';
 
 
 const roomIds = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
-//room status
 const bookDate = ref(null)
 const selectedRoom = ref(null)
 const selectedDate = ref(null)
@@ -59,7 +58,7 @@ provide('lessonData', lessonData)
 provide('roomSelected', roomSelected)
 
 provide('bookDate', bookDate)
-provide('bookTimeSlots',bookTimeSlots)
+provide('bookTimeSlots', bookTimeSlots)
 
 const fetchData = async () => {
   try {
@@ -177,31 +176,33 @@ const handleRoomUnselected = () => {
 const handleTimeSelection = (date, slots) => {
   bookDate.value = date;
   bookTimeSlots.value = slots;
-  console.log(date,slots)
+  console.log(date, slots)
 };
 </script>
 
-<style>
+<style scoped>
 body {
   font-family: 'Cambria', serif;
 }
 
 .home-container {
   display: flex;
-  align-items: start;
   width: 100%;
   height: 100%;
+  overflow: auto;
 }
+
 
 .middle-column {
   flex: 1;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
   background-color: #eceef8;
-  padding: 20px;
+  padding: 10px 20px 10px 20px;
 }
 
 .top-row {
+  height: 17%;
   margin-bottom: 0;
 }
 
@@ -218,12 +219,14 @@ body {
 }
 
 .middle-row {
+  height: 29%;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
 }
 
 .bottom-row {
+  height: 54%;
   display: block;
   width: 100%;
   gap: 20px;
@@ -235,4 +238,12 @@ body {
   width: 28%;
   height: 100%;
 }
+.middle-column, .right-column {
+  min-height: 100%;
+}
+html, body {
+  height: 100%;
+  overflow: auto;
+}
+
 </style>

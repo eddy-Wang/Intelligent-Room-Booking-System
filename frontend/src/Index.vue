@@ -5,18 +5,20 @@
 
       <div class="nav-items-container">
         <div
-          v-for="(item, index) in navItems"
-          :key="index"
-          class="nav-item"
-          :class="{ active: activeNav === index }"
-          @click="setActiveNav(index)"
+            v-for="(item, index) in navItems"
+            :key="index"
+            class="nav-item"
+            :class="{ active: activeNav === index }"
+            @click="setActiveNav(index)"
         >
           <svg-icon type="mdi" :path="$mdi[item.icon]"></svg-icon>
         </div>
       </div>
-      <div class="bottom-icon"><svg-icon type="mdi" :path="$mdi.mdiExitToApp"></svg-icon></div>
+      <div class="bottom-icon">
+        <svg-icon type="mdi" :path="$mdi.mdiExitToApp"></svg-icon>
+      </div>
     </aside>
-    <component :is="activeComponent" />
+    <component :is="activeComponent"/>
   </div>
 </template>
 
@@ -25,9 +27,10 @@ import HomeView from '@/views/HomeView.vue';
 import MyReservation from '@/views/MyReservation.vue';
 import * as $mdi from "@mdi/js";
 import RoomRepair from "@/views/RoomRepair.vue";
+
 export default {
   name: 'Index',
-  components:{
+  components: {
     HomeView,
     MyReservation,
     RoomRepair,
@@ -37,9 +40,9 @@ export default {
       activeTab: 1,
       activeNav: 0,
       navItems: [
-        { icon: 'mdiHomeOutline',  component: 'HomeView' },
-        { icon: 'mdiAccountOutline', component: 'MyReservation'},
-          { icon: 'mdiBellOutline', component: 'RoomRepair' },
+        {icon: 'mdiHomeOutline', component: 'HomeView'},
+        {icon: 'mdiAccountOutline', component: 'MyReservation'},
+        {icon: 'mdiTools', component: 'RoomRepair'},
       ]
     };
   },
@@ -63,6 +66,7 @@ export default {
 <style scoped>
 
 .index-container {
+  font-family: 'Cambria', serif;
   display: grid;
   grid-template-columns: 80px 1fr;
   height: 100vh;
