@@ -155,8 +155,8 @@ watch(filteredRooms, (newValue, oldValue) => {
 
 .room-info {
   position: absolute;
-  left: 34%;
-  width: 66%;
+  left: 33.5%;
+  width: 66.5%;
   height: 90%;
   background: white;
   border-radius: 12px;
@@ -194,7 +194,7 @@ watch(filteredRooms, (newValue, oldValue) => {
   background: #eceef8;
   width: 100%;
   height: 100%;
-  max-width: 90%;
+  max-width: 89%;
   margin: auto 0;
   display: flex;
   gap: 2%;
