@@ -10,7 +10,7 @@
             @click="handleRoomClick(room)"
         >
           <div class="room-image">
-            <img :src="getImagePath(room.name)" :alt="room.name"/>
+            <img :src="room.image_url" :alt="room.name"/>
           </div>
           <div class="room-name"><strong>{{ room.name }}</strong></div>
         </div>
@@ -29,9 +29,9 @@
         <h2>{{ selectedRoom.name }}</h2>
         <p>Capacity: {{ selectedRoom.capacity }}</p>
         <p>Equipment: {{ selectedRoom.equipment }}</p>
-        <p>Access: {{ selectedRoom.access }}</p>
+        <p>Access: {{  accessMap[selectedRoom.access] }}</p>
         <div v-if="selectedRoom.report && selectedRoom.report.length > 0" class="warning-messages">
-          <div class="warning-message" v-for="(warning, index) in selectedRoom.report.slice(0, 2)" :key="index">
+          <div class="warning-message" v-for="(warning, index) in selectedRoom.report" :key="index">
             Warning {{ index + 1 }}: {{ warning }}
           </div>
         </div>
@@ -56,14 +56,11 @@ const props = defineProps({
     default: () => []
   }
 })
-const getImagePath = (name) => {
-  if (name.startsWith("English Room")) {
-    return new URL(`../assets/english-room.png`, import.meta.url).href;
-  } else {
-    const fileName = name.toLowerCase().replace(/\s+/g, '-');
-    return new URL(`../assets/${fileName}.png`, import.meta.url).href;
-  }
-}
+const accessMap = ref({
+      0: "All",
+      1: "Staff Only",
+      2: "Selected Staff"
+    });
 const filteredRooms = computed(() => {
   return props.rooms.filter(room => props.roomIds.includes(room.id))
 })
@@ -147,7 +144,7 @@ watch(filteredRooms, (newValue, oldValue) => {
 <style scoped>
 .close-btn {
   position: absolute;
-  top: 100px;
+  top: 43%;
   right: 15px;
   font-size: 24px;
   background: none;
@@ -158,14 +155,15 @@ watch(filteredRooms, (newValue, oldValue) => {
 
 .room-info {
   position: absolute;
-  left: 34.5%;
-  width: 65%;
+  left: 34%;
+  width: 66%;
   height: 90%;
   background: white;
   border-radius: 12px;
-  padding: 20px;
+  padding: 10px 20px 10px 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 2;
+  overflow-y: auto;
 }
 
 .warning-message {
@@ -174,8 +172,8 @@ watch(filteredRooms, (newValue, oldValue) => {
   padding: 10px;
   border: 1px solid red;
   border-radius: 5px;
-  margin-top: 10px;
-  max-height: 50%;
+  margin-top: 0.8%;
+  height: 20%;
   max-width: 90%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -189,7 +187,7 @@ watch(filteredRooms, (newValue, oldValue) => {
   position: relative;
   background: #eceef8;
   display: flex;
-  padding: 16px;
+  padding: 16px 0 16px 0;
 }
 
 .rooms-container {
@@ -223,7 +221,7 @@ watch(filteredRooms, (newValue, oldValue) => {
 
 .room-image {
   width: 100%;
-  height: 200px;
+  height: 80%;
   overflow: hidden;
 }
 
@@ -235,6 +233,7 @@ watch(filteredRooms, (newValue, oldValue) => {
 
 .room-name {
   padding: 10px;
+  height: 100%;
   text-align: center;
   font-size: 16px;
   color: #333;
