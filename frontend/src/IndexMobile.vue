@@ -18,7 +18,7 @@
 
 <script>
 import HomeViewMobile from '@/views/HomeViewMobile.vue';
-import MyReservationMobile from '@/views/MyReservation.vue';
+import MyReservationMobile from '@/views/MyReservationMobile.vue';
 import RoomRepairMobile from '@/views/RoomRepairMobile.vue';
 
 export default {
