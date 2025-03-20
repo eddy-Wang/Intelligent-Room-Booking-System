@@ -276,6 +276,7 @@ const processingStateOptions = ['unprocessed', 'processed', 'completed'];
 
 // Fetch rooms from backend API
 const fetchRooms = async () => {
+
   try {
     const response = await fetch('http://172.20.10.3:8080/rooms_id_and_name');
 
@@ -347,6 +348,7 @@ const handleCloseModifyDialog = () => {
 
 
 const saveModifiedBooking = async () => {
+
   try {
     console.log(currentBooking.value)
     const payload = {
@@ -368,6 +370,7 @@ const saveModifiedBooking = async () => {
     console.error('Error updating booking:', error);
     ElMessage.error('Failed to update booking');
   }
+
 };
 const handleUserSelect = (selected) => {
   filters.value.userInput = selected.value.split(' (')[0];
