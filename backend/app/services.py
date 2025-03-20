@@ -97,21 +97,21 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose):
         DIICSU Room Booking Service
         """
     elif status == "Modify":
-            body = f"""
-            Dear User,
+        body = f"""
+        Dear User,
 
-            Administrator has changed your booking details as following. Please check your new booking details.
+        Administrator has changed your booking details as following. Please check your new booking details.
 
-            Booking Details:
-            Room ID: {room_name}
-            Date: {formatted_date}
-            Time: {formatted_time}
-            Purpose: {purpose}
+        Booking Details:
+        Room ID: {room_name}
+        Date: {formatted_date}
+        Time: {formatted_time}
+        Purpose: {purpose}
 
-            If you have any question, please send an email to administrator.
+        If you have any question, please send an email to administrator.
 
-            Best regards,
-            DIICSU Room Booking Service
+        Best regards,
+        DIICSU Room Booking Service
             """
     else:
         body = f"""
@@ -224,6 +224,7 @@ def fetch_rooms_id_and_name():
 
     return rooms
 
+
 def fetch_name_by_id(room_id):
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -332,6 +333,7 @@ def modify_booking(booking_data):
     connection.close()
     return "Booking successfully modified."
 
+
 def add_room(room_data):
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -366,6 +368,7 @@ def add_room(room_data):
         cursor.close()
         connection.close()
 
+
 def modify_room(room_id, room_data):
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -389,7 +392,8 @@ def modify_room(room_id, room_data):
                 UPDATE room SET name=%s, capacity=%s, location=%s, equipment=%s, access=%s, info=%s, image_url=%s
                 WHERE room_id = %s
             """
-        cursor.execute(update_query, (room_name, capacity, location, equipment, access, information,image_url, room_id))
+        cursor.execute(update_query,
+                       (room_name, capacity, location, equipment, access, information, image_url, room_id))
         connection.commit()
 
         return True, 'Room modified successfully!'
@@ -461,6 +465,7 @@ def fetch_room():
         return True, rooms
     return False, None
 
+
 # Get all room issue reports
 def get_all_room_issue_reports():
     connection = get_db_connection()
@@ -487,6 +492,7 @@ def get_all_room_issue_reports():
 
     return reports
 
+
 # Create a new room issue report
 def create_room_issue_report(timestamp, room_id, user_email, reportInfo, reviewed="Unreviewed"):
     connection = get_db_connection()
@@ -507,6 +513,7 @@ def create_room_issue_report(timestamp, room_id, user_email, reportInfo, reviewe
     finally:
         cursor.close()
         connection.close()
+
 
 # Update a room issue report
 def update_room_issue_report(timestamp, reviewed=None):
@@ -536,6 +543,7 @@ def update_room_issue_report(timestamp, reviewed=None):
         cursor.close()
         connection.close()
 
+
 # Delete a room issue report
 def delete_room_issue_report(timestamp):
     connection = get_db_connection()
@@ -554,9 +562,3 @@ def delete_room_issue_report(timestamp):
     finally:
         cursor.close()
         connection.close()
-
-
-
-
-
-
