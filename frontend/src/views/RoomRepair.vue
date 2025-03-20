@@ -106,6 +106,7 @@ onMounted(fetchRoomData);
 
 <style scoped>
 .container {
+  font-family: 'Cambria', serif;
   padding: 20px;
   background-color: #F5F6FA;
   height: 100vh;

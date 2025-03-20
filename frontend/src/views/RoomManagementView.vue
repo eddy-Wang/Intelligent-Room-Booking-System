@@ -465,6 +465,7 @@ export default {
 }
 
 .container {
+  font-family: 'Cambria', serif;
   flex: 1;
   display: flex;
   flex-direction: column;
