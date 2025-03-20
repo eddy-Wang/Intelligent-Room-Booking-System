@@ -4,6 +4,7 @@ from flask_mail import Message
 from mysql.connector import Error
 import socket
 from datetime import datetime
+from dateutil import parser
 
 socket.getfqdn = lambda name=None: "localhost"
 
@@ -34,30 +35,35 @@ def send_verification_email(user_email, code):
 def sending_booking_email(user_email, room_id, date, time, status, purpose):
     """send booking email based on status"""
     subject = "Room Booking Status"
+
+    if user_email is None or room_id is None or purpose is None:
+        print(user_email, room_id, purpose)
+        raise ValueError("Error: Missing essential booking details.")
+
     room_name = fetch_name_by_id(room_id)
 
     time_mapping = {
-        0: '08:00-08:45',
-        1: '08:55-09:40',
-        2: '10:00-10:45',
-        3: '10:55-11:40',
-        4: '12:00-12:45',
-        5: '12:55-13:40',
-        6: '14:00-14:45',
-        7: '14:55-15:40',
-        8: '16:00-16:45',
-        9: '16:55-17:40',
-        10: '19:00-19:45',
-        11: '19:55-20:40',
+        0: '08:00-08:45', 1: '08:55-09:40', 2: '10:00-10:45', 3: '10:55-11:40',
+        4: '12:00-12:45', 5: '12:55-13:40', 6: '14:00-14:45', 7: '14:55-15:40',
+        8: '16:00-16:45', 9: '16:55-17:40', 10: '19:00-19:45', 11: '19:55-20:40'
     }
+
+    if time is None:
+        raise ValueError("Error: Received 'None' for time.")
+
     time = list(map(int, time.split(','))) if isinstance(time, str) else time
     sorted_times = sorted(time)
     time_slots = [time_mapping[time_idx] for time_idx in sorted_times]
-
     formatted_time = ', '.join(time_slots)
 
+    if date is None:
+        raise ValueError("Error: Received 'None' for date.")
+
+    if not isinstance(date, str):
+        date = str(date)
+
     try:
-        date_obj = datetime.fromisoformat(date.replace("Z", "+00:00"))
+        date_obj = parser.parse(date)
         formatted_date = date_obj.strftime('%Y-%m-%d')
     except ValueError:
         formatted_date = date
@@ -96,6 +102,23 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose):
         Best regards,
         DIICSU Room Booking Service
         """
+    elif status == "Declined":
+        body = f"""
+        Dear User,
+
+        Sorry, the administrator has cancelled your booking.
+
+        Booking Details:
+        Room ID: {room_name}
+        Date: {formatted_date}
+        Time: {formatted_time}
+        Purpose: {purpose}
+
+        If you have any question, please send an email to administrator.
+
+        Best regards,
+        DIICSU Room Booking Service
+        """
     elif status == "Modify":
         body = f"""
         Dear User,
@@ -113,6 +136,18 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose):
         Best regards,
         DIICSU Room Booking Service
             """
+    elif status == "CancelByUser":
+        body = f"""
+        Dear User,
+        
+        Your room booking of {room_name} on {formatted_time} during {formatted_time} has been cancelled.
+        
+        Thank you for using booking service.
+        
+        Best regards,
+        DIICSU Room Booking Service
+
+"""
     else:
         body = f"""
         Dear User,
