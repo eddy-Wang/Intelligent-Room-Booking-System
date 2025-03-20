@@ -3,7 +3,6 @@ import string
 from flask_mail import Message
 from mysql.connector import Error
 import socket
-from datetime import datetime
 from dateutil import parser
 
 socket.getfqdn = lambda name=None: "localhost"
@@ -331,25 +330,25 @@ def modify_booking(booking_data):
     time_slots = booking_data["time"]
     purpose = booking_data["purpose"]
     status = booking_data["status"]
-
     query_check = """
     SELECT time
     FROM booking
-    WHERE room_id = %s AND date = %s AND booking_id != %s
+    WHERE room_id = %s AND date = %s
     """
 
-    cursor.execute(query_check, (room_id, date, booking_id))
+    cursor.execute(query_check, (room_id, date))
     existing_bookings = cursor.fetchall()
 
     time_slots_set = set(time_slots)
 
     for existing_time in existing_bookings:
-        existing_time_slots_set = set(map(int, existing_time[0].split(',')))
+        existing_time_slots_set = set(existing_time[0].split(","))
         if time_slots_set & existing_time_slots_set:
-            print(f"Room {room_id} is already booked during the time slots {existing_time_slots_set}.")
+
+            print(f"Room is already booked during the time slots {existing_time_slots_set}.")
             cursor.close()
             connection.close()
-            return "The room is already booked at the specified time."
+            return False, "The room is already booked at the specified time."
 
     query_update = """
     UPDATE booking
@@ -366,7 +365,7 @@ def modify_booking(booking_data):
 
     cursor.close()
     connection.close()
-    return "Booking successfully modified."
+    return True, "Booking successfully modified."
 
 
 def add_room(room_data):
