@@ -203,6 +203,13 @@ def modify_booking_route():
     booking_data = request.get_json()
     try:
         modify_booking(booking_data)
+        room_id = booking_data.get('roomId')
+        room_name = booking_data.get('roomName', '')
+        date = booking_data.get('date')
+        time_slots = booking_data.get('timeSlots')
+        purpose = booking_data.get('purpose')
+        user_email = booking_data.get('user_email', 'test@example.com')
+        sending_booking_email(user_email, room_id, date, time_str, 'Modify',purpose)
         return create_response('000', 'Booking updated successfully!')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
@@ -268,7 +275,7 @@ def book_room():
         conn.commit()
         cursor.close()
         conn.close()
-        sending_booking_email(user_email, room_id, date, time_str, status)
+        sending_booking_email(user_email, room_id, date, time_str, status, purpose)
         return create_response('000', 'Booking successful!')
     except Exception as e:
         return create_response('004', f'Booking failed: {str(e)}')

@@ -31,7 +31,7 @@ def send_verification_email(user_email, code):
         print("Error sending email:", e)
 
 
-def sending_booking_email(user_email, room_id, date, time, status):
+def sending_booking_email(user_email, room_id, date, time, status, purpose):
     """send booking email based on status"""
     subject = "Room Booking Status"
     room_name = fetch_name_by_id(room_id)
@@ -72,6 +72,7 @@ def sending_booking_email(user_email, room_id, date, time, status):
         Room: {room_name}
         Date: {formatted_date}
         Time: {formatted_time}
+        Purpose: {purpose}
 
         Thank you for using booking service.
 
@@ -88,12 +89,30 @@ def sending_booking_email(user_email, room_id, date, time, status):
         Room ID: {room_name}
         Date: {formatted_date}
         Time: {formatted_time}
+        Purpose: {purpose}
 
         Please wait for the administrator's approval.
 
         Best regards,
         DIICSU Room Booking Service
         """
+    elif status == "Modify":
+            body = f"""
+            Dear User,
+
+            Administrator has changed your booking details as following. Please check your new booking details.
+
+            Booking Details:
+            Room ID: {room_name}
+            Date: {formatted_date}
+            Time: {formatted_time}
+            Purpose: {purpose}
+
+            If you have any question, please send an email to administrator.
+
+            Best regards,
+            DIICSU Room Booking Service
+            """
     else:
         body = f"""
         Dear User,
