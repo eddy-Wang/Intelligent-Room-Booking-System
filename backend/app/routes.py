@@ -209,7 +209,8 @@ def modify_booking_route():
         time_slots = booking_data.get('timeSlots')
         purpose = booking_data.get('purpose')
         user_email = booking_data.get('user_email', 'test@example.com')
-        sending_booking_email(user_email, room_id, date, time_slots, 'Modify',purpose)
+        time_str = ",".join(map(str, time_slots))
+        sending_booking_email(user_email, room_id, date, time_str, 'Modify',purpose)
         return create_response('000', 'Booking updated successfully!')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
