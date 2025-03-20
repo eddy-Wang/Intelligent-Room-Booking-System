@@ -171,7 +171,7 @@ const statusOptions = ['Unreviewed', 'Approved', 'Rejected', 'Completed'];
 // Fetch rooms from backend API
 const fetchRooms = async () => {
   try {
-    const response = await fetch('http://172.20.10.3:8080/rooms_id_and_name');
+    const response = await fetch('http://127.0.0.1:8080/rooms_id_and_name');
     if (!response.ok) throw new Error('Failed to fetch rooms');
     const data = await response.json();
     rooms.value = data.data;
@@ -183,7 +183,7 @@ const fetchRooms = async () => {
 // Fetch users from backend API
 const fetchUsers = async () => {
   try {
-    const response = await fetch('http://172.20.10.3:8080/users');
+    const response = await fetch('http://127.0.0.1:8080/users');
     if (!response.ok) throw new Error('Failed to fetch users');
     const data = await response.json();
     users.value = data.data;
@@ -195,14 +195,14 @@ const fetchUsers = async () => {
 // Fetch reports from backend API
 const fetchReports = async () => {
   try {
-    const response = await fetch('http://172.20.10.3:8080/room_issue_reports');
+    const response = await fetch('http://127.0.0.1:8080/room_issue_reports');
     if (!response.ok) throw new Error('Failed to fetch reports');
     const data = await response.json();
-    console.log('Fetched reports:', data); // 调试输出
-    reports.value = Array.isArray(data.data) ? data.data : []; // 确保是数组
+    console.log('Fetched reports:', data);
+    reports.value = Array.isArray(data.data) ? data.data : [];
   } catch (error) {
     console.error('Error fetching reports:', error);
-    reports.value = []; // 遇到错误时设置为空数组
+    reports.value = [];
   }
 };
 
@@ -240,7 +240,7 @@ const filteredReports = computed(() => {
 // Approve report
 const approveReport = async (report) => {
   try {
-    const response = await fetch(`http://172.20.10.3:8080/room_issue_reports/${report.timestamp}`, {
+    const response = await fetch(`http://127.0.0.1:8080/room_issue_reports/${report.timestamp}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({reviewed: 'Approved'}),
@@ -257,7 +257,7 @@ const approveReport = async (report) => {
 // Reject report
 const rejectReport = async (report) => {
   try {
-    const response = await fetch(`http://172.20.10.3:8080/room_issue_reports/${report.timestamp}`, {
+    const response = await fetch(`http://127.0.0.1:8080/room_issue_reports/${report.timestamp}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({reviewed: 'Rejected'}),
@@ -274,7 +274,7 @@ const rejectReport = async (report) => {
 // Complete report
 const completeReport = async (report) => {
   try {
-    const response = await fetch(`http://172.20.10.3:8080/room_issue_reports/${report.timestamp}`, {
+    const response = await fetch(`http://127.0.0.1:8080/room_issue_reports/${report.timestamp}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({reviewed: 'Completed'}),
@@ -291,7 +291,7 @@ const completeReport = async (report) => {
 // Delete report
 const deleteReport = async (report) => {
   try {
-    const response = await fetch(`http://172.20.10.3:8080/room_issue_reports/${report.timestamp}`, {
+    const response = await fetch(`http://127.0.0.1:8080/room_issue_reports/${report.timestamp}`, {
       method: 'DELETE',
     });
     if (!response.ok) throw new Error('Failed to delete report');
@@ -306,7 +306,7 @@ const deleteReport = async (report) => {
 // Submit new report
 const submitNewReport = async () => {
   try {
-    const response = await fetch('http://172.20.10.3:8080/room_issue_reports', {
+    const response = await fetch('http://127.0.0.1:8080/room_issue_reports', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -314,7 +314,7 @@ const submitNewReport = async () => {
         room_id: newReportForm.value.room_id,
         user_email: newReportForm.value.user_email,
         reportInfo: newReportForm.value.reportInfo,
-        reviewed: 'Unreviewed',
+        reviewed: 'Approved',
       }),
     });
     if (!response.ok) throw new Error('Failed to submit report');
