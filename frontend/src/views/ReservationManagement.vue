@@ -267,7 +267,7 @@ const processingStateOptions = ['unprocessed', 'processed', 'completed'];
 // Fetch rooms from backend API
 const fetchRooms = async () => {
     try {
-        const response = await fetch('http://172.20.10.3:8080/rooms_id_and_name');
+        const response = await fetch('http://172.20.10.6:8080/rooms_id_and_name');
 
         if (!response.ok) throw new Error('Failed to fetch rooms');
         const data = await response.json();
@@ -278,7 +278,7 @@ const fetchRooms = async () => {
 };
 const fetchUsers = async () => {
     try {
-        const response = await fetch('http://172.20.10.3:8080/users');
+        const response = await fetch('http://172.20.10.6:8080/users');
         if (!response.ok) throw new Error('Failed to fetch users');
         const data = await response.json();
         users.value = data.data;
@@ -347,7 +347,7 @@ const saveModifiedBooking = async () => {
             time: currentBooking.value.time.sort(),
         };
         console.log(3)
-        const response = await fetch(`http://172.20.10.3:8080/modifyBooking`, {
+        const response = await fetch(`http://172.20.10.6:8080/modifyBooking`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
@@ -386,7 +386,7 @@ const handleDateChange = (date) => {
 // Function to cancel a booking
 const cancelBooking = async (booking_id) => {
     try {
-        const response = await fetch(`http://172.20.10.3:8080/bookings/${booking_id}`, {
+        const response = await fetch(`http://172.20.10.6:8080/bookings/${booking_id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: 'Declined' })
@@ -403,7 +403,7 @@ const cancelBooking = async (booking_id) => {
 // Function to approve a booking
 const approveBooking = async (booking_id) => {
     try {
-        const response = await fetch(`http://172.20.10.3:8080/bookings/${booking_id}`, {
+        const response = await fetch(`http://172.20.10.6:8080/bookings/${booking_id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: 'Confirmed' })
@@ -420,7 +420,7 @@ const approveBooking = async (booking_id) => {
 // Function to reject a booking
 const rejectBooking = async (booking_id) => {
     try {
-        const response = await fetch(`http://172.20.10.3:8080/bookings/${booking_id}`, {
+        const response = await fetch(`http://172.20.10.6:8080/bookings/${booking_id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: 'Declined' })
@@ -437,7 +437,7 @@ const rejectBooking = async (booking_id) => {
 // Function to delete a booking
 const deleteBooking = async (booking_id) => {
     try {
-        const response = await fetch(`http://172.20.10.3:8080/bookings/${booking_id}`, {
+        const response = await fetch(`http://172.20.10.6:8080/bookings/${booking_id}`, {
             method: 'DELETE'
         });
         if (!response.ok) throw new Error('Failed to delete booking');
@@ -494,7 +494,7 @@ const convertTimeStrToTimeSlots = (timeStr) => {
 };
 const fetchBookings = async () => {
     try {
-        const response = await fetch('http://172.20.10.3:8080/bookings');
+        const response = await fetch('http://172.20.10.6:8080/bookings');
         if (!response.ok) throw new Error('Failed to fetch bookings');
         const booking = await response.json();
         const data = booking.data;
