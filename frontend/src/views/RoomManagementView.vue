@@ -356,14 +356,10 @@ export default {
           });
           const data = await response.json();
           if (data.code === '000') {
-            // 找到要删除的房间在 rooms 数组中的索引
             const roomIndex = this.rooms.findIndex(r => r.id === roomId);
             if (roomIndex !== -1) {
-              // 从 rooms 数组中删除该房间
               this.rooms.splice(roomIndex, 1);
             }
-
-            // 如果当前页没有房间了，并且当前页不是第一页，则回到上一页
             if (this.paginatedRooms.length === 0 && this.currentPage > 1) {
               this.currentPage--;
             }
@@ -379,7 +375,7 @@ export default {
         alert("Please select an image to upload");
         return;
       }
-      const maxFileSize = 5 * 1024 * 1024; // 5MB
+      const maxFileSize = 5 * 1024 * 1024;
       if (file.size > maxFileSize) {
         alert("The max size is 5MB");
         return;
@@ -404,21 +400,19 @@ export default {
         if (result.code === 200) {
           const image_url = result.data.url;
           if (this.isModifying) {
-            this.modifiedRoom.image_url = image_url; // 更新修改房间的图片
+            this.modifiedRoom.image_url = image_url;
           } else {
-            this.newRoom.image_url = image_url; // 更新新增房间的图片
+            this.newRoom.image_url = image_url;
           }
           alert("upload successfully");
           this.newRoom.image_url = image_url;
           console.log(this.newRoom.image_url)
           alert("upload successfully");
         } else {
-          // 上传失败
           alert(`error：${result.message || "unknown error"}`);
         }
       } catch (error) {
-        console.error("上传失败：", error);
-        alert("上传失败，请检查网络连接");
+        alert("Upload failed, please check network connection");
       }
     },
 
@@ -713,17 +707,16 @@ input[type="file"] {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  align-items: flex-start; /* 左对齐 */
-  margin-bottom: 15px; /* 增加底部间距 */
+  align-items: flex-start;
+  margin-bottom: 15px;
 }
 
-/* 每个复选框的标签 */
 .equipment-checkboxes label {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.95rem; /* 调整字体大小 */
-  color: #444; /* 字体颜色 */
+  font-size: 0.95rem;
+  color: #444;
   white-space: nowrap;
 }
 
