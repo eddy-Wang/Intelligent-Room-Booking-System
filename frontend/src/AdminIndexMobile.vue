@@ -56,6 +56,7 @@ export default {
   background-color: #eceef8;
   overflow: hidden;
   position: relative;
+  font-family: 'Cambria', serif;
 }
 
 .nav-container {

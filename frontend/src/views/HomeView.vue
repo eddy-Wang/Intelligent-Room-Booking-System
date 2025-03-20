@@ -174,7 +174,7 @@ const handleTimeSelection = (date, slots) => {
 };
 </script>
 
-<style>
+<style scoped>
 body {
   font-family: 'Cambria', serif;
 }

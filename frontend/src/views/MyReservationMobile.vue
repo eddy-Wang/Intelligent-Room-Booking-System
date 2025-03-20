@@ -208,6 +208,7 @@ END:VEVENT
 }
 
 .reservation-container {
+  font-family: 'Cambria', serif;
   display: flex;
   flex-direction: column;
   background-color: #eceef8;

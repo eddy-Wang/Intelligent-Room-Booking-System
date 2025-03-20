@@ -43,6 +43,7 @@ body {
 }
 
 .app-container {
+  font-family: 'Cambria', serif;
   min-height: 100vh;
   background: #3155ef;
   display: flex;
