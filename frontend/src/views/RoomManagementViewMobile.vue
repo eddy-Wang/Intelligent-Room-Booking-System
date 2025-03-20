@@ -39,55 +39,63 @@
         <!-- Add Room Modal -->
         <div v-if="showAddRoomModal" class="modal">
           <div class="modal-content">
-            <h2>New Room</h2>
+            <h2>Add Room</h2>
             <form @submit.prevent="addRoom">
-              <input type="text" placeholder="Room Name" v-model="newRoom.name" required>
-              <input type="number" placeholder="Capacity" v-model="newRoom.capacity" required>
-              <input type="text" placeholder="Location" v-model="newRoom.location" required>
+              <label for="room-name">Room Name:</label>
+              <input type="text" id="room-name" v-model="newRoom.name" required/>
 
-              <div class="equipment-section">
-                <label>Equipment:</label>
-                <div class="equipment-grid">
-                  <label v-for="(val, key) in newRoom.equipment" :key="key">
-                    <input type="checkbox" v-model="newRoom.equipment[key]">
-                    {{ key.replace(/([A-Z])/g, ' $1') }}
-                  </label>
-                </div>
+              <label for="room-capacity">Capacity:</label>
+              <input type="number" id="room-capacity" v-model="newRoom.capacity" required/>
+
+              <label for="room-location">Location:</label>
+              <input type="text" id="room-location" v-model="newRoom.location" required/>
+
+              <label>Equipment:</label>
+              <div class="equipment-checkboxes">
+                <label><input type="checkbox" v-model="newRoom.equipment.Projector"> Projector</label>
+                <label><input type="checkbox" v-model="newRoom.equipment.Whiteboard"> Whiteboard</label>
+                <label><input type="checkbox" v-model="newRoom.equipment.Microphone"> Microphone</label>
+                <label><input type="checkbox" v-model="newRoom.equipment.Computer"> Computer</label>
+                <label><input type="checkbox" v-model="newRoom.equipment.PowerOutlets"> Power Outlets</label>
+                <label><input type="checkbox" v-model="newRoom.equipment.WiFi"> Wi-Fi</label>
               </div>
 
-              <select v-model="newRoom.access" required>
-                <option value="All">Open Access</option>
+              <label for="room-access">Access:</label>
+              <select id="room-access" v-model="newRoom.access" required>
+                <option value="All">All</option>
                 <option value="Staff Only">Staff Only</option>
-                <option value="Selected Staff Only">Restricted Access</option>
+                <option value="Selected Staff Only">Selected Staff Only</option>
               </select>
 
-              <div class="image-upload">
-                <label>Upload Photo:</label>
-                <input
+              <label for="room-image">Image:</label>
+              <input
                   type="file"
+                  id="room-image"
                   @change="handleImageUpload"
                   accept="image/*"
                   required
-                >
-                <div v-if="newRoom.image_url" class="image-preview">
-                  <img :src="newRoom.image_url" alt="Preview">
-                </div>
+                  title="Select room image"
+                  class="custom-file-input"
+              >
+              <div v-if="newRoom.image_url" class="image-preview">
+                <img :src="newRoom.image_url" alt="Current Image" class="preview-img">
               </div>
 
-              <textarea placeholder="Additional information (optional)" v-model="newRoom.information"></textarea>
-
-              <div class="form-actions">
-                <button type="submit" class="confirm">Add Room</button>
-                <button @click="showAddRoomModal = false" class="cancel">Cancel</button>
+              <label for="room-information">Information (optional):</label>
+              <textarea id="room-information" v-model="newRoom.information"></textarea>
+              <div class="room-actions">
+                <button type="submit" class="action-button">Add</button>
+                <button @click="showAddRoomModal = false" class="action-button">Cancel</button>
+          
               </div>
-            </form>
+              </form>
           </div>
         </div>
 
-        <!-- Edit Room Modal -->
+        <!-- Modify Room Modal -->
         <div v-if="showModifyRoomModal" class="modal">
           <div class="modal-content">
-            <h2>Edit Room</h2>
+            <h2>Modify Room</h2>
             <form @submit.prevent="saveModifiedRoom">
               <label for="modify-room-name">Room Name:</label>
               <input type="text" id="modify-room-name" v-model="modifiedRoom.name" required/>
@@ -130,10 +138,12 @@
 
               <label for="modify-room-information">Information (optional):</label>
               <textarea id="modify-room-information" v-model="modifiedRoom.information"></textarea>
-
-              <button type="submit" class="action-button">Save</button>
-              <button @click="showModifyRoomModal = false" class="action-button">Cancel</button>
-            </form>
+              <div class="room-actions">
+                <button type="submit" class="action-button">Save</button>
+                <button @click="showModifyRoomModal = false" class="action-button">Cancel</button>
+            
+              </div>
+              </form>
           </div>
         </div>
       </div>
@@ -147,6 +157,7 @@ export default {
   data() {
     return {
       rooms: [],
+      isModifying: false,
       showAddRoomModal: false,
       showModifyRoomModal: false,
       accessMap: {
@@ -156,7 +167,7 @@ export default {
       },
       newRoom: {
         name: "",
-        capacity: 0,
+        capacity: "",
         location: "",
         equipment: {
           Projector: false,
@@ -410,9 +421,29 @@ export default {
 
 <style scoped>
 .mobile-panel {
-  padding: 15px;
-  max-width: 100%;
-  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: #eceef8;
+  width: 100%;
+  min-height: 200vh;
+  height: 100%;
+  padding: 20px;
+}
+
+.title-container {
+  margin-bottom: 0;
+}
+
+.title-container h1 {
+  margin: 5px;
+  font-size: 2.25rem;
+  font-weight: bold;
+}
+
+.title-container h2 {
+  margin: 5px;
+  font-size: 2.25rem;
+  color: #555;
 }
 
 .add-button {
@@ -423,8 +454,8 @@ export default {
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.2s ease;
-  background: #fff;
-  color: #333;
+  background: #3155ef;
+  color: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -561,6 +592,23 @@ input, select, textarea {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   font-size: 14px;
+}
+
+.equipment-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.equipment-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #444;
+  white-space: nowrap;
 }
 
 .equipment-grid {
