@@ -93,19 +93,19 @@
 
         <div class="card-actions">
           <template v-if="getProcessingState(booking.status) === 'processed'">
-            <el-button size="mini" @click="modifyBooking(booking.booking_id, booking)">
+            <el-button size="mini" @click="modifyBooking(booking.booking_id, booking)" round>
               Edit
             </el-button>
-            <el-button size="mini" type="danger" @click="cancelBooking(booking.booking_id)">
+            <el-button size="mini" @click="cancelBooking(booking.booking_id)" round>
               Cancel
             </el-button>
           </template>
 
           <template v-if="getProcessingState(booking.status) === 'unprocessed'">
-            <el-button size="mini" type="success" @click="approveBooking(booking.booking_id)">
+            <el-button size="mini" @click="approveBooking(booking.booking_id)" round>
               Approve
             </el-button>
-            <el-button size="mini" type="danger" @click="rejectBooking(booking.booking_id)">
+            <el-button size="mini" @click="rejectBooking(booking.booking_id)" round>
               Reject
             </el-button>
           </template>
@@ -115,6 +115,7 @@
               size="mini"
               type="danger"
               @click="deleteBooking(booking.booking_id)"
+              round
           >
             Delete
           </el-button>
@@ -124,112 +125,112 @@
 
     <!-- Modify Dialog -->
     <el-dialog
-    v-model="modifyDialogVisible"
-    title="Modify Booking"
-    fullscreen
-    :before-close="handleCloseModifyDialog"
-  >
-    <el-form
-      :model="currentBooking"
-      label-position="top"
-      class="mobile-form"
+        v-model="modifyDialogVisible"
+        title="Modify Booking"
+        fullscreen
+        :before-close="handleCloseModifyDialog"
     >
-      <!-- User Email -->
-      <el-form-item label="User Email">
-        <el-input
-          v-model="currentBooking.user_email"
-          disabled
-          class="mobile-input"
-        />
-      </el-form-item>
-
-      <!-- Room Selection -->
-      <el-form-item label="Room">
-        <el-select
-          v-model="currentBooking.room_id"
-          placeholder="Select Room"
-          class="mobile-select"
-        >
-          <el-option
-            v-for="room in rooms"
-            :key="room.room_id"
-            :label="room.name"
-            :value="room.room_id"
+      <el-form
+          :model="currentBooking"
+          label-position="top"
+          class="mobile-form"
+      >
+        <!-- User Email -->
+        <el-form-item label="User Email">
+          <el-input
+              v-model="currentBooking.user_email"
+              disabled
+              class="mobile-input"
           />
-        </el-select>
-      </el-form-item>
+        </el-form-item>
 
-      <!-- Purpose -->
-      <el-form-item label="Purpose">
-        <el-input
-          v-model="currentBooking.purpose"
-          class="mobile-input"
-          placeholder="Meeting purpose"
-        />
-      </el-form-item>
+        <!-- Room Selection -->
+        <el-form-item label="Room">
+          <el-select
+              v-model="currentBooking.room_id"
+              placeholder="Select Room"
+              class="mobile-select"
+          >
+            <el-option
+                v-for="room in rooms"
+                :key="room.room_id"
+                :label="room.name"
+                :value="room.room_id"
+            />
+          </el-select>
+        </el-form-item>
 
-      <!-- Date Picker -->
-      <el-form-item label="Date">
-        <el-date-picker
-          v-model="currentBooking.date"
-          type="date"
-          placeholder="Select date"
-          value-format="YYYY-MM-DD"
-          class="mobile-date-picker"
-        />
-      </el-form-item>
-
-      <!-- Time Slots -->
-      <el-form-item label="Time Slots">
-        <el-select
-          v-model="currentBooking.time"
-          multiple
-          placeholder="Select times"
-          class="mobile-multi-select"
-        >
-          <el-option
-            v-for="(timeSlot, index) in timeSlots"
-            :key="index"
-            :label="timeSlot"
-            :value="index.toString()"
+        <!-- Purpose -->
+        <el-form-item label="Purpose">
+          <el-input
+              v-model="currentBooking.purpose"
+              class="mobile-input"
+              placeholder="Meeting purpose"
           />
-        </el-select>
-      </el-form-item>
+        </el-form-item>
 
-      <!-- Status -->
-      <el-form-item label="Status">
-        <el-select
-          v-model="currentBooking.status"
-          placeholder="Select status"
-          class="mobile-select"
-        >
-          <el-option label="Pending" value="Pending"/>
-          <el-option label="Confirmed" value="Confirmed"/>
-          <el-option label="Declined" value="Declined"/>
-          <el-option label="Completed" value="Completed"/>
-          <el-option label="Missed" value="Missed"/>
-        </el-select>
-      </el-form-item>
-    </el-form>
+        <!-- Date Picker -->
+        <el-form-item label="Date">
+          <el-date-picker
+              v-model="currentBooking.date"
+              type="date"
+              placeholder="Select date"
+              value-format="YYYY-MM-DD"
+              class="mobile-date-picker"
+          />
+        </el-form-item>
 
-    <template #footer>
-      <div class="dialog-footer-mobile">
-        <el-button
-          class="footer-button"
-          @click="modifyDialogVisible = false"
-        >
-          Cancel
-        </el-button>
-        <el-button
-          type="primary"
-          class="footer-button"
-          @click="saveModifiedBooking"
-        >
-          Save
-        </el-button>
-      </div>
-    </template>
-  </el-dialog>
+        <!-- Time Slots -->
+        <el-form-item label="Time Slots">
+          <el-select
+              v-model="currentBooking.time"
+              multiple
+              placeholder="Select times"
+              class="mobile-multi-select"
+          >
+            <el-option
+                v-for="(timeSlot, index) in timeSlots"
+                :key="index"
+                :label="timeSlot"
+                :value="index.toString()"
+            />
+          </el-select>
+        </el-form-item>
+
+        <!-- Status -->
+        <el-form-item label="Status">
+          <el-select
+              v-model="currentBooking.status"
+              placeholder="Select status"
+              class="mobile-select"
+          >
+            <el-option label="Pending" value="Pending"/>
+            <el-option label="Confirmed" value="Confirmed"/>
+            <el-option label="Declined" value="Declined"/>
+            <el-option label="Completed" value="Completed"/>
+            <el-option label="Missed" value="Missed"/>
+          </el-select>
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <div class="dialog-footer-mobile">
+          <el-button
+              class="footer-button"
+              @click="modifyDialogVisible = false"
+          >
+            Cancel
+          </el-button>
+          <el-button
+              type="primary"
+              class="footer-button"
+              @click="saveModifiedBooking"
+          >
+            Save
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -599,12 +600,13 @@ onMounted(async () => {
   right: 0;
   background: white;
   padding: 1rem;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   gap: 0.5rem;
   margin-bottom: 50px;
   border-radius: 10px;
 }
+
 .slide-down-enter-active,
 .slide-down-leave-active {
   transition: all 0.3s ease;
@@ -635,6 +637,7 @@ onMounted(async () => {
 .status-missed {
   border-left: 4px solid #909399;
 }
+
 .mobile-form {
   padding: 0 1rem;
 }
@@ -677,6 +680,7 @@ onMounted(async () => {
   padding: 1rem;
   font-size: 1.1rem;
 }
+
 @media (max-width: 480px) {
   .app-title {
     font-size: 1.2rem;

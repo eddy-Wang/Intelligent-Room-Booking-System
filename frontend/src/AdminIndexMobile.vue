@@ -23,6 +23,7 @@ import RoomRepairMobile from '@/views/RoomRepairMobile.vue';
 import RoomManagementViewMobile from "@/views/RoomManagementViewMobile.vue";
 import RoomIssueManagementMobile from "@/views/RoomIssueManagementMobile.vue";
 import ReservationManagementMobile from "@/views/ReservationManagementMobile.vue";
+
 export default {
   name: 'IndexMobile',
   components: {
@@ -40,8 +41,8 @@ export default {
         {icon: 'mdiHomeOutline', component: 'HomeViewMobile'},
         {icon: 'mdiAccountOutline', component: 'MyReservationMobile'},
         {icon: 'mdiTools', component: 'RoomIssueManagementMobile'},
-        {icon: 'mdiClipboardTextOutline', component: 'RoomManagementViewMobile'},
-          {icon: 'mdiApplicationEditOutline', component: 'ReservationManagementMobile'}
+        {icon: 'mdiApplicationEditOutline', component: 'ReservationManagementMobile'},
+        {icon: 'mdiClipboardTextOutline', component: 'RoomManagementViewMobile'}
       ]
     };
   },
