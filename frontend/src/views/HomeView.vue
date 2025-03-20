@@ -51,8 +51,11 @@ const selectedSlots = ref([])
 const bookTimeSlots = ref([])
 const roomsData = ref([])
 const childData = ref([])
+const lessonData = ref([])
 const roomSelected = ref(0)
 provide('childData', childData)
+provide('lessonData', lessonData)
+
 provide('roomSelected', roomSelected)
 
 provide('bookDate', bookDate)
@@ -62,7 +65,7 @@ const fetchData = async () => {
   try {
     const instance = getCurrentInstance();
     const userPermission = instance.appContext.config.globalProperties.$user.permission;
-    const url = `http://192.168.1.6:8080/allRoom?permission=`+userPermission;
+    const url = `http://127.0.0.1:8080/allRoom?permission=`+userPermission;
     const response = await fetch(url);
     const data = await response.json();
     roomsData.value = data.data;
@@ -151,11 +154,14 @@ const handleRoomSelected = async (room) => {
 
     const data = await response.json();
     childData.value = data.data.booking;
+    lessonData.value = data.data.lesson;
     console.log("Received room details:", childData.value);
+    console.log("Received lesson details:", lessonData.value);
 
   } catch (error) {
     console.error("Error fetching room details:", error);
     childData.value = null;
+    lessonData.value = null;
   }
 };
 

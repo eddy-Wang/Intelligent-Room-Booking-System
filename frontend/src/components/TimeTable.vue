@@ -56,17 +56,22 @@ export default {
   setup() {
     // 注入父组件提供的数据
     const childData = inject('childData');
+    const lessonData = inject('lessonData');
     const roomSelected = inject('roomSelected')
 
     return {
-      childData, roomSelected
+      childData, lessonData, roomSelected
     };
   },
   watch: {
     childData(newVal, oldVal) {
       console.log("old:", oldVal);
       console.log("new:", newVal);
-      this.updateBookings(newVal);
+
+      // 合并 lessonData 和 childData
+      const combinedData = [...newVal, ...this.lessonData];
+      console.log("combined:",combinedData)
+      this.updateBookings(combinedData);
       this.handleDateSelection(); // 更新时间槽状态
     },
     roomSelected(newVal, oldVal) {
