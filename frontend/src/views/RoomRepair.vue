@@ -4,7 +4,7 @@
 
     <div class="room-list">
       <div v-for="room in rooms" :key="room.id" class="room-card">
-        <img :src="getImagePath(room.name)" alt="Room Image" class="room-image">
+        <img :src="room.image_url" alt="Room Image" class="room-image">
         <h2 class="room-name">{{ room.name }}</h2>
         <div class="button-container">
           <button @click="openRepairDialog(room)" class="report-button">Report Issue</button>
@@ -53,15 +53,6 @@ const openRepairDialog = (room) => {
   showDialog.value = true;
   reportInfo.value = "";
 };
-
-const getImagePath = (name) => {
-  if (name.startsWith("English Room")) {
-    return new URL(`../assets/english-room.png`, import.meta.url).href;
-  } else {
-    const fileName = name.toLowerCase().replace(/\s+/g, '-');
-    return new URL(`../assets/${fileName}.png`, import.meta.url).href;
-  }
-}
 
 const submitRepair = async () => {
       if (!reportInfo.value) {
