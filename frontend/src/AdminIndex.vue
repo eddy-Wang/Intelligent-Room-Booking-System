@@ -38,7 +38,7 @@ export default {
     MyReservation,
     ReservationManagement,
     RoomManagementView,
-      RoomIssueManagement
+    RoomIssueManagement
   },
   data() {
     return {
@@ -49,7 +49,7 @@ export default {
         {icon: 'mdiApplicationEditOutline', component: 'ReservationManagement'},
         {icon: 'mdiClipboardTextOutline', component: 'RoomManagementView'},
         {icon: 'mdiBookAccountOutline', component: 'RoomIssueManagement'},
-          {icon: 'mdiBookAccountOutline', component: 'RoomIssueManagement'},
+        {icon: 'mdiBookAccountOutline', component: 'RoomIssueManagement'},
       ]
     };
   },

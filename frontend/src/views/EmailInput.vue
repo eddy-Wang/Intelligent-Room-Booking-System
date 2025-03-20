@@ -71,7 +71,7 @@ const handleNext = async () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          email: email.value+"@dundee.ac.uk",
+          email: email.value + "@dundee.ac.uk",
         })
       });
 
@@ -330,8 +330,7 @@ body {
 
   .left-content {
     position: relative;
-    z-index: 2;
-    //background: rgba(255, 255, 255, 0.9); /* 登录框背景颜色，稍微透明 */
+    z-index: 3;
     padding: 2rem;
     border-radius: 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -367,7 +366,6 @@ body {
 
     .email-input {
       font-size: 0.8rem;
-      //padding: 0.6rem;
       padding: 0.3rem 0 0.3rem 0.3rem;
       width: 60%;
     }
@@ -394,14 +392,15 @@ body {
       height: 30px;
       padding: 1rem 2rem;
       font-size: 1rem;
-      display: flex; /* 使用 flex 布局 */
-      justify-content: center; /* 水平居中 */
-      align-items: center; /* 垂直居中 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
+
     .button-disabled {
       opacity: 1;
       cursor: not-allowed;
-      background: rgba(213, 221, 255, 0.8); /* 禁用状态按钮颜色 */
+      background: rgba(213, 221, 255, 0.8);
     }
   }
 
@@ -416,14 +415,26 @@ body {
     margin: 0;
   }
 
+  .right-content::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 2;
+  }
+
   .diicsu-picture {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0.7; /* 半透明效果 */
+    opacity: 0.7;
     border-radius: 0;
   }
 }
+
 
 .input-button-container {
   transition: transform 0.5s ease-in-out;

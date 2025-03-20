@@ -57,13 +57,12 @@ body {
 
 .left-content {
   flex: 0 0 50%;
-  padding: 0 4rem;
   position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding-top: 40px;
+  padding: 40px 4rem 0;
 
   .header {
     max-width: 400px;
@@ -72,10 +71,10 @@ body {
     margin-bottom: 30%;
   }
 
-.header-logo {
+  .header-logo {
     height: 45px;
     width: auto;
-}
+  }
 
   .welcome-text {
     width: 100%;
@@ -103,7 +102,7 @@ body {
   }
 
   .sign-in-button {
-    background-image: linear-gradient(to right, #319efd, #9ed2ff);
+    background-image: linear-gradient(to right, #319efd, #9ed2ff, #319efd);
     box-shadow: 0 4px 15px 0 rgba(41, 44, 225, 0.75);
     border: 0;
     margin: 20px;
@@ -117,38 +116,17 @@ body {
     position: relative;
     cursor: pointer;
     transition: all 0.3s ease;
+  }
 
-    &:before {
-      content: '';
-      display: block;
-      background: linear-gradient(to left, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.4) 50%);
-      background-size: 210% 100%;
-      background-position: right bottom;
-      height: 100%;
-      width: 100%;
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      left: 0;
-      border-radius: 50px;
-      transition: all 1s;
-      -webkit-transition: all 1s;
-    }
+  .sign-in-button:hover {
+    background-image: linear-gradient(to right, #319efd, #7db3ff);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(79, 172, 254, 0.9);
+  }
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 25px rgba(79, 172, 254, 0.9);
-
-      &:before {
-        background-position: left bottom;
-      }
-    }
-
-    &:active {
-      transform: translateY(1px);
-      box-shadow: 0 2px 10px rgba(79, 172, 254, 0.6);
-    }
+  .sign-in-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(79, 172, 254, 0.6);
   }
 }
 
@@ -180,7 +158,7 @@ body {
     padding: 0;
     gap: 0;
     height: 100vh;
-    position:relative;
+    position: relative;
   }
 
   .header {
@@ -193,7 +171,6 @@ body {
   .left-content {
     position: relative;
     z-index: 2;
-    //background: rgba(255, 255, 255, 0.9); /* 登录框背景颜色，稍微透明 */
     padding: 2rem;
     border-radius: 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -238,6 +215,18 @@ body {
     padding: 0;
     margin: 0;
   }
+
+  .right-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 2;
+  }
+
 
   .diicsu-picture {
     width: 100%;
