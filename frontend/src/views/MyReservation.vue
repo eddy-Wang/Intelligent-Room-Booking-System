@@ -247,6 +247,7 @@ body {
 }
 
 .container {
+  font-family: 'Cambria', serif;
   width: 100%;
   height: 80%;
   max-width: 1750px;

@@ -63,7 +63,7 @@ def get_all_room_data_for_user(permission):
     if result:
         rooms = []
         booking_dict = get_all_booking_records()
-        class_dict = get_all_classes()
+
         report_dict = get_all_report()
 
         for row in result:
@@ -142,38 +142,6 @@ def get_all_booking_records():
     return booking_dict
 
 
-def get_all_classes():
-    # connection = get_db_connection()
-    # cursor = connection.cursor()
-    #
-    # try:
-    #     query = "SELECT * FROM class"
-    #     cursor.execute(query)
-    #     results = cursor.fetchall()
-    # finally:
-    #     cursor.close()
-    #     connection.close()
-    #
-    # class_dict = {}
-    #
-    # for row in results:
-    #     room_id = row[0]
-    #
-    #     class_record = {
-    #         "class_id": row[1],
-    #         "room_id": room_id,
-    #         "class_name": row[2],
-    #         "teacher": row[3],
-    #         "time": row[4],
-    #     }
-    #
-    #     if room_id not in class_dict:
-    #         class_dict[room_id] = []
-    #     class_dict[room_id].append(class_record)
-    #
-    # return class_dict
-    return {}
-
 
 def get_all_report():
     connection = get_db_connection()
@@ -201,6 +169,39 @@ def get_all_report():
 
     return report_dict
 
+def get_booking_by_id(booking_id):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    try:
+        query = "SELECT * FROM booking WHERE booking_id = %s"
+        cursor.execute(query, (booking_id,))
+        result = cursor.fetchone()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    booking = {}
+    if result:
+        booking_id = result[0]
+        user_email = result[1]
+        room_id = result[2]
+        date = result[3]
+        time = result[4]
+        purpose = result[5]
+        status = result[6]
+
+        booking = {
+            "booking_id": booking_id,
+            "user_email": user_email,
+            "room_id": room_id,
+            "date": date,
+            "time": time,
+            "purpose": purpose,
+            "status": status,
+
+        }
+    return booking
 
 # Get booking records of a room and return as JSON
 def get_booking_record_of_a_room(room_id):

@@ -3,6 +3,8 @@ import string
 from flask_mail import Message
 from mysql.connector import Error
 import socket
+from datetime import datetime
+from dateutil import parser
 
 socket.getfqdn = lambda name=None: "localhost"
 
@@ -26,6 +28,145 @@ def send_verification_email(user_email, code):
     try:
         mail.send(msg)
         print("Verification email sent successfully.")
+    except Exception as e:
+        print("Error sending email:", e)
+
+
+def sending_booking_email(user_email, room_id, date, time, status, purpose):
+    """send booking email based on status"""
+    subject = "Room Booking Status"
+
+    if user_email is None or room_id is None or purpose is None:
+        print(user_email, room_id, purpose)
+        raise ValueError("Error: Missing essential booking details.")
+
+    room_name = fetch_name_by_id(room_id)
+
+    time_mapping = {
+        0: '08:00-08:45', 1: '08:55-09:40', 2: '10:00-10:45', 3: '10:55-11:40',
+        4: '12:00-12:45', 5: '12:55-13:40', 6: '14:00-14:45', 7: '14:55-15:40',
+        8: '16:00-16:45', 9: '16:55-17:40', 10: '19:00-19:45', 11: '19:55-20:40'
+    }
+
+    if time is None:
+        raise ValueError("Error: Received 'None' for time.")
+
+    time = list(map(int, time.split(','))) if isinstance(time, str) else time
+    sorted_times = sorted(time)
+    time_slots = [time_mapping[time_idx] for time_idx in sorted_times]
+    formatted_time = ', '.join(time_slots)
+
+    if date is None:
+        raise ValueError("Error: Received 'None' for date.")
+
+    if not isinstance(date, str):
+        date = str(date)
+
+    try:
+        date_obj = parser.parse(date)
+        formatted_date = date_obj.strftime('%Y-%m-%d')
+    except ValueError:
+        formatted_date = date
+
+    if status == "Confirmed":
+        body = f"""
+        Dear User,
+
+        Your room booking has been successfully confirmed.
+
+        Booking Details:
+        Room: {room_name}
+        Date: {formatted_date}
+        Time: {formatted_time}
+        Purpose: {purpose}
+
+        Thank you for using booking service.
+
+        Best regards,
+        DIICSU Room Booking Service
+        """
+    elif status == "Pending":
+        body = f"""
+        Dear User,
+
+        We have received your room booking request, and it is currently pending approval.
+
+        Booking Details:
+        Room ID: {room_name}
+        Date: {formatted_date}
+        Time: {formatted_time}
+        Purpose: {purpose}
+
+        Please wait for the administrator's approval.
+
+        Best regards,
+        DIICSU Room Booking Service
+        """
+    elif status == "Declined":
+        body = f"""
+        Dear User,
+
+        Sorry, the administrator has cancelled your booking.
+
+        Booking Details:
+        Room ID: {room_name}
+        Date: {formatted_date}
+        Time: {formatted_time}
+        Purpose: {purpose}
+
+        If you have any question, please send an email to administrator.
+
+        Best regards,
+        DIICSU Room Booking Service
+        """
+    elif status == "Modify":
+        body = f"""
+        Dear User,
+
+        Administrator has changed your booking details as following. Please check your new booking details.
+
+        Booking Details:
+        Room ID: {room_name}
+        Date: {formatted_date}
+        Time: {formatted_time}
+        Purpose: {purpose}
+
+        If you have any question, please send an email to administrator.
+
+        Best regards,
+        DIICSU Room Booking Service
+            """
+    elif status == "CancelByUser":
+        body = f"""
+        Dear User,
+        
+        Your room booking of {room_name} on {formatted_time} during {formatted_time} has been cancelled.
+        
+        Thank you for using booking service.
+        
+        Best regards,
+        DIICSU Room Booking Service
+
+"""
+    else:
+        body = f"""
+        Dear User,
+        
+        There is an error happened with your booking request.
+        
+        Please contact support for assistance.
+
+        Best regards,
+        DIICSU Room Booking Service
+        
+        """
+
+    msg = Message(subject, recipients=[user_email])
+    msg.body = body
+
+    try:
+        mail.send(msg)
+        print("Booking email sent successfully.")
     except Exception as e:
         print("Error sending email:", e)
 
@@ -117,6 +258,18 @@ def fetch_rooms_id_and_name():
         rooms.append(room_data)
 
     return rooms
+
+
+def fetch_name_by_id(room_id):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    query = "SELECT name FROM room where room_id = %s"
+    cursor.execute(query, (room_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    if result is not None:
+        return result[0]
 
 
 # Fetch all bookings from the database
@@ -215,6 +368,7 @@ def modify_booking(booking_data):
     connection.close()
     return "Booking successfully modified."
 
+
 def add_room(room_data):
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -249,6 +403,7 @@ def add_room(room_data):
         cursor.close()
         connection.close()
 
+
 def modify_room(room_id, room_data):
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -272,7 +427,8 @@ def modify_room(room_id, room_data):
                 UPDATE room SET name=%s, capacity=%s, location=%s, equipment=%s, access=%s, info=%s, image_url=%s
                 WHERE room_id = %s
             """
-        cursor.execute(update_query, (room_name, capacity, location, equipment, access, information,image_url, room_id))
+        cursor.execute(update_query,
+                       (room_name, capacity, location, equipment, access, information, image_url, room_id))
         connection.commit()
 
         return True, 'Room modified successfully!'
@@ -344,6 +500,7 @@ def fetch_room():
         return True, rooms
     return False, None
 
+
 # Get all room issue reports
 def get_all_room_issue_reports():
     connection = get_db_connection()
@@ -370,6 +527,7 @@ def get_all_room_issue_reports():
 
     return reports
 
+
 # Create a new room issue report
 def create_room_issue_report(timestamp, room_id, user_email, reportInfo, reviewed="Unreviewed"):
     connection = get_db_connection()
@@ -390,6 +548,7 @@ def create_room_issue_report(timestamp, room_id, user_email, reportInfo, reviewe
     finally:
         cursor.close()
         connection.close()
+
 
 # Update a room issue report
 def update_room_issue_report(timestamp, reviewed=None):
@@ -419,6 +578,7 @@ def update_room_issue_report(timestamp, reviewed=None):
         cursor.close()
         connection.close()
 
+
 # Delete a room issue report
 def delete_room_issue_report(timestamp):
     connection = get_db_connection()
@@ -437,9 +597,3 @@ def delete_room_issue_report(timestamp):
     finally:
         cursor.close()
         connection.close()
-
-
-
-
-
-
