@@ -1,6 +1,9 @@
 <template>
     <div class="booking-management">
-        <h2 class="page-title">Reservation Management</h2>
+        <div class="header">
+            <h2 class="page-title">Reservation Management</h2>
+            <el-button class="new-button" type="primary" @click="openLimitUsageDialog">Limit usage time</el-button>
+        </div>
         <el-card class="custom-card">
             <el-table :data="filteredBookings" border stripe style="width: 100%" class="el-table" >
 
@@ -231,6 +234,58 @@
                 <el-button type="primary" @click="saveModifiedBooking">Save</el-button>
             </template>
         </el-dialog>
+        <!-- Limit Usage Time Dialog -->
+        <el-dialog
+            v-model="limitUsageDialogVisible"
+            title="Limit Usage Time"
+            width="50%"
+            :before-close="handleCloseLimitUsageDialog"
+        >
+            <el-form :model="limitUsageForm" label-width="120px">
+                <!-- Room Name -->
+                <el-form-item label="Room Name">
+                    <el-select v-model="limitUsageForm.room_id" placeholder="Select Room">
+                        <el-option
+                            v-for="room in rooms"
+                            :key="room.room_id"
+                            :label="room.name"
+                            :value="room.room_id"
+                        />
+                    </el-select>
+                </el-form-item>
+
+                <!-- Date -->
+                <el-form-item label="Date">
+                    <el-date-picker
+                        v-model="limitUsageForm.date"
+                        type="date"
+                        placeholder="Select Date"
+                        value-format="YYYY-MM-DD"
+                    />
+                </el-form-item>
+
+                <!-- Time Slots -->
+                <el-form-item label="Time Slots">
+                    <el-select
+                        v-model="limitUsageForm.time"
+                        multiple
+                        placeholder="Select Time Slots"
+                    >
+                        <el-option
+                            v-for="(timeSlot, index) in timeSlots.sort()"
+                            :key="index"
+                            :label="timeSlot"
+                            :value="index.toString()"
+                        />
+                    </el-select>
+                </el-form-item>
+            </el-form>
+
+            <template #footer>
+                <el-button @click="limitUsageDialogVisible = false">Cancel</el-button>
+                <el-button type="primary" @click="submitLimitUsage">Submit</el-button>
+            </template>
+        </el-dialog>
     </div>
 
 </template>
@@ -267,7 +322,7 @@ const processingStateOptions = ['unprocessed', 'processed', 'completed'];
 // Fetch rooms from backend API
 const fetchRooms = async () => {
     try {
-        const response = await fetch('http://172.20.10.3:8080/rooms_id_and_name');
+        const response = await fetch('http://172.20.10.6:8080/rooms_id_and_name');
 
         if (!response.ok) throw new Error('Failed to fetch rooms');
         const data = await response.json();
@@ -278,7 +333,7 @@ const fetchRooms = async () => {
 };
 const fetchUsers = async () => {
     try {
-        const response = await fetch('http://172.20.10.3:8080/users');
+        const response = await fetch('http://172.20.10.6:8080/users');
         if (!response.ok) throw new Error('Failed to fetch users');
         const data = await response.json();
         users.value = data.data;
@@ -341,27 +396,33 @@ const handleCloseModifyDialog = () => {
 
 const saveModifiedBooking = async () => {
     try {
-        console.log(currentBooking.value)
+        console.log(currentBooking.value);
         const payload = {
             ...currentBooking.value,
             time: currentBooking.value.time.sort(),
         };
-        console.log(3)
-        const response = await fetch(`http://172.20.10.3:8080/modifyBooking`, {
+        console.log(3);
+        const response = await fetch(`http://172.20.10.6:8080/modifyBooking`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
         });
-        console.log(payload.date);
-        if (!response.ok) throw new Error('Failed to update booking');
+
+        const responseData = await response.json();
+
+        if (responseData.code !== '001') {
+            throw new Error(responseData.message);
+        }
+
         ElMessage.success('Booking updated successfully');
         modifyDialogVisible.value = false;
         fetchBookings();
     } catch (error) {
         console.error('Error updating booking:', error);
-        ElMessage.error('Failed to update booking');
+        ElMessage.error(error.message || 'Failed to update booking');
     }
 };
+
 const handleUserSelect = (selected) => {
     filters.value.userInput = selected.value.split(' (')[0];
 };
@@ -386,7 +447,7 @@ const handleDateChange = (date) => {
 // Function to cancel a booking
 const cancelBooking = async (booking_id) => {
     try {
-        const response = await fetch(`http://172.20.10.3:8080/bookings/${booking_id}`, {
+        const response = await fetch(`http://172.20.10.6:8080/bookings/${booking_id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: 'Declined' })
@@ -403,7 +464,7 @@ const cancelBooking = async (booking_id) => {
 // Function to approve a booking
 const approveBooking = async (booking_id) => {
     try {
-        const response = await fetch(`http://172.20.10.3:8080/bookings/${booking_id}`, {
+        const response = await fetch(`http://172.20.10.6:8080/bookings/${booking_id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: 'Confirmed' })
@@ -420,7 +481,7 @@ const approveBooking = async (booking_id) => {
 // Function to reject a booking
 const rejectBooking = async (booking_id) => {
     try {
-        const response = await fetch(`http://172.20.10.3:8080/bookings/${booking_id}`, {
+        const response = await fetch(`http://172.20.10.6:8080/bookings/${booking_id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: 'Declined' })
@@ -437,7 +498,7 @@ const rejectBooking = async (booking_id) => {
 // Function to delete a booking
 const deleteBooking = async (booking_id) => {
     try {
-        const response = await fetch(`http://172.20.10.3:8080/bookings/${booking_id}`, {
+        const response = await fetch(`http://172.20.10.6:8080/bookings/${booking_id}`, {
             method: 'DELETE'
         });
         if (!response.ok) throw new Error('Failed to delete booking');
@@ -494,7 +555,7 @@ const convertTimeStrToTimeSlots = (timeStr) => {
 };
 const fetchBookings = async () => {
     try {
-        const response = await fetch('http://172.20.10.3:8080/bookings');
+        const response = await fetch('http://172.20.10.6:8080/bookings');
         if (!response.ok) throw new Error('Failed to fetch bookings');
         const booking = await response.json();
         const data = booking.data;
@@ -558,7 +619,48 @@ const filteredBookings = computed(() => {
         });
     });
 });
+// Limit Usage Time Dialog
+const limitUsageDialogVisible = ref(false);
+const limitUsageForm = ref({
+    room_id: '',
+    date: '',
+    time: [],
+    purpose: 'ban'
+});
 
+// 打开弹窗
+const openLimitUsageDialog = () => {
+    limitUsageDialogVisible.value = true;
+};
+
+// 关闭弹窗
+const handleCloseLimitUsageDialog = () => {
+    limitUsageDialogVisible.value = false;
+};
+
+// 提交限制使用时间
+const submitLimitUsage = async () => {
+    try {
+        const payload = {
+            ...limitUsageForm.value,
+            time: limitUsageForm.value.time.sort(),
+        };
+
+        const response = await fetch('http://172.20.10.6:8080/bookings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) throw new Error('Failed to limit usage time');
+        ElMessage.success('Usage time limited successfully');
+        limitUsageDialogVisible.value = false;
+        fetchBookings(); // 刷新数据
+    } catch (error) {
+        console.error('Error limiting usage time:', error);
+        ElMessage.error('Failed to limit usage time');
+    }
+};
 </script>
 
 <style>
@@ -621,5 +723,20 @@ const filteredBookings = computed(() => {
 .el-table-column{
     width:5%;
 }
+.el-dialog {
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
 
+.el-form-item {
+    margin-bottom: 20px;
+}
+
+.el-select {
+    width: 100%;
+}
+
+.el-date-picker {
+    width: 100%;
+}
 </style>
