@@ -18,7 +18,7 @@
     'selected': isSelected(day.date),
     'disabled': !day.isCurrentMonth || day.isPastDate
   }]"
-                @click="!day.isPastDate && selectDate(day.date)"
+                @click="!day.isPastDate && roomSelected !== 0 && selectDate(day.date)"
             >
               {{ day.day }}
             </div>
@@ -53,20 +53,29 @@ export default {
   emits: ['time-selected'],
   setup() {
     const childData = inject('childData');
+    const lessonData = inject('lessonData');
     const roomSelected = inject('roomSelected')
 
     return {
-      childData, roomSelected
+      childData, lessonData, roomSelected
     };
   },
   watch: {
     childData(newVal, oldVal) {
       console.log("old:", oldVal);
       console.log("new:", newVal);
-      this.updateBookings(newVal);
-      this.handleDateSelection();
+
+
+      // 合并 lessonData 和 childData
+      const combinedData = [...newVal, ...this.lessonData];
+      console.log("combined:",combinedData)
+      this.updateBookings(combinedData);
+
+      this.handleDateSelection(); // 更新时间槽状态
+
     },
     roomSelected(newVal, oldVal) {
+      console.log("newVal:",newVal)
       if (newVal === 0) {
         this.timeSlots.forEach((timeSlot) => {
           timeSlot.status = 0
