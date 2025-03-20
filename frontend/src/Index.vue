@@ -66,6 +66,7 @@ export default {
 <style scoped>
 
 .index-container {
+  font-family: 'Cambria', serif;
   display: grid;
   grid-template-columns: 80px 1fr;
   height: 100vh;

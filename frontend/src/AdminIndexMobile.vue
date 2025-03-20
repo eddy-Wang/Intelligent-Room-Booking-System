@@ -58,6 +58,7 @@ export default {
 .index-container {
   background-color: #eceef8;
   position: relative;
+  font-family: 'Cambria', serif;
 }
 
 .nav-container {

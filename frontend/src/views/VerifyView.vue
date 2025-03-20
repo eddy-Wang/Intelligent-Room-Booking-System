@@ -135,6 +135,7 @@ body {
 
 
 .app-container {
+  font-family: 'Cambria', serif;
   background: #3155ef;
   display: flex;
   justify-content: space-between;

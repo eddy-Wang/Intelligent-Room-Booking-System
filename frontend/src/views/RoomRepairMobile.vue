@@ -93,9 +93,9 @@ function getRoomImage(room) {
     case 3:
       return new URL('@/assets/635---multipurpose-teaching-room.png', import.meta.url).href;
     case 16:
-      return new URL('@/assets/formal-meeting.png', import.meta.url).href;
+      return new URL('@/assets/formal-meeting-room.png', import.meta.url).href;
     case 17:
-      return new URL('@/assets/informal-meeting.png', import.meta.url).href;
+      return new URL('@/assets/informal-meeting-room.png', import.meta.url).href;
     default:
       return new URL('@/assets/english-room.png', import.meta.url).href;
   }
@@ -144,6 +144,7 @@ async function submitRepair() {
 
 <style scoped>
 .home-container {
+  font-family: 'Cambria', serif;
   display: flex;
   flex-direction: column;
   background-color: #eceef8;

@@ -53,6 +53,7 @@ export default {
 
 <style scoped>
 .index-container {
+  font-family: 'Cambria', serif;
   background-color: #eceef8;
   overflow: hidden;
   position: relative;
