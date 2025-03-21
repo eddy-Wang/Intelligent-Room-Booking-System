@@ -273,40 +273,6 @@ def get_lesson_of_a_room(room_id):
     return ujson.dumps(class_records, default=str)
 
 
-# Get lesson of a room
-def get_lesson_of_a_room(room_id):
-    connection = get_db_connection()
-    cursor = connection.cursor()
-
-    try:
-        query = "SELECT * FROM lesson WHERE room_id = %s"
-        cursor.execute(query, (room_id,))
-        results = cursor.fetchall()
-
-    finally:
-        cursor.close()
-        connection.close()
-
-    class_records = []
-
-    for row in results:
-        lesson_id = row[0]
-        room_id = row[1]
-        date = row[2]
-        time = row[3]
-
-        lesson_record = {
-            "lesson_id": lesson_id,
-            "room_id": room_id,
-            "date": date,
-            "time": time,
-        }
-
-        class_records.append(lesson_record)
-
-    return ujson.dumps(class_records, default=str)
-
-
 def get_room_report(room_id):
     connection = get_db_connection()
     cursor = connection.cursor()
