@@ -289,7 +289,7 @@ def fetch_bookings():
             "user_email": row[1],
             "room_id": row[2],
             "date": row[3],
-            "time": row[4],
+            "time": ','.join(sorted(row[4].split(','), key=int)),
             "purpose": row[5],
             "status": row[6]
         }
@@ -330,25 +330,38 @@ def modify_booking(booking_data):
     time_slots = booking_data["time"]
     purpose = booking_data["purpose"]
     status = booking_data["status"]
-    query_check = """
-    SELECT time
-    FROM booking
-    WHERE room_id = %s AND date = %s AND status = 'Confirmed'
-    """
-
-    cursor.execute(query_check, (room_id, date))
-    existing_bookings = cursor.fetchall()
 
     time_slots_set = set(time_slots)
+
+    query_check_booking = """
+    SELECT time
+    FROM booking
+    WHERE room_id = %s AND date = %s AND status = 'Confirmed' AND booking_id != %s
+    """
+    cursor.execute(query_check_booking, (room_id, date, booking_id))
+    existing_bookings = cursor.fetchall()
 
     for existing_time in existing_bookings:
         existing_time_slots_set = set(existing_time[0].split(","))
         if time_slots_set & existing_time_slots_set:
-
-            print(f"Room is already booked during the time slots {existing_time_slots_set}.")
             cursor.close()
             connection.close()
-            return False, "The room is already booked at the specified time."
+            return False, "The room is already booked at the specified time in booking table."
+
+    query_check_lesson = """
+    SELECT time
+    FROM lesson
+    WHERE room_id = %s AND date = %s
+    """
+    cursor.execute(query_check_lesson, (room_id, date))
+    existing_lessons = cursor.fetchall()
+
+    for existing_time in existing_lessons:
+        existing_time_slots_set = set(existing_time[0].split(","))
+        if time_slots_set & existing_time_slots_set:
+            cursor.close()
+            connection.close()
+            return False, "The room is already scheduled for a lesson at the specified time."
 
     query_update = """
     UPDATE booking
@@ -359,7 +372,6 @@ def modify_booking(booking_data):
         status = %s
     WHERE booking_id = %s
     """
-
     cursor.execute(query_update, (room_id, date, ','.join(map(str, time_slots_set)), purpose, status, booking_id))
     connection.commit()
 
