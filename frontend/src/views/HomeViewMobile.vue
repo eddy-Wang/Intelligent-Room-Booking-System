@@ -163,7 +163,6 @@
       </div>
       <div class="book-information-content">
         <h2>Purpose</h2>
-        <!-- 使用 v-model 绑定预定目的 -->
         <textarea
             class="input-box"
             placeholder="Enter purpose..."
@@ -650,6 +649,7 @@ body {
   width: 100%;
   height: 100%;
   padding: 20px;
+  overflow: auto;
 }
 
 .title-container {

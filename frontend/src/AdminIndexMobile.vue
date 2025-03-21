@@ -20,6 +20,9 @@
 import HomeViewMobile from '@/views/HomeViewMobile.vue';
 import MyReservationMobile from '@/views/MyReservationMobile.vue';
 import RoomRepairMobile from '@/views/RoomRepairMobile.vue';
+import RoomManagementViewMobile from "@/views/RoomManagementViewMobile.vue";
+import RoomIssueManagementMobile from "@/views/RoomIssueManagementMobile.vue";
+import ReservationManagementMobile from "@/views/ReservationManagementMobile.vue";
 
 export default {
   name: 'IndexMobile',
@@ -27,6 +30,9 @@ export default {
     HomeViewMobile,
     MyReservationMobile,
     RoomRepairMobile,
+    RoomManagementViewMobile,
+    RoomIssueManagementMobile,
+    ReservationManagementMobile
   },
   data() {
     return {
@@ -34,7 +40,9 @@ export default {
       navItems: [
         {icon: 'mdiHomeOutline', component: 'HomeViewMobile'},
         {icon: 'mdiAccountOutline', component: 'MyReservationMobile'},
-        {icon: 'mdiTools', component: 'RoomRepairMobile'}
+        {icon: 'mdiTools', component: 'RoomIssueManagementMobile'},
+        {icon: 'mdiApplicationEditOutline', component: 'ReservationManagementMobile'},
+        {icon: 'mdiClipboardTextOutline', component: 'RoomManagementViewMobile'}
       ]
     };
   },
@@ -54,7 +62,6 @@ export default {
 <style scoped>
 .index-container {
   background-color: #eceef8;
-  overflow: hidden;
   position: relative;
   font-family: 'Cambria', serif;
 }
