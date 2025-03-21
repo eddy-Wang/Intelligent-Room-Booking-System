@@ -45,9 +45,10 @@ export default {
       activeTab: 1,
       activeNav: 0,
       navItems: [
-         {icon: 'mdiHomeOutline', component: 'HomeView'},
+        {icon: 'mdiHomeOutline', component: 'HomeView'},
+        {icon: 'mdiAccountOutline', component: 'MyReservation'},
         {icon: 'mdiApplicationEditOutline', component: 'ReservationManagement'},
-          {icon: 'mdiTools', component: 'RoomIssueManagement'},
+        {icon: 'mdiTools', component: 'RoomIssueManagement'},
         {icon: 'mdiClipboardTextOutline', component: 'RoomManagementView'},
       ]
     };
