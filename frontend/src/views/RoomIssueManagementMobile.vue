@@ -4,7 +4,7 @@
     <header class="app-header">
       <div class="app-title">
         <h1><strong>DRBS</strong></h1>
-        <h2><strong>Reservation Management</strong></h2>
+        <h2><strong>Room Issue Management</strong></h2>
       </div>
       <el-button
           class="new-issue-button"

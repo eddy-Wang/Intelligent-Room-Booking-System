@@ -259,7 +259,7 @@ def book_room():
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        query_check = "SELECT time FROM booking WHERE room_id = %s AND date = %s"
+        query_check = "SELECT time FROM booking WHERE room_id = %s AND date = %s AND status = 'Confirmed'"
         cursor.execute(query_check, (room_id, date))
         existing_bookings = cursor.fetchall()
 

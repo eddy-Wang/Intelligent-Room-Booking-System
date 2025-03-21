@@ -76,6 +76,10 @@ def get_all_room_data_for_user(permission):
             location = row[5]
             info = row[6]
             image_url = row[7]
+            deleted = row[8]
+
+            if deleted:
+                continue
 
             # Filter based on permission
             if permission == "Student" and access != 0:
@@ -110,7 +114,7 @@ def get_all_booking_records():
     cursor = connection.cursor()
 
     try:
-        query = "SELECT * FROM booking"
+        query = "SELECT * FROM booking WHERE status = 'Confirmed'"
         cursor.execute(query)
         results = cursor.fetchall()
     finally:
@@ -140,7 +144,6 @@ def get_all_booking_records():
         booking_dict[room_id].append(booking_record)
 
     return booking_dict
-
 
 
 def get_all_lessons():
@@ -310,7 +313,7 @@ def get_booking_record_of_a_room(room_id):
     cursor = connection.cursor()
 
     try:
-        query = "SELECT * FROM booking WHERE room_id = %s"
+        query = "SELECT * FROM booking WHERE room_id = %s AND status ='Confirmed'"
         cursor.execute(query, (room_id,))
         results = cursor.fetchall()
     finally:

@@ -171,7 +171,7 @@ END:VEVENT
     async cancelReservation(index) {
       const bookingId = this.reservations[index].booking_id;
       try {
-        const response = await fetch(backendAddress+'/cancel-reservation', {
+        const response = await fetch(this.backendAddress+'/cancel-reservation', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

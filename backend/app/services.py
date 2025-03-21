@@ -139,7 +139,7 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose):
         body = f"""
         Dear User,
         
-        Your room booking of {room_name} on {formatted_time} during {formatted_time} has been cancelled.
+        Your room booking of {room_name} on {formatted_date} during {formatted_time} has been cancelled.
         
         Thank you for using booking service.
         
@@ -333,7 +333,7 @@ def modify_booking(booking_data):
     query_check = """
     SELECT time
     FROM booking
-    WHERE room_id = %s AND date = %s
+    WHERE room_id = %s AND date = %s AND status = 'Confirmed'
     """
 
     cursor.execute(query_check, (room_id, date))

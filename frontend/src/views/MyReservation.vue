@@ -179,7 +179,7 @@ END:VEVENT
       const bookingId = this.reservations[(this.currentPage - 1) * this.itemsPerPage + index].booking_id;
       console.log(this.reservations[index])
       try {
-        const response = await fetch(backendAddress+'/cancel-reservation', {
+        const response = await fetch(this.backendAddress+'/cancel-reservation', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
