@@ -664,12 +664,16 @@ const submitLimitUsage = async () => {
 </script>
 
 <style>
-
+.header {
+    position: static;
+    padding: 1rem;
+    margin-bottom: 0;
+}
 .page-title {
     font-size: 40px;
     font-weight: bold;
     margin-bottom: 20px;
-    padding:10px;
+    padding: 10px;
 }
 .el-table{
     height:700px;
@@ -738,5 +742,13 @@ const submitLimitUsage = async () => {
 
 .el-date-picker {
     width: 100%;
+}
+.el-table-column {
+    width: 5%;
+}
+
+.new-button {
+    width: 10%;
+    height: 50%;
 }
 </style>
