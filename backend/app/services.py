@@ -289,7 +289,7 @@ def fetch_bookings():
             "user_email": row[1],
             "room_id": row[2],
             "date": row[3],
-            "time": row[4],
+            "time": ','.join(sorted(row[4].split(','), key=int)),
             "purpose": row[5],
             "status": row[6]
         }
