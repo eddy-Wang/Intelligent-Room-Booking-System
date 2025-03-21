@@ -29,6 +29,7 @@ app.config.globalProperties.$user = {
   name: '',
   permission: '',
 };
+app.config.globalProperties.$backendAddress = "http://127.0.0.1:8080"
 
 // use vuetify and router
 app.use(vuetify)

@@ -41,6 +41,8 @@ import RoomSearch from "@/components/RoomSearch.vue";
 import TimeTable from '@/components/TimeTable.vue';
 import RoomDisplay from '@/components/RoomDisplay.vue';
 
+const instance = getCurrentInstance()
+const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 
 const roomIds = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
 const bookDate = ref(null)
@@ -64,7 +66,7 @@ const fetchData = async () => {
   try {
     const instance = getCurrentInstance();
     const userPermission = instance.appContext.config.globalProperties.$user.permission;
-    const url = `http://127.0.0.1:8080/allRoom?permission=`+userPermission;
+    const url = backendAddress+`/allRoom?permission=`+userPermission;
     const response = await fetch(url);
     const data = await response.json();
     roomsData.value = data.data;
@@ -145,7 +147,7 @@ const handleRoomSelected = async (room) => {
   selectedRoom.value = room;
   roomSelected.value = 1
   try {
-    const response = await fetch(`http://127.0.0.1:8080/requestRoomDetails?roomId=${room.id}`);
+    const response = await fetch(backendAddress+`/requestRoomDetails?roomId=${room.id}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

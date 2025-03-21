@@ -136,12 +136,13 @@ export default {
 
   setup() {
     let instance = getCurrentInstance()
+    const backendAddress = instance.appContext.config.globalProperties.$backendAddress
     const user_email = instance.appContext.config.globalProperties.$user.email
     const bookDate = inject('bookDate');
     const bookTimeSlots = inject('bookTimeSlots')
 
     return {
-      bookDate, bookTimeSlots, user_email
+      bookDate, bookTimeSlots, user_email, backendAddress
     };
   },
   watch: {
@@ -341,7 +342,7 @@ export default {
         user_email: this.user_email
       };
       try {
-        const response = await axios.post('http://127.0.0.1:8080/bookRoom', bookingData, {
+        const response = await axios.post(this.backendAddress+'/bookRoom', bookingData, {
           headers: {'Content-Type': 'application/json'}
         });
         if (response.data.code === '000') {

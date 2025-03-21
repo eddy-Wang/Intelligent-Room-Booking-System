@@ -159,8 +159,16 @@
   </div>
 </template>
 <script>
+import {getCurrentInstance} from "vue";
+
 export default {
   name: 'RoomManagement',
+  setup() {
+    const instance = getCurrentInstance()
+    const backendAddress = instance.appContext.config.globalProperties.$backendAddress
+
+    return {backendAddress}
+  },
   data() {
     return {
       isModifying: false,
@@ -239,7 +247,7 @@ export default {
     },
     async fetchRoomData() {
       try {
-        const response = await fetch('http://127.0.0.1:8080/getRooms');
+        const response = await fetch(this.backendAddress+'/getRooms');
         const data = await response.json();
         this.rooms = data.data;
       } catch (error) {
@@ -265,7 +273,7 @@ export default {
       };
 
       try {
-        const response = await fetch('http://127.0.0.1:8080/rooms', {
+        const response = await fetch(this.backendAddress+'/rooms', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -323,7 +331,7 @@ export default {
       };
       console.log(this.modifiedRoom.id)
       try {
-        const response = await fetch(`http://127.0.0.1:8080/rooms/${this.modifiedRoom.id}`, {
+        const response = await fetch(this.backendAddress+`/rooms/${this.modifiedRoom.id}`, {
           method: 'PUT',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(room)
@@ -351,7 +359,7 @@ export default {
         const roomId = room.id;
 
         try {
-          const response = await fetch(`http://127.0.0.1:8080/rooms/${roomId}`, {
+          const response = await fetch(this.backendAddress+`/rooms/${roomId}`, {
             method: 'DELETE',
           });
           const data = await response.json();

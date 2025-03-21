@@ -51,12 +51,14 @@
 import {ref, onMounted, computed, getCurrentInstance} from 'vue';
 import axios from 'axios';
 
+const instance = getCurrentInstance()
+const backendAddress = instance.appContext.config.globalProperties.$backendAddress
+
 const selectedRoom = ref(null);
 const roomsData = ref([]);
 const searchQuery = ref('');
 const showRepairDialog = ref(false);
 const repairDescription = ref('');
-const instance = getCurrentInstance();
 
 const filteredRooms = computed(() => {
   const query = searchQuery.value.toLowerCase().replace(/\s+/g, '');
@@ -68,7 +70,7 @@ const filteredRooms = computed(() => {
 
 onMounted(async () => {
   try {
-    const response = await axios.get('http://localhost:8080/allRoom', {
+    const response = await axios.get(backendAddress+'/allRoom', {
       params: {permission: instance.appContext.config.globalProperties.$user.permission}
     });
     if (response.data.code === '001') {
@@ -125,7 +127,7 @@ async function submitRepair() {
   };
 
   try {
-    const response = await axios.put('http://127.0.0.1:8080/room_issue', repairData, {
+    const response = await axios.put(backendAddress+'/room_issue', repairData, {
       headers: {'Content-Type': 'application/json'}
     });
 

@@ -30,17 +30,19 @@
 <script setup>
 import {getCurrentInstance, onMounted, ref} from "vue";
 
+const instance = getCurrentInstance()
+const backendAddress = instance.appContext.config.globalProperties.$backendAddress
+
 const rooms = ref([]);
 const showDialog = ref(false);
 const selectedRoom = ref(null);
 const reportInfo = ref("");
-const instance = getCurrentInstance();
 const userEmail = instance.appContext.config.globalProperties.$user.email;
 const userPermission = instance.appContext.config.globalProperties.$user.permission;
 
 const fetchRoomData = async () => {
   try {
-    const response = await fetch("http://127.0.0.1:8080/getRooms");
+    const response = await fetch(backendAddress+"/getRooms");
     const data = await response.json();
     rooms.value = data.data;
   } catch (error) {
@@ -69,7 +71,7 @@ const submitRepair = async () => {
 
       console.log("Repair data:", repairData);
       try {
-        const response = await fetch("http://127.0.0.1:8080/room_issue", {
+        const response = await fetch(backendAddress+"/room_issue", {
           method: "PUT",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify(repairData),

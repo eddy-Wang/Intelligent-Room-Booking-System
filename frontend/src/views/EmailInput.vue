@@ -46,12 +46,15 @@
 </template>
 
 <script setup>
-import {ref, computed} from 'vue'
+import {ref, computed, getCurrentInstance} from 'vue'
 import {useRouter} from 'vue-router'
 
 const router = useRouter()
 const email = ref('')
 const showError = ref(false)
+
+const instance = getCurrentInstance()
+const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 
 const isValidEmail = computed(() => {
   return email.value.length > 0 && !showError.value
@@ -65,7 +68,7 @@ const validateEmail = () => {
 const handleNext = async () => {
   if (isValidEmail.value) {
     try {
-      const response = await fetch('http://127.0.0.1:8080/login', {
+      const response = await fetch(backendAddress+'/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -166,10 +166,14 @@ export default {
       return this.selectedDate && this.formatDate(this.selectedDate) === date;
     },
     handleDateSelection() {
+      console.log(this.selectedDate)
       if (!this.selectedDate) {
         this.timeSlots = this.timeSlots.map(slot => ({...slot, status: 1}));
+        console.log("return")
         return;
       }
+      console.log("timeSlots",this.timeSlots)
+
 
       const dateKey = this.formatDate(this.selectedDate);
 

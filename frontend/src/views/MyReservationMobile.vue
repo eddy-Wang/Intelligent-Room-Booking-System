@@ -63,6 +63,12 @@ const reverseTimeSlotMap = {
 
 export default {
   name: 'MyReservationMobile',
+  setup() {
+    const instance = getCurrentInstance()
+    const backendAddress = instance.appContext.config.globalProperties.$backendAddress
+
+    return {backendAddress}
+  },
   data() {
     return {
       user: [],
@@ -145,7 +151,7 @@ END:VEVENT
     },
     async fetchReservations() {
       try {
-        const response = await fetch('http://localhost:8080/get-reservations', {
+        const response = await fetch(this.backendAddress+'/get-reservations', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -165,7 +171,7 @@ END:VEVENT
     async cancelReservation(index) {
       const bookingId = this.reservations[index].booking_id;
       try {
-        const response = await fetch('http://localhost:8080/cancel-reservation', {
+        const response = await fetch(backendAddress+'/cancel-reservation', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

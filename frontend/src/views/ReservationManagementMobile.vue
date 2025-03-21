@@ -235,9 +235,12 @@
 </template>
 
 <script setup>
-import {ref, computed, onMounted} from 'vue'
+import {ref, computed, onMounted, getCurrentInstance} from 'vue'
 import {ElButton, ElMessage, ElOption, ElSelect} from 'element-plus'
 import {User, Clock, Document} from '@element-plus/icons-vue'
+
+const instance = getCurrentInstance()
+const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 
 // Reactive state
 const bookings = ref([])
@@ -350,7 +353,7 @@ const formatDate = (dateString) => {
 // Data fetching
 const fetchBookings = async () => {
   try {
-    const response = await fetch('http://127.0.0.1:8080/bookings')
+    const response = await fetch(backendAddress+'/bookings')
     if (!response.ok) throw new Error('Failed to fetch bookings')
     const data = await response.json()
     bookings.value = data.data || []
@@ -361,7 +364,7 @@ const fetchBookings = async () => {
 
 const fetchRooms = async () => {
   try {
-    const response = await fetch('http://127.0.0.1:8080/rooms_id_and_name')
+    const response = await fetch(backendAddress+'/rooms_id_and_name')
     if (!response.ok) throw new Error('Failed to fetch rooms')
     const data = await response.json()
     rooms.value = data.data
@@ -372,7 +375,7 @@ const fetchRooms = async () => {
 
 const fetchUsers = async () => {
   try {
-    const response = await fetch('http://127.0.0.1:8080/users')
+    const response = await fetch(backendAddress+'/users')
     if (!response.ok) throw new Error('Failed to fetch users')
     const data = await response.json()
     users.value = data.data
@@ -402,7 +405,7 @@ const saveModifiedBooking = async () => {
       time: currentBooking.value.time.sort().join(',')
     }
 
-    const response = await fetch('http://127.0.0.1:8080/modifyBooking', {
+    const response = await fetch(backendAddress+'/modifyBooking', {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload)
@@ -419,7 +422,7 @@ const saveModifiedBooking = async () => {
 }
 const cancelBooking = async (booking_id) => {
   try {
-    const response = await fetch(`http://127.0.0.1:8080/bookings/${booking_id}`, {
+    const response = await fetch(backendAddress+`/bookings/${booking_id}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({status: 'Declined'})
@@ -435,7 +438,7 @@ const cancelBooking = async (booking_id) => {
 // Function to approve a booking
 const approveBooking = async (booking_id) => {
   try {
-    const response = await fetch(`http://127.0.0.1:8080/bookings/${booking_id}`, {
+    const response = await fetch(backendAddress+`/bookings/${booking_id}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({status: 'Confirmed'})
@@ -451,7 +454,7 @@ const approveBooking = async (booking_id) => {
 // Function to reject a booking
 const rejectBooking = async (booking_id) => {
   try {
-    const response = await fetch(`http://127.0.0.1:8080/bookings/${booking_id}`, {
+    const response = await fetch(backendAddress+`/bookings/${booking_id}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({status: 'Declined'})
@@ -467,7 +470,7 @@ const rejectBooking = async (booking_id) => {
 // Function to delete a booking
 const deleteBooking = async (booking_id) => {
   try {
-    const response = await fetch(`http://127.0.0.1:8080/bookings/${booking_id}`, {
+    const response = await fetch(backendAddress+`/bookings/${booking_id}`, {
       method: 'DELETE'
     });
     if (!response.ok) throw new Error('Failed to delete booking');

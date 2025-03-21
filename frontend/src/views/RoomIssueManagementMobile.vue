@@ -151,8 +151,11 @@
 </template>
 
 <script setup>
-import {ref, computed, onMounted} from 'vue'
+import {ref, computed, onMounted, getCurrentInstance} from 'vue'
 import {ElMessage} from 'element-plus'
+
+const instance = getCurrentInstance()
+const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 
 // Reactive state
 const reports = ref([])
@@ -177,7 +180,7 @@ onMounted(async () => {
 
 async function fetchRooms() {
   try {
-    const response = await fetch('http://127.0.0.1:8080/rooms_id_and_name')
+    const response = await fetch(backendAddress+'/rooms_id_and_name')
     rooms.value = (await response.json()).data
   } catch (error) {
     ElMessage.error('Failed to load rooms')
@@ -186,7 +189,7 @@ async function fetchRooms() {
 
 async function fetchReports() {
   try {
-    const response = await fetch('http://127.0.0.1:8080/room_issue_reports')
+    const response = await fetch(backendAddress+'/room_issue_reports')
     reports.value = (await response.json()).data || []
   } catch (error) {
     ElMessage.error('Failed to load reports')
@@ -226,7 +229,7 @@ function statusClass(status) {
 // Report actions
 async function updateReportStatus(report, status) {
   try {
-    await fetch(`http://127.0.0.1:8080/room_issue_reports/${report.timestamp}`, {
+    await fetch(backendAddress+`/room_issue_reports/${report.timestamp}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({reviewed: status})
@@ -240,7 +243,7 @@ async function updateReportStatus(report, status) {
 
 async function deleteReport(report) {
   try {
-    await fetch(`http://127.0.0.1:8080/room_issue_reports/${report.timestamp}`, {
+    await fetch(backendAddress+`/room_issue_reports/${report.timestamp}`, {
       method: 'DELETE'
     })
     ElMessage.success('Report deleted')
@@ -252,7 +255,7 @@ async function deleteReport(report) {
 
 async function submitNewReport() {
   try {
-    await fetch('http://127.0.0.1:8080/room_issue_reports', {
+    await fetch(backendAddress+'/room_issue_reports', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({

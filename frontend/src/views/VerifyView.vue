@@ -54,7 +54,7 @@ import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import {faBackward} from '@fortawesome/free-solid-svg-icons';
 
 const vueInstance = getCurrentInstance()
-
+const backendAddress = vueInstance.appContext.config.globalProperties.$backendAddress
 const router = useRouter()
 const route = useRoute()
 const email = route.params.email
@@ -69,7 +69,7 @@ const handleVerify = async () => {
   console.log(email)
   if (isValidCode.value) {
     try {
-      const response = await fetch('http://127.0.0.1:8080/verify-code', {
+      const response = await fetch(backendAddress+'/verify-code', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

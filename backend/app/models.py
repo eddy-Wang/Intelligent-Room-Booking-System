@@ -337,6 +337,41 @@ def get_room_detailed(room_id):
     print(this_room)
     return this_room
 
+
+# Get booking records of a room and return as JSON
+def get_booking_record_of_a_room(room_id):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "SELECT * FROM booking WHERE room_id = %s"
+        cursor.execute(query, (room_id,))
+        results = cursor.fetchall()
+    finally:
+        cursor.close()
+        connection.close()
+
+    booking_records = []
+
+    for row in results:
+        time_str = row[4]
+        time_points = time_str.split(",")
+        time_array = [int(point) for point in time_points if point.strip()]
+
+        booking_record = {
+            "booking_id": row[0],
+            "user_email": row[1],
+            "room_id": row[2],
+            "date": row[3],
+            "time": time_array,
+            "purpose": row[5],
+            "status": row[6],
+        }
+        booking_records.append(booking_record)
+
+    return ujson.dumps(booking_records, default=str)
+
+
 def add_room_issue(room_id, user_email, report_info, user_permission):
     if not report_info or report_info == "":
         return False, "Empty report info."

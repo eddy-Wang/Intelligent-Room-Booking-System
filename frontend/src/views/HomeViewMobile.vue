@@ -188,6 +188,8 @@ import {ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance} fr
 import Vue3Datepicker from 'vue3-datepicker';
 import axios from 'axios';
 
+const instance = getCurrentInstance()
+const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 
 const roomIds = ref([]);
 const bookDate = ref(null);
@@ -196,10 +198,10 @@ const selectedDate = ref(null);
 const selectedSlots = ref([]);
 const roomsData = ref([]);
 const bookingPurpose = ref('');
-const instance = getCurrentInstance();
+
 onMounted(async () => {
   try {
-    const response = await axios.get('http://localhost:8080/allRoom', {
+    const response = await axios.get(backendAddress+'/allRoom', {
       params: {permission: instance.appContext.config.globalProperties.$user.permission}
     });
     if (response.data.code === '001') {
@@ -613,7 +615,7 @@ async function handleBook() {
     user_email: instance.appContext.config.globalProperties.$user.email
   };
   try {
-    const response = await axios.post('http://localhost:8080/bookRoom', bookingData, {
+    const response = await axios.post(backendAddress+'/bookRoom', bookingData, {
       headers: {'Content-Type': 'application/json'}
     });
     if (response.data.code === '000') {
