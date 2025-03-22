@@ -87,188 +87,91 @@
   </div>
 </template>
 
-<script setup>
-import {ref, computed} from 'vue';
+<script>
+import { getCurrentInstance } from 'vue'
 
-//TODO:static data for test
-const testUsers = ref([
-  {
-    user_email: 'user1@example.com',
-    user_name: 'AAA',
-    violation_count: 3,
-    ban_start: '2024-03-01',
-    ban_end: '2024-06-01'
+export default {
+  name: 'BlacklistView',
+  setup() {
+    const instance = getCurrentInstance()
+    const backendAddress = instance.appContext.config.globalProperties.$backendAddress
+    return { backendAddress }
   },
-  {
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
+  data() {
+    return {
+      users: [],
+      filters: {
+        user_email: '',
+        user_name: '',
+        violation_count: null
+      },
+      loading: false,
+      error: null
+    }
   },
-  {
-    user_email: 'user3@example.com',
-    user_name: 'CCC',
-    violation_count: 2,
-    ban_start: '2024-04-01',
-    ban_end: '2024-07-01'
+  computed: {
+    filteredUsers() {
+      return this.users.filter(user => {
+        const emailMatch = user.user_email.toLowerCase().includes(this.filters.user_email.toLowerCase())
+        const nameMatch = user.user_name.toLowerCase().includes(this.filters.user_name.toLowerCase())
+        const countMatch = !this.filters.violation_count ||
+          (user.violation_count !== '' && user.violation_count >= parseInt(this.filters.violation_count))
+        return emailMatch && nameMatch && countMatch
+      })
+    }
   },
-  {
-    user_email: 'tech@example.com',
-    user_name: 'DDD',
-    violation_count: 7,
-    ban_start: '2024-01-10',
-    ban_end: '2024-04-10'
+  methods: {
+    async fetchBadUsers() {
+      this.loading = true
+      try {
+        const resp = await fetch(`${this.backendAddress}/bad_users`)
+        const result = await resp.json()
+        if (result.code === '000') {
+          this.users = (result.data || []).map(row => ({
+            user_email: row[0] || '',
+            user_name: row[1] || '',
+            violation_count: row[2] ?? '',
+            ban_start: '',
+            ban_end: ''
+          }))
+        } else {
+          throw new Error(result.message || 'Unknown error')
+        }
+      } catch (err) {
+        this.error = err.message
+        console.error('Fetch bad users error:', err)
+      } finally {
+        this.loading = false
+      }
+    },
+    queryUsers(queryString, cb) {
+      const results = this.users
+        .filter(u => u.user_email.toLowerCase().includes(queryString.toLowerCase()))
+        .map(u => ({ value: u.user_email }))
+      cb(results)
+    },
+    queryUserNames(queryString, cb) {
+      const results = this.users
+        .filter(u => u.user_name.toLowerCase().includes(queryString.toLowerCase()))
+        .map(u => ({ value: u.user_name }))
+      cb(results)
+    },
+    handleUnban(row) {
+      console.log('Unban user:', row)
+      // TODO: call backend unban endpoint
+    },
+    handleDelete(row) {
+      console.log('Delete record:', row)
+      // TODO: call backend delete endpoint
+    }
   },
-  {
-    user_email: 'support@example.com',
-    user_name: 'EEE',
-    violation_count: 4,
-    ban_start: '2024-03-20',
-    ban_end: '2024-06-20'
-  },
-  {
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  }, {
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  }, {
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  }, {
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  }, {
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  }, {
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  }, {
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  },{
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  },{
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  },{
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  },{
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  },{
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  },{
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  },{
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  },{
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  },{
-    user_email: 'user2@example.com',
-    user_name: 'BBB',
-    violation_count: 5,
-    ban_start: '2024-02-15',
-    ban_end: '2024-05-15'
-  },
-
-]);
-
-const filters = ref({
-  user_email: '',
-  user_name: '',
-  violation_count: null
-});
-
-
-const filteredUsers = computed(() => {
-  return testUsers.value.filter(user => {
-    const emailMatch = user.user_email.toLowerCase().includes(filters.value.user_email.toLowerCase());
-    const nameMatch = user.user_name.toLowerCase().includes(filters.value.user_name.toLowerCase());
-    const countMatch = !filters.value.violation_count ||
-        user.violation_count >= parseInt(filters.value.violation_count);
-
-    return emailMatch && nameMatch && countMatch;
-  });
-});
-
-
-const queryUsers = (queryString, cb) => {
-  const results = testUsers.value
-      .filter(user => user.user_email.toLowerCase().includes(queryString.toLowerCase()))
-      .map(user => ({value: user.user_email}));
-  cb(results);
-};
-
-const queryUserNames = (queryString, cb) => {
-  const results = testUsers.value
-      .filter(user => user.user_name.toLowerCase().includes(queryString.toLowerCase()))
-      .map(user => ({value: user.user_name}));
-  cb(results);
-};
-
-
-const handleUnban = (row) => {
-  console.log('Unban user:', row);
-};
-
-const handleDelete = (row) => {
-  console.log('Delete record:', row);
-};
+  mounted() {
+    this.fetchBadUsers()
+  }
+}
 </script>
+
+
 
 <style scoped>
 .header {
