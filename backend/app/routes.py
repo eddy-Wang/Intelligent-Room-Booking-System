@@ -185,7 +185,15 @@ def get_bookings():
 # Update booking status route
 @bp.route('/bookings/<int:id>', methods=['PUT'])
 def update_booking(id):
-    status = request.json.get('status')
+    data=request.json
+    status = data.get('status')
+
+    message=''
+    if data.get('cancel_reason') is not None:
+        print("cancel reason")
+
+        message = data.get('cancel_reason')
+        print(message)
     if not status:
         return create_response('400', 'Status is required.')
 
@@ -198,7 +206,7 @@ def update_booking(id):
         time = this_booking.get('time')
         purpose = this_booking.get('purpose')
 
-        sending_booking_email(user_email, room_id, date, time, status, purpose)
+        sending_booking_email(user_email, room_id, date, time, status, purpose, message)
         return create_response('000', 'Booking updated successfully!')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')

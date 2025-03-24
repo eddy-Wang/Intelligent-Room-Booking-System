@@ -286,6 +286,28 @@
                 <el-button type="primary" @click="submitLimitUsage">Submit</el-button>
             </template>
         </el-dialog>
+        <!-- Cancel Reason Dialog -->
+        <el-dialog
+            v-model="cancelDialogVisible"
+            title="Cancel Booking"
+            width="50%"
+        >
+            <el-form :model="cancelForm" label-width="120px">
+                <el-form-item label="Reason">
+                    <el-input
+                        v-model="cancelForm.reason"
+                        type="textarea"
+                        :rows="4"
+                        placeholder="Please enter the reason for cancellation"
+                    />
+                </el-form-item>
+            </el-form>
+
+            <template #footer>
+                <el-button @click="cancelDialogVisible = false">Cancel</el-button>
+                <el-button type="primary" @click="confirmCancelBooking">Confirm</el-button>
+            </template>
+        </el-dialog>
     </div>
 
 </template>
@@ -303,8 +325,12 @@ const bookings = ref([]);
 const rooms = ref([]);
 const users = ref([]);
 const filters = ref({ user_email: [], room_id: [], date: [], time: [], status: [], permission: [], processing_state: [] });
-
-// Time slots mapping
+// Cancel dialog related data
+const cancelDialogVisible = ref(false);
+const cancelForm = ref({
+    booking_id: null,
+    reason: ''
+});// Time slots mapping
 const reverseTimeSlotMap = {
     0: '08:00-08:45',
     1: '08:55-09:45',
@@ -447,23 +473,36 @@ const handleDateChange = (date) => {
     console.log('Selected Date:', date);
     console.log('Current Booking Date:', currentBooking.value.date);
 };
-// Function to cancel a booking
+// Function to show cancel dialog
 const cancelBooking = async (booking_id) => {
+    cancelForm.value = {
+        booking_id: booking_id,
+        reason: ''
+    };
+    cancelDialogVisible.value = true;
+};
+// Function to confirm cancellation with reason
+const confirmCancelBooking = async () => {
     try {
-        const response = await fetch(backendAddress+`/bookings/${booking_id}`, {
+        const response = await fetch(backendAddress+`/bookings/${cancelForm.value.booking_id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: 'Declined' })
+            body: JSON.stringify({
+                status: 'Declined',
+                cancel_reason: cancelForm.value.reason
+            })
         });
+        console.log(cancelForm.value.reason)
         if (!response.ok) throw new Error('Failed to cancel booking');
+
         ElMessage.success('Booking canceled successfully');
+        cancelDialogVisible.value = false;
         fetchBookings(); // Refresh data
     } catch (error) {
         console.error('Error canceling booking:', error);
-        ElMessage.error('Failed to cancel booking');
+        ElMessage.error(error.message || 'Failed to cancel booking');
     }
 };
-
 // Function to approve a booking
 const approveBooking = async (booking_id) => {
     try {
