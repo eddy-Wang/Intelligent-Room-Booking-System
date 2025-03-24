@@ -399,25 +399,24 @@ def get_bad_user_list():
     cursor = connection.cursor()
 
     try:
-        query = "SELECT user_email, status FROM booking WHERE status = \"Missed\""
+        query = "SELECT user_email, name, added_at, missed_time FROM user_blacklist LEFT JOIN users ON user_blacklist.user_email = users.email"
         cursor.execute(query)
         res = cursor.fetchall()
-
-        hash_map = {}
-
-        for record in res:
-            if record[0] in hash_map:
-                hash_map[record[0]] += 1
-            else:
-                hash_map[record[0]] = 1
-
         ret = []
 
-        for (key, value) in hash_map.items():
-            if value > 0:
-                cursor.execute("SELECT email, name FROM users WHERE email = \""+key+"\"")
-                tmp = cursor.fetchone()
-                ret.append((tmp[0],tmp[1],value))
+        for item in res:
+            email = item[0]
+            name = item[1]
+            db_time = item[2]
+            missed_time = item[3]
+
+            result = {
+                "user_email": email,
+                "user_name": name,
+                "added_at": db_time,
+                "missed_time": missed_time
+            }
+            ret.append(result)
 
         return True, ret
 
@@ -432,7 +431,7 @@ def reset_missed_times_for_user(user_email):
     cursor = connection.cursor()
 
     try:
-        query = "UPDATE booking SET status = \"Completed\" WHERE user_email = %s and status = \"Missed\""
+        query = "DELETE FROM user_blacklist WHERE user_email = %s"
         cursor.execute(query, (user_email,))
         connection.commit()
 
@@ -442,6 +441,7 @@ def reset_missed_times_for_user(user_email):
     finally:
         cursor.close()
         connection.close()
+
 
 if __name__ == '__main__':
     get_room_detailed(1)
