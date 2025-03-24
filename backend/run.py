@@ -12,7 +12,7 @@ def run_crawler_periodically():
         time.sleep(180)
 
 if __name__ == '__main__':
-    # 只有在实际运行的子进程中启动定时任务线程
+    # only run crawler in the subprocess that is actually running
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         threading.Thread(target=run_crawler_periodically, daemon=True).start()
     app.run(host="0.0.0.0", port=8080)
