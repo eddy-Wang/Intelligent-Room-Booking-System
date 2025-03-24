@@ -394,5 +394,54 @@ def set_room_issue_report_info(report_id, value):
         cursor.close()
         connection.close()
 
+def get_bad_user_list():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "SELECT user_email, status FROM booking WHERE status = \"Missed\""
+        cursor.execute(query)
+        res = cursor.fetchall()
+
+        hash_map = {}
+
+        for record in res:
+            if record[0] in hash_map:
+                hash_map[record[0]] += 1
+            else:
+                hash_map[record[0]] = 1
+
+        ret = []
+
+        for (key, value) in hash_map.items():
+            if value > 0:
+                cursor.execute("SELECT email, name FROM users WHERE email = \""+key+"\"")
+                tmp = cursor.fetchone()
+                ret.append((tmp[0],tmp[1],value))
+
+        return True, ret
+
+    except Error as e:
+        return False, str(e)
+    finally:
+        cursor.close()
+        connection.close()
+
+def reset_missed_times_for_user(user_email):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "UPDATE booking SET status = \"Completed\" WHERE user_email = %s and status = \"Missed\""
+        cursor.execute(query, (user_email,))
+        connection.commit()
+
+        return True, "Reset successfully!"
+    except Error as e:
+        return False, str(e)
+    finally:
+        cursor.close()
+        connection.close()
+
 if __name__ == '__main__':
     get_room_detailed(1)

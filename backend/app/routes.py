@@ -8,7 +8,8 @@ from .services import generate_verification_code, send_verification_email, verif
     delete_booking, modify_booking, add_room, modify_room, delete_room, fetch_room, update_room_issue_report, \
     create_room_issue_report, delete_room_issue_report, get_all_room_issue_reports, sending_booking_email
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
-    get_all_room_data_for_user, add_room_issue, set_room_issue_reviewed, set_room_issue_report_info, get_booking_by_id
+    get_all_room_data_for_user, add_room_issue, set_room_issue_reviewed, set_room_issue_report_info, get_booking_by_id, \
+    get_bad_user_list, reset_missed_times_for_user
 
 bp = Blueprint('routes', __name__)
 
@@ -488,3 +489,27 @@ def delete_report(timestamp):
             return create_response('400', 'Failed to delete report.')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
+
+@bp.route('/bad_users', methods=['GET'])
+def get_bad_users():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    resBool, resData = get_bad_user_list()
+
+    if resBool:
+        return create_response('000',"Get bad users successfully!",resData)
+    else:
+        return create_response('500',"Error: "+resData)
+
+@bp.route('/reset_missed_times/<string:user_email>', methods=['GET'])
+def reset_missed_times(user_email):
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    resBool, resData = reset_missed_times_for_user(user_email)
+
+    if resBool:
+        return create_response('000',resData)
+    else:
+        return create_response('500',"Error: "+resData)
