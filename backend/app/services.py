@@ -31,12 +31,11 @@ def send_verification_email(user_email, code):
         print("Error sending email:", e)
 
 
-def sending_booking_email(user_email, room_id, date, time, status, purpose):
+def sending_booking_email(user_email, room_id, date, time, status, purpose, message=''):
     """send booking email based on status"""
     subject = "Room Booking Status"
 
     if user_email is None or room_id is None or purpose is None:
-        print(user_email, room_id, purpose)
         raise ValueError("Error: Missing essential booking details.")
 
     room_name = fetch_name_by_id(room_id)
@@ -54,6 +53,7 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose):
     sorted_times = sorted(time)
     time_slots = [time_mapping[time_idx] for time_idx in sorted_times]
     formatted_time = ', '.join(time_slots)
+
 
     if date is None:
         raise ValueError("Error: Received 'None' for date.")
@@ -106,6 +106,7 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose):
         Dear User,
 
         Sorry, the administrator has cancelled your booking.
+        Reason: {message}
 
         Booking Details:
         Room ID: {room_name}
@@ -294,7 +295,6 @@ def fetch_bookings():
             "status": row[6]
         }
         bookings.append(booking_data)
-    print(bookings)
     return bookings
 
 
