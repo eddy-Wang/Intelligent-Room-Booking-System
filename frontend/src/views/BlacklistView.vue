@@ -58,7 +58,7 @@
             <div class="action-buttons">
               <el-button
                   size="small"
-                  @click="handleUnban(row)"
+                  @click="handleRelease(row)"
               >
                 Release
               </el-button>
@@ -101,13 +101,18 @@ export default {
     }
   },
   methods: {
-    convertTime(gmtTimeString) {
+    convertTime(gmtTimeString, addDays = 0) {
       if (!gmtTimeString) return '';
 
       const gmtDate = new Date(gmtTimeString);
       if (isNaN(gmtDate.getTime())) {
         console.error('invalid date :', gmtTimeString);
         return 'invalid date';
+      }
+
+      // Add days if specified
+      if (addDays > 0) {
+        gmtDate.setDate(gmtDate.getDate() + addDays);
       }
 
       return new Intl.DateTimeFormat('zh-CN', {
@@ -134,7 +139,7 @@ export default {
             user_name: row.user_name || '',
             missed_time: row.missed_time ?? 0,
             ban_start: this.convertTime(row.added_at) || '',
-            ban_end: row.ban_end || ''
+            ban_end: this.convertTime(row.added_at, 30) || '' // Add 30 days here
           }))
         } else {
           throw new Error(result.message || 'Unknown error')
@@ -158,10 +163,65 @@ export default {
           .map(u => ({value: u.user_name}))
       cb(results)
     },
-    handleUnban(row) {
-      console.log('Unban user:', row)
-      // TODO: call backend unban endpoint
-    },
+    async handleRelease(row) {
+      try {
+        // Confirm with the user before releasing
+        const confirmResult = await this.$confirm(
+            `Are you sure you want to release ${row.user_email} from the blacklist?`,
+            'Confirm Release',
+            {
+              confirmButtonText: 'Release',
+              cancelButtonText: 'Cancel',
+              type: 'warning'
+            }
+        ).catch(() => {
+          // User clicked cancel
+          return false;
+        });
+
+        if (!confirmResult) return;
+
+        // Show loading
+        const loadingInstance = this.$loading({
+          lock: true,
+          text: 'Releasing user...',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+
+        // Call the API
+        const response = await fetch(
+            `${this.backendAddress}/reset_missed_times/${encodeURIComponent(row.user_email)}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }
+        );
+
+        const result = await response.json();
+
+        if (result.code === '000') {
+          this.$message({
+            message: 'User released successfully!',
+            type: 'success'
+          });
+          // Refresh the list
+          await this.fetchBadUsers();
+        } else {
+          throw new Error(result.message || 'Failed to release user');
+        }
+      } catch (error) {
+        this.$message({
+          message: error.message || 'An error occurred while releasing the user',
+          type: 'error'
+        });
+        console.error('Release error:', error);
+      } finally {
+        // Hide loading
+        this.$loading().close();
+      }
+    }
   },
   mounted() {
     this.fetchBadUsers()
