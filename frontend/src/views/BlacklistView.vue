@@ -43,17 +43,7 @@
         </el-table-column>
 
         <!-- Violation Count Column -->
-        <el-table-column class="el-table-column" label="remarks" prop="violation_count" sortable>
-          <template #header>
-            <div class="filter-header">
-              <span class="header-label">Remarks</span>
-              <el-select v-model="filters.violation_count" placeholder="Filter" clearable>
-                <el-option label="≥3" value="3"/>
-                <el-option label="≥5" value="5"/>
-                <el-option label="≥10" value="10"/>
-              </el-select>
-            </div>
-          </template>
+        <el-table-column class="el-table-column" label="Missed Time" prop="missed_time" sortable>
         </el-table-column>
 
         <!-- Ban Start Time -->
@@ -72,13 +62,6 @@
               >
                 Release
               </el-button>
-              <el-button
-                  size="small"
-                  type="danger"
-                  @click="handleDelete(row)"
-              >
-                Delete
-              </el-button>
             </div>
           </template>
         </el-table-column>
@@ -88,14 +71,14 @@
 </template>
 
 <script>
-import { getCurrentInstance } from 'vue'
+import {getCurrentInstance} from 'vue'
 
 export default {
   name: 'BlacklistView',
   setup() {
     const instance = getCurrentInstance()
     const backendAddress = instance.appContext.config.globalProperties.$backendAddress
-    return { backendAddress }
+    return {backendAddress}
   },
   data() {
     return {
@@ -103,7 +86,6 @@ export default {
       filters: {
         user_email: '',
         user_name: '',
-        violation_count: null
       },
       loading: false,
       error: null
@@ -114,13 +96,33 @@ export default {
       return this.users.filter(user => {
         const emailMatch = user.user_email.toLowerCase().includes(this.filters.user_email.toLowerCase())
         const nameMatch = user.user_name.toLowerCase().includes(this.filters.user_name.toLowerCase())
-        const countMatch = !this.filters.violation_count ||
-          (user.violation_count !== '' && user.violation_count >= parseInt(this.filters.violation_count))
-        return emailMatch && nameMatch && countMatch
+        return emailMatch && nameMatch
       })
     }
   },
   methods: {
+    convertTime(gmtTimeString) {
+      if (!gmtTimeString) return '';
+
+      const gmtDate = new Date(gmtTimeString);
+      if (isNaN(gmtDate.getTime())) {
+        console.error('invalid date :', gmtTimeString);
+        return 'invalid date';
+      }
+
+      return new Intl.DateTimeFormat('zh-CN', {
+        timeZone: 'Asia/Shanghai',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      }).format(gmtDate);
+    },
+
+
     async fetchBadUsers() {
       this.loading = true
       try {
@@ -128,11 +130,11 @@ export default {
         const result = await resp.json()
         if (result.code === '000') {
           this.users = (result.data || []).map(row => ({
-            user_email: row[0] || '',
-            user_name: row[1] || '',
-            violation_count: row[2] ?? '',
-            ban_start: '',
-            ban_end: ''
+            user_email: row.user_email || '',
+            user_name: row.user_name || '',
+            missed_time: row.missed_time ?? 0,
+            ban_start: this.convertTime(row.added_at) || '',
+            ban_end: row.ban_end || ''
           }))
         } else {
           throw new Error(result.message || 'Unknown error')
@@ -146,31 +148,26 @@ export default {
     },
     queryUsers(queryString, cb) {
       const results = this.users
-        .filter(u => u.user_email.toLowerCase().includes(queryString.toLowerCase()))
-        .map(u => ({ value: u.user_email }))
+          .filter(u => u.user_email.toLowerCase().includes(queryString.toLowerCase()))
+          .map(u => ({value: u.user_email}))
       cb(results)
     },
     queryUserNames(queryString, cb) {
       const results = this.users
-        .filter(u => u.user_name.toLowerCase().includes(queryString.toLowerCase()))
-        .map(u => ({ value: u.user_name }))
+          .filter(u => u.user_name.toLowerCase().includes(queryString.toLowerCase()))
+          .map(u => ({value: u.user_name}))
       cb(results)
     },
     handleUnban(row) {
       console.log('Unban user:', row)
       // TODO: call backend unban endpoint
     },
-    handleDelete(row) {
-      console.log('Delete record:', row)
-      // TODO: call backend delete endpoint
-    }
   },
   mounted() {
     this.fetchBadUsers()
   }
 }
 </script>
-
 
 
 <style scoped>
