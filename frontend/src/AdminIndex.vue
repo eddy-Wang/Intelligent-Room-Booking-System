@@ -38,7 +38,7 @@ export default {
     MyReservation,
     ReservationManagement,
     RoomManagementView,
-      RoomIssueManagement
+    RoomIssueManagement
   },
   data() {
     return {
@@ -49,7 +49,7 @@ export default {
         {icon: 'mdiApplicationEditOutline', component: 'ReservationManagement'},
         {icon: 'mdiClipboardTextOutline', component: 'RoomManagementView'},
         {icon: 'mdiBookAccountOutline', component: 'RoomIssueManagement'},
-          {icon: 'mdiBookAccountOutline', component: 'RoomIssueManagement'},
+        {icon: 'mdiBookAccountOutline', component: 'RoomIssueManagement'},
       ]
     };
   },
@@ -69,6 +69,7 @@ export default {
 <style scoped>
 /* 整体布局 */
 .index-container {
+  font-family: 'Cambria', serif;
   display: grid;
   grid-template-columns: 80px 1fr;
   height: 100vh;
