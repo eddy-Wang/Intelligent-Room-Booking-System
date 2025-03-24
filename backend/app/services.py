@@ -106,7 +106,7 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose, mess
         Dear User,
 
         Sorry, the administrator has cancelled your booking.
-        Cancel reason: {message}
+        Reason: {message}
 
         Booking Details:
         Room ID: {room_name}
