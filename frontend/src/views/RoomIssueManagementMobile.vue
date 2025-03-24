@@ -376,6 +376,8 @@ const showReportDialog = () => {
 
 .mobile-filter {
   flex: 1;
+    width:40%;
+
 }
 
 .status-unreviewed {

@@ -525,7 +525,11 @@ onMounted(() => {
 const timestampToTime = (timestamp) => {
     const timestampInSeconds = timestamp / 1000;
     const time = new Date(timestampInSeconds * 1000);
-    return time.toISOString().replace('T', ' ').slice(0, 19); // Format as 'YYYY-MM-DD HH:MM:SS'
+
+    const chinaOffset = 8 * 60 * 60 * 1000;
+    const chinaTime = new Date(time.getTime() + chinaOffset);
+
+    return chinaTime.toISOString().replace('T', ' ').slice(0, 19);
 };
 
 // Function to get room name by room_id
@@ -668,9 +672,10 @@ const submitLimitUsage = async () => {
 
 <style>
 .header {
-    position: static;
-    padding: 1rem;
-    margin-bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 .page-title {
     font-size: 40px;
@@ -684,11 +689,13 @@ const submitLimitUsage = async () => {
     overflow: auto;
 }
 .booking-management {
+    font-family: 'Cambria', serif;
     width: 100%;
     padding: 20px;
     background-color: #f8f9fa;
     overflow: auto;
 }
+
 .custom-card {
     width: 100%;
     padding: 20px;
@@ -730,22 +737,7 @@ const submitLimitUsage = async () => {
 .el-table-column{
     width:5%;
 }
-.el-dialog {
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
 
-.el-form-item {
-    margin-bottom: 20px;
-}
-
-.el-select {
-    width: 100%;
-}
-
-.el-date-picker {
-    width: 100%;
-}
 .el-table-column {
     width: 5%;
 }
