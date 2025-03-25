@@ -139,7 +139,6 @@ import { ElMessage } from 'element-plus'
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 
-// Reactive state
 const reports = ref([])
 const rooms = ref([])
 const filters = ref({
@@ -154,7 +153,6 @@ const newReportForm = ref({
 })
 const statusOptions = ['Unreviewed', 'Approved', 'Rejected', 'Completed']
 
-// Data fetching
 onMounted(async () => {
   await fetchRooms()
   await fetchReports()
@@ -178,7 +176,6 @@ async function fetchReports() {
   }
 }
 
-// Computed properties
 const filteredReports = computed(() => {
   return reports.value.filter(report => {
     const roomMatch =
@@ -191,7 +188,6 @@ const filteredReports = computed(() => {
   })
 })
 
-// Helper methods
 function getRoomName(roomId) {
   return rooms.value.find(r => r.room_id === roomId)?.name || 'Unknown Room'
 }
@@ -200,7 +196,6 @@ function statusClass(status) {
   return `status-${status.toLowerCase()}`
 }
 
-// Report actions
 async function updateReportStatus(report, status) {
   try {
     await fetch(backendAddress + `/room_issue_reports/${report.timestamp}`, {
@@ -246,7 +241,6 @@ async function submitNewReport() {
   }
 }
 
-// Action shortcuts
 const approveReport = (report) => updateReportStatus(report, 'Approved')
 const rejectReport = (report) => updateReportStatus(report, 'Rejected')
 const completeReport = (report) => updateReportStatus(report, 'Completed')
@@ -255,7 +249,6 @@ const showReportDialog = () => {
   dialogVisible.value = true
 }
 
-// 锁定滚动方案：记录当前滚动位置，并固定 body
 let scrollPosition = 0
 watch(dialogVisible, (newVal) => {
   if (newVal) {
@@ -273,7 +266,6 @@ watch(dialogVisible, (newVal) => {
   }
 })
 
-// 组件卸载时清除 body 样式
 onBeforeUnmount(() => {
   document.body.style.position = ''
   document.body.style.top = ''

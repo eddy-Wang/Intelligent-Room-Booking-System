@@ -5,7 +5,6 @@
       <h2><strong>Reservation Management</strong></h2>
     </div>
     <div class="filter-controls">
-      <!-- 搜索用户的控件保持单独一行 -->
       <el-autocomplete
           v-model="filters.userInput"
           :fetch-suggestions="queryUsers"
@@ -14,7 +13,6 @@
           class="mobile-filter"
           @select="handleUserSelect"
       />
-      <!-- 第一行：Rooms, Date, Time -->
       <div class="select-row">
         <el-select
             v-model="filters.room_id"
@@ -62,7 +60,6 @@
           />
         </el-select>
       </div>
-      <!-- 第二行：Processing State, Status -->
       <div class="select-row">
         <el-select
             v-model="filters.processing_state"
@@ -192,7 +189,6 @@
       </div>
     </div>
 
-    <!-- 使用自定义模态框替换 Element Plus 的 Dialog -->
     <div v-if="modifyDialogVisible" class="modal" @click.self="modifyDialogVisible = false">
       <div class="modal-content">
         <h2>Modify Booking</h2>
@@ -249,16 +245,13 @@ import {User, Calendar, Clock, Document} from '@element-plus/icons-vue'
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 
-// 响应式数据
 const bookings = ref([])
 const rooms = ref([])
 const users = ref([])
 
-// 编辑弹窗控制与当前预订数据
 const modifyDialogVisible = ref(false)
 const currentBooking = ref({})
 
-// 过滤条件
 const filters = ref({
   userInput: '',
   room_id: [],
@@ -268,7 +261,6 @@ const filters = ref({
   status: []
 })
 
-// 常量定义
 const statusOptions = ['Pending', 'Confirmed', 'Declined', 'Completed', 'Missed']
 const processingStateOptions = ['unprocessed', 'processed', 'completed']
 const reverseTimeSlotMap = {
@@ -287,7 +279,6 @@ const reverseTimeSlotMap = {
 }
 const timeSlots = Object.values(reverseTimeSlotMap)
 
-// 生成日期过滤项
 const uniqueDates = computed(() => {
   return [...new Set(bookings.value.map(b => b.date))]
 })
@@ -295,7 +286,6 @@ const sortedDates = computed(() => {
   return uniqueDates.value.sort((a, b) => new Date(a) - new Date(b))
 })
 
-// 过滤逻辑
 const filteredBookings = computed(() => {
   if (!Array.isArray(bookings.value)) return []
   const result = bookings.value.filter(booking => {
@@ -341,7 +331,6 @@ const filteredBookings = computed(() => {
   })
 })
 
-// 用户搜索辅助函数
 const queryUsers = (queryString, cb) => {
   const trimmedQuery = queryString.trim().toLowerCase()
   if (!trimmedQuery) {
@@ -368,12 +357,10 @@ const handleUserSelect = (selected) => {
   filters.value.userInput = selected.value.split(' (')[0]
 }
 
-// 获取房间名称
 const getRoomName = (roomId) => {
   return rooms.value.find(r => r.room_id === roomId)?.name || 'Unknown Room'
 }
 
-// 映射处理状态
 const getProcessingState = (status) => {
   const stateMap = {
     'Pending': 'unprocessed',
@@ -385,13 +372,11 @@ const getProcessingState = (status) => {
   return stateMap[status] || 'unknown'
 }
 
-// 格式化日期
 const formatDate = (dateString) => {
   const date = new Date(dateString)
   return date.toLocaleDateString('en-CA')
 }
 
-// 转换时间字符串为可读时间段
 const convertTimeStrToTimeSlots = (timeStr) => {
   return timeStr.split(',')
       .map(Number)
@@ -399,7 +384,6 @@ const convertTimeStrToTimeSlots = (timeStr) => {
       .join('  ')
 }
 
-// 状态显示相关辅助方法
 const statusClass = (status) => {
   const classMap = {
     'Pending': 'status-pending',
@@ -426,7 +410,6 @@ const getUserDisplay = (email) => {
   return user ? `${user.name} (${user.permission})` : 'Unknown User'
 }
 
-// 数据请求
 const fetchBookings = async () => {
   try {
     const response = await fetch(backendAddress + '/bookings')
@@ -458,14 +441,13 @@ const fetchUsers = async () => {
   }
 }
 
-// 修改、保存、取消、审批、拒绝和删除预订
 const modifyBooking = async (booking_id, newbooking) => {
   const booking = newbooking
   if (booking) {
     currentBooking.value = {
       ...booking,
-      date: booking.date,             // 保持 YYYY-MM-DD 格式
-      time: booking.time.split(',')   // 转为数组，便于多选
+      date: booking.date,
+      time: booking.time.split(',')
     }
     modifyDialogVisible.value = true
   }
@@ -544,29 +526,23 @@ const deleteBooking = async (booking_id) => {
   }
 }
 
-// 锁定滚动的方案：记录当前滚动位置，并固定 body
 let scrollPosition = 0
 watch(modifyDialogVisible, (newVal) => {
   if (newVal) {
-    // 记录当前滚动位置
     scrollPosition = window.pageYOffset || document.documentElement.scrollTop
-    // 固定 body，并将 top 设置为负值
     document.body.style.position = 'fixed'
     document.body.style.top = `-${scrollPosition}px`
     document.body.style.left = '0'
     document.body.style.right = '0'
   } else {
-    // 恢复 body 样式
     document.body.style.position = ''
     document.body.style.top = ''
     document.body.style.left = ''
     document.body.style.right = ''
-    // 恢复滚动位置
     window.scrollTo(0, scrollPosition)
   }
 })
 
-// 组件卸载时清除设置
 onBeforeUnmount(() => {
   document.body.style.position = ''
   document.body.style.top = ''
@@ -574,7 +550,6 @@ onBeforeUnmount(() => {
   document.body.style.right = ''
 })
 
-// 页面加载时获取数据
 onMounted(async () => {
   await Promise.all([fetchBookings(), fetchRooms(), fetchUsers()])
 })
@@ -619,7 +594,6 @@ onMounted(async () => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* select-row 用于将筛选组件排列成一行 */
 .select-row {
   display: flex;
   flex-wrap: nowrap;
@@ -752,7 +726,6 @@ onMounted(async () => {
   height: 1.6rem;
 }
 
-/* 自定义模态框样式 */
 .modal {
   position: fixed;
   top: 0;
