@@ -8,6 +8,7 @@ import time
 import os
 import sys
 import logging
+import csv
 
 # Setup logging
 logging.basicConfig(
@@ -27,6 +28,7 @@ class ClassroomScheduleScraper:
         
         # Chrome options setup
         chrome_options = Options()
+        chrome_options.add_argument('--headless')
         chrome_options.add_argument('--disable-blink-features=AutomationControlled')
         chrome_options.add_argument('--start-maximized')
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -36,7 +38,8 @@ class ClassroomScheduleScraper:
         self.driver = webdriver.Chrome(options=chrome_options)
         
         # Create output directory
-        self.output_dir = "classroom_schedules"
+        # 第29行左右，在 __init__ 方法中
+        self.output_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "classroom_schedules")
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
 
@@ -209,7 +212,7 @@ class ClassroomScheduleScraper:
                                 row_data = {
                                     'time_slot': cells[7].text.strip().replace(',', ''),  # Time slot
                                     'location': room_number,  # Room number only
-                                    'weeks': cells[9].text.strip().replace(',', ''),  # Weeks
+                                    'weeks': cells[9].text.strip(),  # Weeks
                                     'week_type': week_type  # Converted week type
                                 }
                                 all_rows_data.append(row_data)
@@ -242,13 +245,12 @@ class ClassroomScheduleScraper:
             if len(all_rows_data) > 0:
                 logger.info(f"Collected {len(all_rows_data)} course records total")
                 
-                with open(classroom_filename, 'w', encoding='utf-8') as f:
-                    # Write CSV header
-                    f.write("timeslot,location,weeks,week_type\n")
-                    
-                    # Write data rows
-                    for data in all_rows_data:
-                        f.write(f"{data['time_slot']},{data['location']},{data['weeks']},{data['week_type']}\n")
+
+                with open(classroom_filename, 'w', encoding='utf-8', newline='') as f:
+                    # Use the csv module's writer to properly handle commas in fields
+                    writer = csv.DictWriter(f, fieldnames=['time_slot', 'location', 'weeks', 'week_type'])
+                    writer.writeheader()
+                    writer.writerows(all_rows_data)
                 
                 logger.info(f"Successfully saved all course data to {classroom_filename}")
             else:

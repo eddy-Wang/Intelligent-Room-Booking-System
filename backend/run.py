@@ -8,7 +8,7 @@ app = create_app()
 
 def run_crawler_periodically():
     while True:
-        subprocess.call(["python", "./crawler/main.py"])
+        subprocess.run(["python", os.path.join("backend", "crawler", "main.py")])
         time.sleep(180)
 
 if __name__ == '__main__':
