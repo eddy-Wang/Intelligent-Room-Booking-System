@@ -150,7 +150,7 @@ export default {
       this.$emit('filters-updated', newFilters);
     },
     selectedDate(newDate) {
-      this.$emit('date-selected', newDate); // 将 selectedDate 传递给父组件
+      this.$emit('date-selected', newDate);
     },
 
     bookDate(newVal, oldVal) {
