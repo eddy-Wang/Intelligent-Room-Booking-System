@@ -30,8 +30,9 @@ export default {
   },
   data() {
     return {
-      activeNav: 0,
+      activeNav: 1,
       navItems: [
+        {icon: 'mdiArrowLeft'},
         {icon: 'mdiApplicationEditOutline', component: 'ReservationManagementMobile'},
         {icon: 'mdiTools', component: 'RoomIssueManagementMobile'},
         {icon: 'mdiClipboardTextOutline', component: 'RoomManagementViewMobile'}
@@ -45,7 +46,11 @@ export default {
   },
   methods: {
     setActiveNav(index) {
-      this.activeNav = index;
+      if (index === 0) {
+        this.$router.back();
+      } else {
+        this.activeNav = index;
+      }
     }
   },
 };

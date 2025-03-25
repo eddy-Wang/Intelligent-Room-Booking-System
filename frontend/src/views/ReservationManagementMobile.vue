@@ -603,7 +603,7 @@ onMounted(async () => {
 .booking-list {
   display: grid;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 50px;
 }
 
 .booking-card {

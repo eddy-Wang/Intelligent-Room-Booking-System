@@ -38,7 +38,6 @@
         />
       </el-select>
     </div>
-    <!-- 自定义模态框，替换原来的 el-dialog -->
     <div v-if="dialogVisible" class="modal" @click.self="dialogVisible = false">
       <div class="modal-content">
         <h2>Report Issue</h2>
@@ -139,6 +138,7 @@ import { ElMessage } from 'element-plus'
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 
+// Reactive state
 const reports = ref([])
 const rooms = ref([])
 const filters = ref({
@@ -153,6 +153,7 @@ const newReportForm = ref({
 })
 const statusOptions = ['Unreviewed', 'Approved', 'Rejected', 'Completed']
 
+// Data fetching
 onMounted(async () => {
   await fetchRooms()
   await fetchReports()
@@ -176,6 +177,7 @@ async function fetchReports() {
   }
 }
 
+// Computed properties
 const filteredReports = computed(() => {
   return reports.value.filter(report => {
     const roomMatch =
@@ -188,6 +190,7 @@ const filteredReports = computed(() => {
   })
 })
 
+// Helper methods
 function getRoomName(roomId) {
   return rooms.value.find(r => r.room_id === roomId)?.name || 'Unknown Room'
 }
@@ -196,6 +199,7 @@ function statusClass(status) {
   return `status-${status.toLowerCase()}`
 }
 
+// Report actions
 async function updateReportStatus(report, status) {
   try {
     await fetch(backendAddress + `/room_issue_reports/${report.timestamp}`, {
@@ -241,6 +245,7 @@ async function submitNewReport() {
   }
 }
 
+// Action shortcuts
 const approveReport = (report) => updateReportStatus(report, 'Approved')
 const rejectReport = (report) => updateReportStatus(report, 'Rejected')
 const completeReport = (report) => updateReportStatus(report, 'Completed')
@@ -334,7 +339,7 @@ onBeforeUnmount(() => {
 .issues-list {
   display: grid;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 50px;
 }
 
 .issue-card {
@@ -429,7 +434,6 @@ onBeforeUnmount(() => {
   border-left: 4px solid #38b6ff;
 }
 
-/* 自定义模态框样式，和之前的表单一致 */
 .modal {
   position: fixed;
   top: 0;
@@ -441,7 +445,6 @@ onBeforeUnmount(() => {
   align-items: center;
   padding: 15px;
 }
-
 .modal-content {
   background: white;
   width: 90%;
