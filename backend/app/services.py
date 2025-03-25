@@ -1,5 +1,7 @@
 import random
 import string
+from datetime import datetime, timedelta
+
 from flask_mail import Message
 from mysql.connector import Error
 import socket
@@ -658,6 +660,49 @@ def delete_room_issue_report(timestamp):
         print(f"Error deleting report: {e}")
         connection.rollback()
         return False
+    finally:
+        cursor.close()
+        connection.close()
+
+def booking_check_in_service(booking_id):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute('SELECT date, time, status FROM booking WHERE booking_id = %s', (booking_id,))
+        res = cursor.fetchone()
+
+        if res[2] == "Completed":
+            return False, "Booking is already checked in."
+        if res[2] != "Confirmed":
+            return False, "Booking is not confirmed yet."
+
+        time_mapping = {
+            0: '08:00', 1: '08:55', 2: '10:00', 3: '10:55',
+            4: '12:00', 5: '12:55', 6: '14:00', 7: '14:55',
+            8: '16:00', 9: '16:55', 10: '19:00', 11: '19:55'
+        }
+
+        tmp = res[1].split(',')
+        tmp.sort()
+        start_time = time_mapping[int(tmp[0])]
+        time_obj = datetime.strptime(start_time, "%H:%M").time()
+        datetime_obj = datetime.combine(res[0], time_obj)
+
+        lower_bound = datetime_obj - timedelta(minutes=10)
+        upper_bound = datetime_obj + timedelta(minutes=10)
+
+        now = datetime.now()
+        if lower_bound <= now <= upper_bound:
+            cursor.execute("UPDATE booking SET status = 'Completed' WHERE booking_id = %s", (booking_id,))
+            connection.commit()
+            return True, "Check in successfully."
+        else:
+            return False, "Not in available time to check in."
+
+    except Exception as e:
+        connection.rollback()
+        return False, e
     finally:
         cursor.close()
         connection.close()

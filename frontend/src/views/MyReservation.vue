@@ -51,6 +51,7 @@
                         <div class="status-and-actions">
                             <div class="reservation-status">{{ reservation.status }}</div>
                             <div class="reservation-actions" v-if="reservation.status.toString() === 'Confirmed'">
+                                <button @click="checkIn(index)" class="action-button">Check In</button>
                                 <button @click="cancelReservation(index)" class="action-button">Cancel</button>
                             </div>
                         </div>
@@ -255,6 +256,23 @@ END:VEVENT
                 .map(index => this.reverseTimeSlotMap[index])
                 .join('  ');
         },
+        async checkIn(index) {
+          const bookingId = this.reservations[(this.currentPage - 1) * this.itemsPerPage + index].booking_id
+          try {
+            const response = await fetch(this.backendAddress + '/booking_check_in/'+bookingId, {
+              method: 'GET'
+            });
+            const data = await response.json();
+            if (data.code === '000') {
+              alert('Check-in successfully!');
+              await this.fetchReservations();
+            } else {
+              alert(data.message);
+            }
+          } catch (error) {
+            console.error('Error:', error);
+          }
+        }
     },
     mounted() {
         const instance = getCurrentInstance();
