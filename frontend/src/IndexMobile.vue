@@ -4,11 +4,11 @@
     <div class="nav-container">
       <nav class="bottom-nav">
         <div
-            v-for="(item, index) in navItems"
-            :key="index"
-            class="nav-item"
-            :class="{ active: activeNav === index }"
-            @click="setActiveNav(index)">
+          v-for="(item, index) in navItems"
+          :key="index"
+          class="nav-item"
+          :class="{ active: activeNav === index }"
+          @click="setActiveNav(index)">
           <svg-icon type="mdi" :path="$mdi[item.icon]"></svg-icon>
         </div>
       </nav>
@@ -30,24 +30,40 @@ export default {
   },
   data() {
     return {
-      activeNav: 0,
-      navItems: [
-        {icon: 'mdiHomeOutline', component: 'HomeViewMobile'},
-        {icon: 'mdiAccountOutline', component: 'MyReservationMobile'},
-        {icon: 'mdiTools', component: 'RoomRepairMobile'}
+      activeNav: 1,
+      adminNavItems: [
+        { icon: 'mdiArrowLeft' },
+        { icon: 'mdiHomeOutline', component: 'HomeViewMobile' },
+        { icon: 'mdiAccountOutline', component: 'MyReservationMobile' },
+        { icon: 'mdiTools', component: 'RoomRepairMobile' }
+      ],
+      userNavItems: [
+        { icon: 'mdiHomeOutline', component: 'HomeViewMobile' },
+        { icon: 'mdiAccountOutline', component: 'MyReservationMobile' },
+        { icon: 'mdiTools', component: 'RoomRepairMobile' }
       ]
     };
   },
   computed: {
+    permission() {
+      return this.$user ? this.$user.permission : 'user';
+    },
+    navItems() {
+      return this.permission === 'Admin' ? this.adminNavItems : this.userNavItems;
+    },
     activeComponent() {
       return this.navItems[this.activeNav].component;
     }
   },
   methods: {
     setActiveNav(index) {
-      this.activeNav = index;
+      if (this.permission === 'Admin' && index === 0) {
+        this.$router.back();
+      } else {
+        this.activeNav = index;
+      }
     }
-  },
+  }
 };
 </script>
 
