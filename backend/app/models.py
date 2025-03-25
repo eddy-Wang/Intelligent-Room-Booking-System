@@ -114,7 +114,7 @@ def get_all_booking_records():
     cursor = connection.cursor()
 
     try:
-        query = "SELECT * FROM booking WHERE status = 'Confirmed'"
+        query = "SELECT * FROM booking WHERE status IN ('Confirmed', 'Banned')"
         cursor.execute(query)
         results = cursor.fetchall()
     finally:
@@ -313,7 +313,7 @@ def get_booking_record_of_a_room(room_id):
     cursor = connection.cursor()
 
     try:
-        query = "SELECT * FROM booking WHERE room_id = %s AND status ='Confirmed'"
+        query = "SELECT * FROM booking WHERE room_id = %s AND status IN ('Confirmed', 'Banned')"
         cursor.execute(query, (room_id,))
         results = cursor.fetchall()
     finally:
@@ -442,6 +442,26 @@ def reset_missed_times_for_user(user_email):
         cursor.close()
         connection.close()
 
+def get_permission_by_email(email):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    try:
+        query = "SELECT permission FROM users WHERE email = %s"
+        cursor.execute(query, (email,))
+        res = cursor.fetchone()
+
+        if res:
+            return res[0]
+        else:
+            return None
+
+    except Exception as e:
+        print("Error fetching permission:", e)
+        return None
+
+    finally:
+        cursor.close()
+        connection.close()
 
 if __name__ == '__main__':
     get_room_detailed(1)

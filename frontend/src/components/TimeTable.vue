@@ -65,13 +65,11 @@ export default {
       console.log("old:", oldVal);
       console.log("new:", newVal);
 
-
-      // 合并 lessonData 和 childData
       const combinedData = [...newVal, ...this.lessonData];
       console.log("combined:",combinedData)
       this.updateBookings(combinedData);
 
-      this.handleDateSelection(); // 更新时间槽状态
+      this.handleDateSelection();
 
     },
     roomSelected(newVal, oldVal) {
