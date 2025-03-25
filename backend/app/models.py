@@ -114,7 +114,7 @@ def get_all_booking_records():
     cursor = connection.cursor()
 
     try:
-        query = "SELECT * FROM booking WHERE status = 'Confirmed'"
+        query = "SELECT * FROM booking WHERE status IN ('Confirmed', 'Banned')"
         cursor.execute(query)
         results = cursor.fetchall()
     finally:
@@ -313,7 +313,7 @@ def get_booking_record_of_a_room(room_id):
     cursor = connection.cursor()
 
     try:
-        query = "SELECT * FROM booking WHERE room_id = %s AND status ='Confirmed'"
+        query = "SELECT * FROM booking WHERE room_id = %s AND status IN ('Confirmed', 'Banned')"
         cursor.execute(query, (room_id,))
         results = cursor.fetchall()
     finally:
