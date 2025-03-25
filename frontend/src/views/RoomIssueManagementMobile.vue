@@ -1,70 +1,85 @@
 <template>
-  <div class="mobile-repair-container">
-    <!-- Header Section -->
-    <header class="app-header">
-      <div class="app-title">
-        <h1><strong>DRBS</strong></h1>
-        <h2><strong>Room Issue Management</strong></h2>
-      </div>
-      <el-button
-          class="new-issue-button"
-          type="primary"
-          @click="showReportDialog"
+  <div class="room-issue-management-container">
+    <div class="title-container">
+      <h1><strong>DRBS</strong></h1>
+      <h2><strong>Room Issue Management</strong></h2>
+    </div>
+    <button @click="showReportDialog" class="new-issue-button">New Issue</button>
+    <div class="filter-controls">
+      <el-select
+          v-model="filters.room_id"
+          multiple
+          collapse-tags
+          clearable
+          placeholder="Filter Rooms"
+          class="mobile-filter"
       >
-        + New Issue
-      </el-button>
-    </header>
+        <el-option
+            v-for="room in rooms"
+            :key="room.room_id"
+            :label="room.name"
+            :value="room.room_id"
+        />
+      </el-select>
 
-    <!-- New Issue Dialog -->
-    <el-dialog
-        v-model="dialogVisible"
-        title="Report Issue"
-        fullscreen
-    >
-      <el-form :model="newReportForm">
-        <el-form-item label="Room">
-          <el-select
-              v-model="newReportForm.room_id"
-              placeholder="Select Room"
-              size="large"
-          >
-            <el-option
+      <el-select
+          v-model="filters.status"
+          multiple
+          collapse-tags
+          clearable
+          placeholder="Filter Status"
+          class="mobile-filter"
+      >
+        <el-option
+            v-for="status in statusOptions"
+            :key="status"
+            :label="status"
+            :value="status"
+        />
+      </el-select>
+    </div>
+    <!-- 自定义模态框，替换原来的 el-dialog -->
+    <div v-if="dialogVisible" class="modal" @click.self="dialogVisible = false">
+      <div class="modal-content">
+        <h2>Report Issue</h2>
+        <form @submit.prevent="submitNewReport">
+          <label for="issue-room">Room:</label>
+          <select id="issue-room" v-model="newReportForm.room_id" required>
+            <option value="" disabled>Select Room</option>
+            <option
                 v-for="room in rooms"
                 :key="room.room_id"
-                :label="room.name"
                 :value="room.room_id"
-            />
-          </el-select>
-        </el-form-item>
+            >
+              {{ room.name }}
+            </option>
+          </select>
 
-        <el-form-item label="Your Email">
-          <el-input
+          <label for="issue-email">Your Email:</label>
+          <input
+              type="email"
+              id="issue-email"
               v-model="newReportForm.user_email"
               placeholder="email@example.com"
-              type="email"
-              size="large"
+              required
           />
-        </el-form-item>
 
-        <el-form-item label="Issue Details">
-          <el-input
+          <label for="issue-details">Issue Details:</label>
+          <textarea
+              id="issue-details"
               v-model="newReportForm.reportInfo"
-              type="textarea"
               placeholder="Describe the problem..."
               rows="4"
-          />
-        </el-form-item>
-      </el-form>
+          ></textarea>
 
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="dialogVisible = false" round>Cancel</el-button>
-          <el-button type="primary" @click="submitNewReport" round>Submit</el-button>
-        </div>
-      </template>
-    </el-dialog>
+          <div class="room-actions">
+            <button type="submit" class="action-button">Submit</button>
+            <button type="button" class="action-button" @click="dialogVisible = false">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
-    <!-- Issues List -->
     <div class="issues-list">
       <div
           v-for="report in filteredReports"
@@ -74,7 +89,7 @@
       >
         <div class="card-header">
           <span class="room-name">{{ getRoomName(report.room_id) }}</span>
-          <el-tag :type="statusTagType(report.reviewed)" size="small">
+          <el-tag class="booking-status-tag" :data-status="report.reviewed" size="small">
             {{ report.reviewed }}
           </el-tag>
         </div>
@@ -114,45 +129,12 @@
         </div>
       </div>
     </div>
-
-    <!-- Filter Controls -->
-    <div class="filter-controls">
-      <el-select
-          v-model="filters.room_id"
-          multiple
-          collapse-tags
-          placeholder="Filter Rooms"
-          class="mobile-filter"
-      >
-        <el-option
-            v-for="room in rooms"
-            :key="room.room_id"
-            :label="room.name"
-            :value="room.room_id"
-        />
-      </el-select>
-
-      <el-select
-          v-model="filters.status"
-          multiple
-          collapse-tags
-          placeholder="Filter Status"
-          class="mobile-filter"
-      >
-        <el-option
-            v-for="status in statusOptions"
-            :key="status"
-            :label="status"
-            :value="status"
-        />
-      </el-select>
-    </div>
   </div>
 </template>
 
 <script setup>
-import {ref, computed, onMounted, getCurrentInstance} from 'vue'
-import {ElMessage} from 'element-plus'
+import { ref, computed, onMounted, getCurrentInstance, watch, onBeforeUnmount } from 'vue'
+import { ElMessage } from 'element-plus'
 
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
@@ -180,7 +162,7 @@ onMounted(async () => {
 
 async function fetchRooms() {
   try {
-    const response = await fetch(backendAddress+'/rooms_id_and_name')
+    const response = await fetch(backendAddress + '/rooms_id_and_name')
     rooms.value = (await response.json()).data
   } catch (error) {
     ElMessage.error('Failed to load rooms')
@@ -189,7 +171,7 @@ async function fetchRooms() {
 
 async function fetchReports() {
   try {
-    const response = await fetch(backendAddress+'/room_issue_reports')
+    const response = await fetch(backendAddress + '/room_issue_reports')
     reports.value = (await response.json()).data || []
   } catch (error) {
     ElMessage.error('Failed to load reports')
@@ -199,10 +181,12 @@ async function fetchReports() {
 // Computed properties
 const filteredReports = computed(() => {
   return reports.value.filter(report => {
-    const roomMatch = filters.value.room_id.length === 0 ||
-        filters.value.room_id.includes(report.room_id)
-    const statusMatch = filters.value.status.length === 0 ||
-        filters.value.status.includes(report.reviewed)
+    const roomMatch =
+      filters.value.room_id.length === 0 ||
+      filters.value.room_id.includes(report.room_id)
+    const statusMatch =
+      filters.value.status.length === 0 ||
+      filters.value.status.includes(report.reviewed)
     return roomMatch && statusMatch
   })
 })
@@ -212,16 +196,6 @@ function getRoomName(roomId) {
   return rooms.value.find(r => r.room_id === roomId)?.name || 'Unknown Room'
 }
 
-function statusTagType(status) {
-  const types = {
-    Unreviewed: 'warning',
-    Approved: 'success',
-    Rejected: 'danger',
-    Completed: 'info'
-  }
-  return types[status] || 'info'
-}
-
 function statusClass(status) {
   return `status-${status.toLowerCase()}`
 }
@@ -229,10 +203,10 @@ function statusClass(status) {
 // Report actions
 async function updateReportStatus(report, status) {
   try {
-    await fetch(backendAddress+`/room_issue_reports/${report.timestamp}`, {
+    await fetch(backendAddress + `/room_issue_reports/${report.timestamp}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({reviewed: status})
+      body: JSON.stringify({ reviewed: status })
     })
     ElMessage.success(`Report ${status.toLowerCase()}`)
     await fetchReports()
@@ -243,7 +217,7 @@ async function updateReportStatus(report, status) {
 
 async function deleteReport(report) {
   try {
-    await fetch(backendAddress+`/room_issue_reports/${report.timestamp}`, {
+    await fetch(backendAddress + `/room_issue_reports/${report.timestamp}`, {
       method: 'DELETE'
     })
     ElMessage.success('Report deleted')
@@ -255,7 +229,7 @@ async function deleteReport(report) {
 
 async function submitNewReport() {
   try {
-    await fetch(backendAddress+'/room_issue_reports', {
+    await fetch(backendAddress + '/room_issue_reports', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -277,47 +251,98 @@ const approveReport = (report) => updateReportStatus(report, 'Approved')
 const rejectReport = (report) => updateReportStatus(report, 'Rejected')
 const completeReport = (report) => updateReportStatus(report, 'Completed')
 const showReportDialog = () => {
-  newReportForm.value = {room_id: '', user_email: '', reportInfo: ''}
+  newReportForm.value = { room_id: '', user_email: '', reportInfo: '' }
   dialogVisible.value = true
 }
+
+// 锁定滚动方案：记录当前滚动位置，并固定 body
+let scrollPosition = 0
+watch(dialogVisible, (newVal) => {
+  if (newVal) {
+    scrollPosition = window.pageYOffset || document.documentElement.scrollTop
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollPosition}px`
+    document.body.style.left = '0'
+    document.body.style.right = '0'
+  } else {
+    document.body.style.position = ''
+    document.body.style.top = ''
+    document.body.style.left = ''
+    document.body.style.right = ''
+    window.scrollTo(0, scrollPosition)
+  }
+})
+
+// 组件卸载时清除 body 样式
+onBeforeUnmount(() => {
+  document.body.style.position = ''
+  document.body.style.top = ''
+  document.body.style.left = ''
+  document.body.style.right = ''
+})
 </script>
 
+
 <style scoped>
-.mobile-repair-container {
-  padding: 1rem;
-  max-width: 100%;
-  min-height: 100vh;
-  background: #f5f7fa;
-}
-
-.app-header {
+.room-issue-management-container {
+  font-family: 'Cambria', serif;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
+  flex-direction: column;
+  background-color: #eceef8;
+  width: 100%;
+  height: 100vh;
+  padding: 20px;
+  overflow: auto;
 }
 
-.app-title {
-  font-size: 1.5rem;
-  color: #2c3e50;
-  margin: 0;
+.title-container {
+  margin-bottom: 0;
+}
+
+.title-container h1 {
+  margin: 5px;
+  font-size: 2.25rem;
+  font-weight: bold;
+}
+
+.title-container h2 {
+  margin: 5px;
+  font-size: 2.25rem;
+  color: #555;
 }
 
 .new-issue-button {
-  font-size: 2rem;
-  padding: 0.75rem 1.5rem;
-  color: white;
-  background: #3f63fd;
-  height: 40px;
-  width: 50%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-radius: 15px;
+  margin: 20px 0 0 0;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: #3155ef;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-filter {
+  flex: 1;
 }
 
 .issues-list {
   display: grid;
   gap: 1rem;
-  margin-bottom: 100px;
+  margin-bottom: 2rem;
 }
 
 .issue-card {
@@ -335,8 +360,37 @@ const showReportDialog = () => {
 }
 
 .room-name {
-  font-weight: 600;
-  color: #34495e;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.booking-status-tag {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.booking-status-tag[data-status="Approved"] {
+  background-color: #5ccb6a !important;
+  border-color: #5ccb6a !important;
+  color: #fff !important;
+}
+
+.booking-status-tag[data-status="Unreviewed"] {
+  background-color: #b58d54 !important;
+  border-color: #b58d54 !important;
+  color: #fff !important;
+}
+
+.booking-status-tag[data-status="Rejected"] {
+  background-color: #ff5757 !important;
+  border-color: #ff5757 !important;
+  color: #fff !important;
+}
+
+.booking-status-tag[data-status="Completed"] {
+  background-color: #38b6ff !important;
+  border-color: #38b6ff !important;
+  color: #fff !important;
 }
 
 .card-content {
@@ -355,63 +409,97 @@ const showReportDialog = () => {
 }
 
 .card-actions {
+  margin: 1rem 10px auto 10px;
   display: flex;
+  justify-content: space-between;
   gap: 0.5rem;
-  flex-wrap: wrap;
 }
 
-.filter-controls {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: white;
-  padding: 1rem;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 50px;
-  border-radius: 10px;
-}
-
-.mobile-filter {
-  flex: 1;
-    width:40%;
-
+.card-actions .el-button {
+  width: 45%;
+  font-size: 1rem;
+  height: 1.6rem;
 }
 
 .status-unreviewed {
-  border-left: 4px solid #e67e22;
+  border-left: 4px solid #ffbd59;
 }
 
 .status-approved {
-  border-left: 4px solid #2ecc71;
+  border-left: 4px solid #5ccb6a;
 }
 
 .status-rejected {
-  border-left: 4px solid #e74c3c;
+  border-left: 4px solid #ff5757;
 }
 
 .status-completed {
-  border-left: 4px solid #3498db;
+  border-left: 4px solid #38b6ff;
+}
+
+/* 自定义模态框样式，和之前的表单一致 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  padding: 15px;
+}
+
+.modal-content {
+  background: white;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px;
+  margin: auto;
+  border-radius: 12px;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content label {
+  margin: 8px 0 4px;
+  font-weight: 500;
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.room-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.action-button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #3155ef;
+  color: #FFFFFF;
 }
 
 .el-button {
   transition: all 0.2s ease;
-}
-
-.el-button:hover {
-  transform: translateY(-1px);
-}
-
-@media (max-width: 480px) {
-  .app-title {
-    font-size: 1.2rem;
-  }
-
-  .new-issue-button {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-  }
 }
 </style>

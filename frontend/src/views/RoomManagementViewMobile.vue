@@ -1,151 +1,142 @@
 <template>
-  <div class="mobile-panel">
-    <div class="container">
-      <div class="title-container">
+  <div class="room-management-mobile-container">
+    <div class="title-container">
       <h1><strong>DRBS</strong></h1>
       <h2><strong>Room Management</strong></h2>
     </div>
-      <div class="content-wrapper">
-        <button @click="showAddRoomModal = true" class="add-button">Add Room</button>
+    <button @click="showAddRoomModal = true" class="add-button-container">Add Room</button>
+    <div class="room-list-container">
+      <div
+          v-for="(room, index) in rooms"
+          :key="index"
+          class="room-item"
+      >
+        <div class="room-image">
+          <img :src="room.image_url" alt="Room" class="room-img"/>
+        </div>
 
-        <div class="room-list">
-          <div
-            v-for="(room, index) in rooms"
-            :key="index"
-            class="room-item"
+        <div class="room-info">
+          <div class="room-name">{{ room.name }}</div>
+          <div class="room-meta">
+            <div>Capacity: {{ room.capacity }}</div>
+            <div>Location: {{ room.location }}</div>
+            <div>Access: {{ accessMap[room.access] }}</div>
+          </div>
+          <div class="room-equipment">Equipment: {{ formatEquipment(room.equipment) }}</div>
+          <div class="room-information">{{ room.information || 'No additional info' }}</div>
+        </div>
+
+        <div class="room-actions">
+          <button @click="modifyRoom(index)" class="action-button">Edit</button>
+          <button @click="deleteRoom(index)" class="action-button delete">Delete</button>
+        </div>
+      </div>
+    </div>
+    <div v-if="showAddRoomModal" class="modal" @click.self="showAddRoomModal = false">
+      <div class="modal-content">
+        <h2>Add Room</h2>
+        <form @submit.prevent="addRoom">
+          <label for="room-name">Room Name:</label>
+          <input type="text" id="room-name" v-model="newRoom.name" required/>
+
+          <label for="room-capacity">Capacity:</label>
+          <input type="number" id="room-capacity" v-model="newRoom.capacity" required/>
+
+          <label for="room-location">Location:</label>
+          <input type="text" id="room-location" v-model="newRoom.location" required/>
+
+          <label>Equipment:</label>
+          <div class="equipment-checkboxes">
+            <label><input type="checkbox" v-model="newRoom.equipment.Projector"> Projector</label>
+            <label><input type="checkbox" v-model="newRoom.equipment.Whiteboard"> Whiteboard</label>
+            <label><input type="checkbox" v-model="newRoom.equipment.Microphone"> Microphone</label>
+            <label><input type="checkbox" v-model="newRoom.equipment.Computer"> Computer</label>
+            <label><input type="checkbox" v-model="newRoom.equipment.PowerOutlets"> Power Outlets</label>
+            <label><input type="checkbox" v-model="newRoom.equipment.WiFi"> Wi-Fi</label>
+          </div>
+
+          <label for="room-access">Access:</label>
+          <select id="room-access" v-model="newRoom.access" required>
+            <option value="All">All</option>
+            <option value="Staff Only">Staff Only</option>
+            <option value="Selected Staff Only">Selected Staff Only</option>
+          </select>
+
+          <label for="room-image">Image:</label>
+          <input
+              type="file"
+              id="room-image"
+              @change="handleImageUpload"
+              accept="image/*"
+              required
+              title="Select room image"
+              class="custom-file-input"
           >
-            <div class="room-image">
-              <img :src="room.image_url" alt="Room" class="room-img"/>
-            </div>
-
-            <div class="room-info">
-              <div class="room-name">{{ room.name }}</div>
-              <div class="room-meta">
-                <div>Capacity: {{ room.capacity }}</div>
-                <div>Location: {{ room.location }}</div>
-                <div>Access: {{ accessMap[room.access] }}</div>
-              </div>
-              <div class="room-equipment">Equipment: {{ formatEquipment(room.equipment) }}</div>
-              <div class="room-information">{{ room.information || 'No additional info' }}</div>
-            </div>
-
-            <div class="room-actions">
-              <button @click="modifyRoom(index)" class="action-button">Edit</button>
-              <button @click="deleteRoom(index)" class="action-button delete">Delete</button>
-            </div>
+          <div v-if="newRoom.image_url" class="image-preview">
+            <img :src="newRoom.image_url" alt="Current Image" class="preview-img">
           </div>
-        </div>
 
-        <!-- Add Room Modal -->
-        <div v-if="showAddRoomModal" class="modal">
-          <div class="modal-content">
-            <h2>Add Room</h2>
-            <form @submit.prevent="addRoom">
-              <label for="room-name">Room Name:</label>
-              <input type="text" id="room-name" v-model="newRoom.name" required/>
+          <label for="room-information">Information (optional):</label>
+          <textarea id="room-information" v-model="newRoom.information"></textarea>
+          <div class="room-actions">
+            <button type="submit" class="action-button">Add</button>
+            <button @click="showAddRoomModal = false" class="action-button">Cancel</button>
 
-              <label for="room-capacity">Capacity:</label>
-              <input type="number" id="room-capacity" v-model="newRoom.capacity" required/>
-
-              <label for="room-location">Location:</label>
-              <input type="text" id="room-location" v-model="newRoom.location" required/>
-
-              <label>Equipment:</label>
-              <div class="equipment-checkboxes">
-                <label><input type="checkbox" v-model="newRoom.equipment.Projector"> Projector</label>
-                <label><input type="checkbox" v-model="newRoom.equipment.Whiteboard"> Whiteboard</label>
-                <label><input type="checkbox" v-model="newRoom.equipment.Microphone"> Microphone</label>
-                <label><input type="checkbox" v-model="newRoom.equipment.Computer"> Computer</label>
-                <label><input type="checkbox" v-model="newRoom.equipment.PowerOutlets"> Power Outlets</label>
-                <label><input type="checkbox" v-model="newRoom.equipment.WiFi"> Wi-Fi</label>
-              </div>
-
-              <label for="room-access">Access:</label>
-              <select id="room-access" v-model="newRoom.access" required>
-                <option value="All">All</option>
-                <option value="Staff Only">Staff Only</option>
-                <option value="Selected Staff Only">Selected Staff Only</option>
-              </select>
-
-              <label for="room-image">Image:</label>
-              <input
-                  type="file"
-                  id="room-image"
-                  @change="handleImageUpload"
-                  accept="image/*"
-                  required
-                  title="Select room image"
-                  class="custom-file-input"
-              >
-              <div v-if="newRoom.image_url" class="image-preview">
-                <img :src="newRoom.image_url" alt="Current Image" class="preview-img">
-              </div>
-
-              <label for="room-information">Information (optional):</label>
-              <textarea id="room-information" v-model="newRoom.information"></textarea>
-              <div class="room-actions">
-                <button type="submit" class="action-button">Add</button>
-                <button @click="showAddRoomModal = false" class="action-button">Cancel</button>
-          
-              </div>
-              </form>
           </div>
-        </div>
+        </form>
+      </div>
+    </div>
+    <div v-if="showModifyRoomModal" class="modal" @click.self="showModifyRoomModal = false">
+      <div class="modal-content">
+        <h2>Modify Room</h2>
+        <form @submit.prevent="saveModifiedRoom">
+          <label for="modify-room-name">Room Name:</label>
+          <input type="text" id="modify-room-name" v-model="modifiedRoom.name" required/>
 
-        <!-- Modify Room Modal -->
-        <div v-if="showModifyRoomModal" class="modal">
-          <div class="modal-content">
-            <h2>Modify Room</h2>
-            <form @submit.prevent="saveModifiedRoom">
-              <label for="modify-room-name">Room Name:</label>
-              <input type="text" id="modify-room-name" v-model="modifiedRoom.name" required/>
+          <label for="modify-room-capacity">Capacity:</label>
+          <input type="number" id="modify-room-capacity" v-model="modifiedRoom.capacity" required/>
 
-              <label for="modify-room-capacity">Capacity:</label>
-              <input type="number" id="modify-room-capacity" v-model="modifiedRoom.capacity" required/>
+          <label for="modify-room-location">Location:</label>
+          <input type="text" id="modify-room-location" v-model="modifiedRoom.location" required/>
 
-              <label for="modify-room-location">Location:</label>
-              <input type="text" id="modify-room-location" v-model="modifiedRoom.location" required/>
-
-              <label>Equipment:</label>
-              <div class="equipment-checkboxes">
-                <label><input type="checkbox" v-model="modifiedRoom.equipment.Projector"> Projector</label>
-                <label><input type="checkbox" v-model="modifiedRoom.equipment.Whiteboard"> Whiteboard</label>
-                <label><input type="checkbox" v-model="modifiedRoom.equipment.Microphone"> Microphone</label>
-                <label><input type="checkbox" v-model="modifiedRoom.equipment.Computer"> Computer</label>
-                <label><input type="checkbox" v-model="modifiedRoom.equipment.PowerOutlets"> Power Outlets</label>
-                <label><input type="checkbox" v-model="modifiedRoom.equipment.WiFi"> Wi-Fi</label>
-              </div>
-
-              <label for="modify-room-access">Access:</label>
-              <select id="modify-room-access" v-model="modifiedRoom.access" required>
-                <option value="0">All</option>
-                <option value="1">Staff Only</option>
-                <option value="2">Selected Staff Only</option>
-              </select>
-
-              <label for="modify-room-image">Image:</label>
-              <input
-                  type="file"
-                  id="modify-room-image"
-                  @change="handleImageUpload"
-                  accept="image/*"
-                  title="Select room image"
-                  class="custom-file-input"
-              >
-              <div v-if="modifiedRoom.image_url" class="image-preview">
-                <img :src="modifiedRoom.image_url" alt="Current Image" class="preview-img">
-              </div>
-
-              <label for="modify-room-information">Information (optional):</label>
-              <textarea id="modify-room-information" v-model="modifiedRoom.information"></textarea>
-              <div class="room-actions">
-                <button type="submit" class="action-button">Save</button>
-                <button @click="showModifyRoomModal = false" class="action-button">Cancel</button>
-            
-              </div>
-              </form>
+          <label>Equipment:</label>
+          <div class="equipment-checkboxes">
+            <label><input type="checkbox" v-model="modifiedRoom.equipment.Projector"> Projector</label>
+            <label><input type="checkbox" v-model="modifiedRoom.equipment.Whiteboard"> Whiteboard</label>
+            <label><input type="checkbox" v-model="modifiedRoom.equipment.Microphone"> Microphone</label>
+            <label><input type="checkbox" v-model="modifiedRoom.equipment.Computer"> Computer</label>
+            <label><input type="checkbox" v-model="modifiedRoom.equipment.PowerOutlets"> Power Outlets</label>
+            <label><input type="checkbox" v-model="modifiedRoom.equipment.WiFi"> Wi-Fi</label>
           </div>
-        </div>
+
+          <label for="modify-room-access">Access:</label>
+          <select id="modify-room-access" v-model="modifiedRoom.access" required>
+            <option value="0">All</option>
+            <option value="1">Staff Only</option>
+            <option value="2">Selected Staff Only</option>
+          </select>
+
+          <label for="modify-room-image">Image:</label>
+          <input
+              type="file"
+              id="modify-room-image"
+              @change="handleImageUpload"
+              accept="image/*"
+              title="Select room image"
+              class="custom-file-input"
+          >
+          <div v-if="modifiedRoom.image_url" class="image-preview">
+            <img :src="modifiedRoom.image_url" alt="Current Image" class="preview-img">
+          </div>
+
+          <label for="modify-room-information">Information (optional):</label>
+          <textarea id="modify-room-information" v-model="modifiedRoom.information"></textarea>
+          <div class="room-actions">
+            <button type="submit" class="action-button">Save</button>
+            <button @click="showModifyRoomModal = false" class="action-button">Cancel</button>
+
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -226,7 +217,7 @@ export default {
     },
     async fetchRoomData() {
       try {
-        const response = await fetch(this.backendAddress+'/getRooms');
+        const response = await fetch(this.backendAddress + '/getRooms');
         const data = await response.json();
         this.rooms = data.data;
       } catch (error) {
@@ -252,7 +243,7 @@ export default {
       };
 
       try {
-        const response = await fetch(this.backendAddress+'/rooms', {
+        const response = await fetch(this.backendAddress + '/rooms', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -311,7 +302,7 @@ export default {
       };
       console.log(this.modifiedRoom.id)
       try {
-        const response = await fetch(this.backendAddress+`/rooms/${this.modifiedRoom.id}`, {
+        const response = await fetch(this.backendAddress + `/rooms/${this.modifiedRoom.id}`, {
           method: 'PUT',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(room)
@@ -339,7 +330,7 @@ export default {
         const roomId = room.id;
 
         try {
-          const response = await fetch(this.backendAddress+`/rooms/${roomId}`, {
+          const response = await fetch(this.backendAddress + `/rooms/${roomId}`, {
             method: 'DELETE',
           });
           const data = await response.json();
@@ -368,18 +359,16 @@ export default {
       }
 
       const formData = new FormData();
-      formData.append("uid", "af7c509daf8264c6f539e62ad1a63fbd"); // UID
-      formData.append("token", "0ee94f5bd8b1a55cddf0e1a5d5436785"); // Token
-      formData.append("file", file); // image file
+      formData.append("uid", "af7c509daf8264c6f539e62ad1a63fbd");
+      formData.append("token", "0ee94f5bd8b1a55cddf0e1a5d5436785");
+      formData.append("file", file);
 
       try {
-        // post request
         const response = await fetch("https://www.imgurl.org/api/v2/upload", {
           method: "POST",
           body: formData,
         });
 
-        // response handling
         const result = await response.json();
         console.log(result)
         console.log(result.code)
@@ -428,14 +417,15 @@ export default {
 </script>
 
 <style scoped>
-.mobile-panel {
+.room-management-mobile-container {
+  font-family: 'Cambria', serif;
   display: flex;
   flex-direction: column;
   background-color: #eceef8;
   width: 100%;
-  min-height: 200vh;
-  height: 100%;
+  height: 100vh;
   padding: 20px;
+  overflow: auto;
 }
 
 .title-container {
@@ -454,7 +444,7 @@ export default {
   color: #555;
 }
 
-.add-button {
+.add-button-container {
   margin: 20px 0;
   padding: 10px 20px;
   border: none;
@@ -468,42 +458,19 @@ export default {
 }
 
 .action-button {
+  font-weight: bold;
   padding: 10px 20px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.2s ease;
-  background: #fff;
-  color: #333;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.add-button:hover:not(:disabled),
-.action-button:hover:not(:disabled){
-  background: #3155ef;
-  color: #fff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(49, 85, 239, 0.3);
-}
-
-.add-button:active:not(:disabled),
-.action-button:active:not(:disabled) {
-  transform: translateY(0);
+  background-color: #3155ef;
+  color: #FFFFFF;
 }
 
 
-.content-wrapper {
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-}
-
-body {
-  font-family: 'Cambria', serif;
-}
-
-.room-list {
+.room-list-container {
   display: grid;
   gap: 15px;
   margin-bottom: 50px;
@@ -513,7 +480,7 @@ body {
   background: #fff;
   border-radius: 12px;
   padding: 15px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .room-image {
@@ -536,7 +503,7 @@ body {
 }
 
 .room-name {
-  font-size: 18px;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #2c3e50;
 }
@@ -578,7 +545,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   padding: 15px;
@@ -586,10 +553,11 @@ body {
 
 .modal-content {
   background: white;
-  width: 100%;
-  max-height: 90vh;
+  width: 90%;
+  max-height: 80vh;
   overflow-y: auto;
   padding: 20px;
+  margin: auto;
   border-radius: 12px;
 }
 

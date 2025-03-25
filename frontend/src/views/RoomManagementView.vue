@@ -4,9 +4,9 @@
       <h1>Room Management</h1>
       <div class="content-wrapper">
         <div class="admin-actions">
-          <button @click="showAddRoomModal = true" class="add-button">Add Room</button>
+          <button @click="showAddRoomModal = true" class="add-button-container">Add Room</button>
         </div>
-        <div class="room-list">
+        <div class="room-list-container">
           <div class="room-items-container">
             <div
                 v-for="(room, index) in paginatedRooms"
@@ -247,7 +247,7 @@ export default {
     },
     async fetchRoomData() {
       try {
-        const response = await fetch(this.backendAddress+'/getRooms');
+        const response = await fetch(this.backendAddress + '/getRooms');
         const data = await response.json();
         this.rooms = data.data;
       } catch (error) {
@@ -273,7 +273,7 @@ export default {
       };
 
       try {
-        const response = await fetch(this.backendAddress+'/rooms', {
+        const response = await fetch(this.backendAddress + '/rooms', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -331,7 +331,7 @@ export default {
       };
       console.log(this.modifiedRoom.id)
       try {
-        const response = await fetch(this.backendAddress+`/rooms/${this.modifiedRoom.id}`, {
+        const response = await fetch(this.backendAddress + `/rooms/${this.modifiedRoom.id}`, {
           method: 'PUT',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(room)
@@ -359,7 +359,7 @@ export default {
         const roomId = room.id;
 
         try {
-          const response = await fetch(this.backendAddress+`/rooms/${roomId}`, {
+          const response = await fetch(this.backendAddress + `/rooms/${roomId}`, {
             method: 'DELETE',
           });
           const data = await response.json();
@@ -459,7 +459,6 @@ export default {
 };
 
 </script>
-
 <style scoped>
 * {
   margin: 0;
@@ -502,7 +501,7 @@ h1 {
   padding-right: 20px;
 }
 
-.room-list {
+.room-list-container {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -583,7 +582,7 @@ h1 {
 }
 
 
-.add-button {
+.add-button-container {
   padding: 10px 20px;
   border: none;
   border-radius: 8px;
@@ -608,7 +607,7 @@ h1 {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.add-button:hover:not(:disabled),
+.add-button-container:hover:not(:disabled),
 .action-button:hover:not(:disabled),
 .pagination-button:hover:not(:disabled) {
   background: #3155ef;
@@ -617,7 +616,7 @@ h1 {
   box-shadow: 0 4px 10px rgba(49, 85, 239, 0.3);
 }
 
-.add-button:active:not(:disabled),
+.add-button-container:active:not(:disabled),
 .action-button:active:not(:disabled),
 .pagination-button:active:not(:disabled) {
   transform: translateY(0);
