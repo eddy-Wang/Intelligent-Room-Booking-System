@@ -1,14 +1,18 @@
 import time
 from datetime import datetime
 
+from Demos.FileSecurityTest import permissions
 from flask import Blueprint, request, jsonify
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code, \
     get_user_reservations, cancel_reservation, fetch_users, fetch_rooms_id_and_name, fetch_bookings, \
     update_booking_status, \
     delete_booking, modify_booking, add_room, modify_room, delete_room, fetch_room, update_room_issue_report, \
-    create_room_issue_report, delete_room_issue_report, get_all_room_issue_reports, sending_booking_email
+    create_room_issue_report, delete_room_issue_report, get_all_room_issue_reports, sending_booking_email, \
+    send_conflict_email, send_ban_email
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
-    get_all_room_data_for_user, add_room_issue, set_room_issue_reviewed, set_room_issue_report_info, get_booking_by_id
+    get_all_room_data_for_user, add_room_issue, set_room_issue_reviewed, set_room_issue_report_info, get_booking_by_id, \
+    get_bad_user_list, reset_missed_times_for_user, get_db_connection, get_permission_by_email
+
 
 bp = Blueprint('routes', __name__)
 
@@ -104,7 +108,6 @@ def requestRoomDetails():
     room_id = request.args.get('roomId')
 
     room_data = get_room_detailed(room_id)
-    print(room_data)
     if room_data:
         return create_response('001', 'Room found!', room_data)
     else:
@@ -185,7 +188,15 @@ def get_bookings():
 # Update booking status route
 @bp.route('/bookings/<int:id>', methods=['PUT'])
 def update_booking(id):
-    status = request.json.get('status')
+    data=request.json
+    status = data.get('status')
+
+    message=''
+    if data.get('cancel_reason') is not None:
+        print("cancel reason")
+
+        message = data.get('cancel_reason')
+        print(message)
     if not status:
         return create_response('400', 'Status is required.')
 
@@ -198,7 +209,7 @@ def update_booking(id):
         time = this_booking.get('time')
         purpose = this_booking.get('purpose')
 
-        sending_booking_email(user_email, room_id, date, time, status, purpose)
+        sending_booking_email(user_email, room_id, date, time, status, purpose, message)
         return create_response('000', 'Booking updated successfully!')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
@@ -284,7 +295,10 @@ def book_room():
             conn.close()
             return create_response('006', 'Room not found.')
 
-        status = "Confirmed" if room_access == 0 else "Pending"
+        permission = get_permission_by_email(user_email)
+        print(permission)
+        status = "Confirmed" if room_access == 0 or permission == "Admin" else "Pending"
+        print(status)
         time_str = ",".join(map(str, time_slots))
         booking_id = str(int(time.time() * 1000))
 
@@ -334,6 +348,84 @@ def getRooms():
     else:
         return create_response('002', message)
 
+@bp.route('/ban', methods=['POST', 'OPTIONS'])
+def set_ban_period():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.get_json()
+    required_fields = ['room_id', 'date', 'time']
+    for field in required_fields:
+        if field not in data or not data[field]:
+            return create_response('400', f'Missing required fields: {field}')
+
+    room_id = data['room_id']
+    date = data['date']
+    time_slots = list(map(int, data['time']))
+    print(time_slots)
+    time_str = ','.join(map(str, sorted(set(time_slots))))
+    print(time_str)
+    purpose = data['purpose'] if 'purpose' in data else 'Banned from administrator'
+    user_email = data['user_email']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT booking_id FROM booking 
+            WHERE room_id=%s 
+              AND date=%s 
+              AND time=%s 
+              AND status='Banned'
+        """, (room_id, date, time_str))
+        if cursor.fetchone():
+            return create_response('409', 'This prohibited time period already exists')
+
+        booking_id = str(int(time.time() * 1000))
+        cursor.execute("""
+            INSERT INTO booking 
+            (booking_id, user_email, room_id, date, time, purpose, status)
+            VALUES (%s, %s, %s, %s, %s, %s, 'Banned')
+        """, (booking_id, user_email, room_id, date, time_str, purpose))
+
+        cursor.execute("""
+            SELECT booking_id, user_email, time 
+            FROM booking 
+            WHERE room_id=%s 
+              AND date=%s 
+              AND status IN ('Pending','Confirmed')
+        """, (room_id, date))
+
+        conflict_count = 0
+        for (bid, email, exist_time) in cursor.fetchall():
+            exist_slots = set(map(int, exist_time.split(',')))
+            if exist_slots & set(time_slots):
+                cursor.execute("""
+                    UPDATE booking 
+                    SET status='Declined' 
+                    WHERE booking_id=%s
+                """, (bid,))
+                conflict_count += 1
+
+                send_conflict_email(email, room_id, date, exist_time, purpose)
+
+
+        conn.commit()
+
+        send_ban_email(user_email, room_id, date, time_str, purpose)
+
+        return create_response('200', 'Prohibited time period set successfully', {
+            'conflict_count': conflict_count,
+            'ban_id': booking_id
+        })
+
+
+    except Exception as e:
+        conn.rollback()
+        return create_response('500', f'server error: {str(e)}')
+    finally:
+        cursor.close()
+        conn.close()
 
 @bp.route('/rooms/<int:room_id>', methods=['PUT'])
 def modify_room_route(room_id):
@@ -480,3 +572,27 @@ def delete_report(timestamp):
             return create_response('400', 'Failed to delete report.')
     except Exception as e:
         return create_response('500', f'Error: {str(e)}')
+
+@bp.route('/bad_users', methods=['GET'])
+def get_bad_users():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    resBool, resData = get_bad_user_list()
+
+    if resBool:
+        return create_response('000',"Get bad users successfully!",resData)
+    else:
+        return create_response('500',"Error: "+resData)
+
+@bp.route('/reset_missed_times/<string:user_email>', methods=['GET'])
+def reset_missed_times(user_email):
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    resBool, resData = reset_missed_times_for_user(user_email)
+
+    if resBool:
+        return create_response('000',resData)
+    else:
+        return create_response('500',"Error: "+resData)
