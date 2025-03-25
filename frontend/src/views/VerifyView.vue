@@ -69,7 +69,7 @@ const handleVerify = async () => {
   console.log(email)
   if (isValidCode.value) {
     try {
-      const response = await fetch(backendAddress+'/verify-code', {
+      const response = await fetch(backendAddress + '/verify-code', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -95,13 +95,13 @@ const handleVerify = async () => {
 
         if (window.innerWidth <= 768) {
           if (userPermission === "Admin") {
-            await router.push({path: "../adminIndexMobile"})
+            await router.push({path: "../AdminEnterPageMobile"})
           } else {
             await router.push({path: "../IndexMobile"})
           }
         } else {
           if (userPermission === "Admin") {
-            await router.push({path: "../adminIndex"})
+            await router.push({path: "../AdminIndex"})
           } else {
             await router.push({path: "../Index"})
           }
@@ -355,7 +355,6 @@ body {
     text-align: center;
   }
 
-  /* 将登录框层级调至最高 */
   .left-content {
     position: relative;
     z-index: 3;
@@ -445,7 +444,7 @@ body {
     }
   }
 
-  /* 背景图片铺满页面，并添加黑色半透明蒙版 */
+
   .right-content {
     position: absolute;
     top: 0;

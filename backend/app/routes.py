@@ -1,14 +1,12 @@
 import time
-from datetime import datetime
 
-from Demos.FileSecurityTest import permissions
 from flask import Blueprint, request, jsonify
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code, \
     get_user_reservations, cancel_reservation, fetch_users, fetch_rooms_id_and_name, fetch_bookings, \
     update_booking_status, \
     delete_booking, modify_booking, add_room, modify_room, delete_room, fetch_room, update_room_issue_report, \
     create_room_issue_report, delete_room_issue_report, get_all_room_issue_reports, sending_booking_email, \
-    send_conflict_email, send_ban_email
+    send_conflict_email, send_ban_email, booking_check_in_service
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
     get_all_room_data_for_user, add_room_issue, set_room_issue_reviewed, set_room_issue_report_info, get_booking_by_id, \
     get_bad_user_list, reset_missed_times_for_user, get_db_connection, get_permission_by_email
@@ -596,3 +594,15 @@ def reset_missed_times(user_email):
         return create_response('000',resData)
     else:
         return create_response('500',"Error: "+resData)
+
+@bp.route('/booking_check_in/<string:booking_id>', methods=['GET'])
+def booking_check_in(booking_id):
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    resBool, resData = booking_check_in_service(booking_id)
+
+    if resBool:
+        return create_response('000', resData)
+    else:
+        return create_response('500', "Error: " + resData)
