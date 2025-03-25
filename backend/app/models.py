@@ -114,7 +114,7 @@ def get_all_booking_records():
     cursor = connection.cursor()
 
     try:
-        query = "SELECT * FROM booking WHERE status = 'Confirmed'"
+        query = "SELECT * FROM booking WHERE status IN ('Confirmed', 'Banned')"
         cursor.execute(query)
         results = cursor.fetchall()
     finally:
@@ -313,7 +313,7 @@ def get_booking_record_of_a_room(room_id):
     cursor = connection.cursor()
 
     try:
-        query = "SELECT * FROM booking WHERE room_id = %s AND status ='Confirmed'"
+        query = "SELECT * FROM booking WHERE room_id = %s AND status IN ('Confirmed', 'Banned')"
         cursor.execute(query, (room_id,))
         results = cursor.fetchall()
     finally:
@@ -390,6 +390,75 @@ def set_room_issue_report_info(report_id, value):
         return True, "Set the info of issue report successfully!"
     except Error as e:
         return False, str(e)
+    finally:
+        cursor.close()
+        connection.close()
+
+def get_bad_user_list():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "SELECT user_email, name, added_at, missed_time FROM user_blacklist LEFT JOIN users ON user_blacklist.user_email = users.email"
+        cursor.execute(query)
+        res = cursor.fetchall()
+        ret = []
+
+        for item in res:
+            email = item[0]
+            name = item[1]
+            db_time = item[2]
+            missed_time = item[3]
+
+            result = {
+                "user_email": email,
+                "user_name": name,
+                "added_at": db_time,
+                "missed_time": missed_time
+            }
+            ret.append(result)
+
+        return True, ret
+
+    except Error as e:
+        return False, str(e)
+    finally:
+        cursor.close()
+        connection.close()
+
+def reset_missed_times_for_user(user_email):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = "DELETE FROM user_blacklist WHERE user_email = %s"
+        cursor.execute(query, (user_email,))
+        connection.commit()
+
+        return True, "Reset successfully!"
+    except Error as e:
+        return False, str(e)
+    finally:
+        cursor.close()
+        connection.close()
+
+def get_permission_by_email(email):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    try:
+        query = "SELECT permission FROM users WHERE email = %s"
+        cursor.execute(query, (email,))
+        res = cursor.fetchone()
+
+        if res:
+            return res[0]
+        else:
+            return None
+
+    except Exception as e:
+        print("Error fetching permission:", e)
+        return None
+
     finally:
         cursor.close()
         connection.close()

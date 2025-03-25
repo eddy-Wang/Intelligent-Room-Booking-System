@@ -31,12 +31,10 @@ def send_verification_email(user_email, code):
         print("Error sending email:", e)
 
 
-def sending_booking_email(user_email, room_id, date, time, status, purpose):
+def sending_booking_email(user_email, room_id, date, time, status, purpose, message=''):
     """send booking email based on status"""
-    subject = "Room Booking Status"
 
     if user_email is None or room_id is None or purpose is None:
-        print(user_email, room_id, purpose)
         raise ValueError("Error: Missing essential booking details.")
 
     room_name = fetch_name_by_id(room_id)
@@ -55,6 +53,7 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose):
     time_slots = [time_mapping[time_idx] for time_idx in sorted_times]
     formatted_time = ', '.join(time_slots)
 
+
     if date is None:
         raise ValueError("Error: Received 'None' for date.")
 
@@ -66,6 +65,17 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose):
         formatted_date = date_obj.strftime('%Y-%m-%d')
     except ValueError:
         formatted_date = date
+
+    subject_map = {
+        'Confirmed': 'Room Booking Confirmation',
+        'Pending': 'Room Booking Pending Approval',
+        'Ban': 'Prohibited Time Period Set Successfully',
+        'Banned': 'Room Booking Cancelled Due to Time Restriction',
+        'Declined': 'Room Booking Declined',
+        'Modify': 'Room Booking Modification Notice',
+        'CancelByUser': 'Room Booking Cancellation Confirmation'
+    }
+    subject = subject_map.get(status, 'System notification')
 
     if status == "Confirmed":
         body = f"""
@@ -106,6 +116,7 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose):
         Dear User,
 
         Sorry, the administrator has cancelled your booking.
+        Reason: {message}
 
         Booking Details:
         Room ID: {room_name}
@@ -125,7 +136,7 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose):
         Administrator has changed your booking details as following. Please check your new booking details.
 
         Booking Details:
-        Room ID: {room_name}
+        Room name: {room_name}
         Date: {formatted_date}
         Time: {formatted_time}
         Purpose: {purpose}
@@ -145,8 +156,42 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose):
         
         Best regards,
         DIICSU Room Booking Service
+        """
 
-"""
+    elif status == "Banned":
+        body = f"""
+        Dear User,
+        
+        Your booking for the following time slots has been cancelled due to the administrator setting the time slots off-limits: 
+
+        Room name：{room_name}
+        Date：{formatted_date}
+        Time：{formatted_time}
+        Reason：{purpose}
+        
+        If you have any question, please send an email to administrator.
+
+        Best regards,
+        DIICSU Room Booking Service
+    """
+
+    elif status == "Ban":
+        body = f"""
+        Dear User,
+    
+        You have successfully set the following prohibited time periods: 
+    
+        Room name：{room_name}
+        Date：{formatted_date}
+        Time：{formatted_time}
+        Reason：{purpose}
+    
+        Thank you for using booking service.
+    
+        Best regards,
+        DIICSU Room Booking Service
+    """
+
     else:
         body = f"""
         Dear User,
@@ -175,6 +220,15 @@ def remove_verification_code(user_email):
     if user_email in verification_codes:
         del verification_codes[user_email]
 
+
+def send_conflict_email(user_email, room_id, date, conflict_slots, purpose):
+    """Send a conflict email to the user."""
+    status = 'Banned'
+    sending_booking_email(user_email, room_id, date, conflict_slots, status, purpose)
+
+def send_ban_email(user_email, room_id, date, conflict_slots, purpose):
+    status = 'Ban'
+    sending_booking_email(user_email, room_id, date, conflict_slots, status, purpose)
 
 # Get user reservations by email
 def get_user_reservations(email):
@@ -294,7 +348,6 @@ def fetch_bookings():
             "status": row[6]
         }
         bookings.append(booking_data)
-    print(bookings)
     return bookings
 
 

@@ -30,6 +30,7 @@ import MyReservation from '@/views/MyReservation.vue';
 import ReservationManagement from '@/views/ReservationManagement.vue';
 import RoomManagementView from '@/views/RoomManagementView.vue';
 import RoomIssueManagement from '@/views/RoomIssueManagement.vue';
+import BlacklistView from "@/views/BlacklistView.vue";
 
 export default {
   name: 'Index',
@@ -38,7 +39,8 @@ export default {
     MyReservation,
     ReservationManagement,
     RoomManagementView,
-    RoomIssueManagement
+    RoomIssueManagement,
+    BlacklistView,
   },
   data() {
     return {
@@ -50,6 +52,7 @@ export default {
         {icon: 'mdiApplicationEditOutline', component: 'ReservationManagement'},
         {icon: 'mdiTools', component: 'RoomIssueManagement'},
         {icon: 'mdiClipboardTextOutline', component: 'RoomManagementView'},
+        {icon: 'mdiEmoticonPoopOutline', component: 'BlacklistView'},
       ]
     };
   },
