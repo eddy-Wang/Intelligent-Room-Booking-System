@@ -1,6 +1,7 @@
 import time
 from datetime import datetime
 
+from Demos.FileSecurityTest import permissions
 from flask import Blueprint, request, jsonify
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code, \
     get_user_reservations, cancel_reservation, fetch_users, fetch_rooms_id_and_name, fetch_bookings, \
@@ -9,7 +10,7 @@ from .services import generate_verification_code, send_verification_email, verif
     create_room_issue_report, delete_room_issue_report, get_all_room_issue_reports, sending_booking_email
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
     get_all_room_data_for_user, add_room_issue, set_room_issue_reviewed, set_room_issue_report_info, get_booking_by_id, \
-    get_bad_user_list, reset_missed_times_for_user
+    get_bad_user_list, reset_missed_times_for_user, get_permission_by_email
 
 bp = Blueprint('routes', __name__)
 
@@ -293,7 +294,10 @@ def book_room():
             conn.close()
             return create_response('006', 'Room not found.')
 
-        status = "Confirmed" if room_access == 0 else "Pending"
+        permission = get_permission_by_email(user_email)
+        print(permission)
+        status = "Confirmed" if room_access == 0 or permission == "Admin" else "Pending"
+        print(status)
         time_str = ",".join(map(str, time_slots))
         booking_id = str(int(time.time() * 1000))
 
