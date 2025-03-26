@@ -7,73 +7,56 @@
       <div class="filter-container">
         <el-select v-model="roomFilter" placeholder="Filter by Room" clearable>
           <el-option
-              v-for="room in uniqueRooms"
-              :key="room"
-              :label="room"
-              :value="room"
+            v-for="room in uniqueRooms"
+            :key="room"
+            :label="room"
+            :value="room"
           />
         </el-select>
 
         <el-select v-model="dateFilter" placeholder="Filter by Date" clearable>
           <el-option
-              v-for="date in uniqueDates"
-              :key="date"
-              :label="date"
-              :value="date"
+            v-for="date in uniqueDates"
+            :key="date"
+            :label="date"
+            :value="date"
           />
         </el-select>
 
         <el-select v-model="statusFilter" placeholder="Filter by Status" clearable>
           <el-option
-              v-for="status in uniqueStatuses"
-              :key="status"
-              :label="status"
-              :value="status"
+            v-for="status in uniqueStatuses"
+            :key="status"
+            :label="status"
+            :value="status"
           />
         </el-select>
       </div>
 
-            <div class="content-wrapper">
-                <div class="reservation-list">
-                    <div
-                            v-for="(reservation, index) in paginatedReservations"
-                            :key="index"
-                            class="reservation-item"
-                    >
-                        <div class="reservation-info">
-                            <div class="reservation-name">{{ reservation.name }}</div>
-                            <div class="reservation-time">
-                                {{ reservation.date.split('00:00:00')[0] + convertTimeStrToTimeSlots(reservation.time) }}
-                            </div>
-                            <div class="reservation-capacity">Capacity: {{ reservation.capacity }}</div>
-                            <div class="reservation-purpose">{{ reservation.purpose }}</div>
-                        </div>
-                        <div class="status-and-actions">
-                            <div class="reservation-status">{{ reservation.status }}</div>
-                            <div class="reservation-actions" v-if="reservation.status.toString() === 'Confirmed'">
-                                <button @click="checkIn(index)" class="action-button">Check In</button>
-                                <button @click="cancelReservation(index)" class="action-button">Cancel</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="pagination">
-                        <button @click="prevPage" :disabled="currentPage === 1" class="pagination-button">Previous</button>
-                        <button @click="nextPage" :disabled="currentPage === totalPages" class="pagination-button">Next</button>
-                    </div>
-                </div>
-
-                <div class="user-info">
-                    <div class="user-avatar">
-                        <img :src="userAvatar" alt="User Avatar"/>
-                    </div>
-                    <div class="user-email">{{ user.name }}</div>
-                    <div class="user-email">{{ user.email }}</div>
-                    <div class="user-role">{{ user.permission }}</div>
-                    <button @click="downloadCalendar" class="download-button">Subscribe to Calendar</button>
-                </div>
-
+      <div class="content-wrapper">
+        <div class="reservation-list">
+          <div
+            v-for="(reservation, index) in paginatedReservations"
+            :key="reservation.booking_id"
+            class="reservation-item"
+          >
+            <div class="reservation-info">
+              <div class="reservation-name">{{ reservation.name }}</div>
+              <div class="reservation-time">
+                {{ reservation.date.split('00:00:00')[0] + convertTimeStrToTimeSlots(reservation.time) }}
+              </div>
+              <div class="reservation-capacity">Capacity: {{ reservation.capacity }}</div>
+              <div class="reservation-purpose">{{ reservation.purpose }}</div>
+            </div>
+            <div class="status-and-actions">
+              <div class="reservation-status">{{ reservation.status }}</div>
+              <div v-if="reservation.status === 'Confirmed'" class="reservation-actions">
+                <button @click="checkIn(index)" class="action-button">Check In</button>
+                <button @click="cancelReservation(index)" class="action-button">Cancel</button>
+              </div>
             </div>
           </div>
+
           <div class="pagination">
             <button @click="prevPage" :disabled="currentPage === 1" class="pagination-button">Previous</button>
             <button @click="nextPage" :disabled="currentPage === totalPages" class="pagination-button">Next</button>
@@ -82,7 +65,7 @@
 
         <div class="user-info">
           <div class="user-avatar">
-            <img :src="userAvatar" alt="User Avatar"/>
+            <img :src="userAvatar" alt="User Avatar" />
           </div>
           <div class="user-email">{{ user.name }}</div>
           <div class="user-email">{{ user.email }}</div>
@@ -90,29 +73,25 @@
           <button @click="subscribeCalendar" class="download-button">Subscribe to Calendar</button>
           <button @click="downloadCalendar" class="download-button">Download the Calendar</button>
         </div>
-        <!-- Import Calendar Instructions Dialog -->
-        <el-dialog
-            v-model="instructionsDialogVisible"
-            title="Import Calendar Instructions"
-            width="50%"
-        >
-          <el-form label-width="120px">
-              <el-input
-                  v-model="instructionsText"
-                  type="textarea"
-                  :rows="7"
-                  readonly
-              />
-          </el-form>
-
-          <template #footer>
-            <el-button @click="instructionsDialogVisible = false">Close</el-button>
-          </template>
-        </el-dialog>
       </div>
+
+      <!-- Import Calendar Instructions Dialog -->
+      <el-dialog
+        v-model="instructionsDialogVisible"
+        title="Import Calendar Instructions"
+        width="50%"
+      >
+        <el-form label-width="120px">
+          <el-input v-model="instructionsText" type="textarea" :rows="7" readonly />
+        </el-form>
+        <template #footer>
+          <el-button @click="instructionsDialogVisible = false">Close</el-button>
+        </template>
+      </el-dialog>
     </div>
   </div>
 </template>
+
 <script>
 import {getCurrentInstance} from "vue";
 import {ElMessage} from "element-plus";
