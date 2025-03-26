@@ -179,7 +179,6 @@ export default {
 
       if (this.bookings[dateKey]) {
         this.timeSlots = this.timeSlots.map((slot, index) => {
-          // 如果是今天且时间段已过，设为禁用(0)
           const isPast = selectedDate.getTime() === today.getTime() &&
               this.isSlotDisabled(slot, index);
 
@@ -190,7 +189,6 @@ export default {
         });
       } else {
         this.timeSlots = this.timeSlots.map((slot, index) => {
-          // 如果是今天且时间段已过，设为禁用(0)
           const isPast = selectedDate.getTime() === today.getTime() &&
               this.isSlotDisabled(slot, index);
 
