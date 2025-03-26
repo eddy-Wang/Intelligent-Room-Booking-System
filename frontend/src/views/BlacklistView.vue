@@ -1,7 +1,7 @@
 <template>
   <div class="room-repair-handling">
     <div class="header">
-      <h2 class="page-title">User Black List</h2>
+      <h2 class="page-title">User Blacklist Management</h2>
     </div>
 
     <el-card class="custom-card">

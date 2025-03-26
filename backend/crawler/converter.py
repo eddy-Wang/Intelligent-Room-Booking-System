@@ -61,9 +61,9 @@ def get_room_id(room_number):
     return None
 
 class CSVToDatabaseConverter:
-    def __init__(self, csv_dir="classroom_schedules"):
+    def __init__(self):
         """Initialize the converter with directory for CSV files."""
-        self.csv_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "classroom_schedules")
+        self.csv_dir = "classroom_schedules"
         # Dictionary to store unique (room_id, date) combinations and their sections
         self.data_dict = {}
     
@@ -293,13 +293,13 @@ class CSVToDatabaseConverter:
 
 def main():
     # Initialize converter
-    converter = CSVToDatabaseConverter(csv_dir=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "classroom_schedules"))
+    converter = CSVToDatabaseConverter()
     
     # Process all files
     converter.process_all_files()
     
     # Save to CSV
-    converter.save_to_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "all_lessons.csv"))
+    converter.save_to_csv("all_lessons.csv")
     
     return 0
 

@@ -69,7 +69,7 @@ const handleVerify = async () => {
   console.log(email)
   if (isValidCode.value) {
     try {
-      const response = await fetch(backendAddress+'/verify-code', {
+      const response = await fetch(backendAddress + '/verify-code', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -95,13 +95,13 @@ const handleVerify = async () => {
 
         if (window.innerWidth <= 768) {
           if (userPermission === "Admin") {
-            await router.push({path: "../adminIndexMobile"})
+            await router.push({path: "../AdminEnterPageMobile"})
           } else {
             await router.push({path: "../IndexMobile"})
           }
         } else {
           if (userPermission === "Admin") {
-            await router.push({path: "../adminIndex"})
+            await router.push({path: "../AdminIndex"})
           } else {
             await router.push({path: "../Index"})
           }
@@ -255,7 +255,8 @@ body {
   }
 
   .verify-button {
-    background-image: linear-gradient(to right, #319efd, #9ed2ff);
+    background: #319efd;
+    color: #FFFFFF;
     box-shadow: 0 4px 15px 0 rgba(41, 44, 225, 0.75);
     border: 0;
     margin: 20px auto;
@@ -275,8 +276,9 @@ body {
     &:before {
       content: '';
       display: block;
+      background: linear-gradient(to left, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.4) 50%);
       background-size: 210% 100%;
-      background: linear-gradient(to left, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.4) 50%) right bottom;
+      background-position: right bottom;
       height: 100%;
       width: 100%;
       position: absolute;
@@ -289,7 +291,7 @@ body {
       -webkit-transition: all 1s;
     }
 
-    &:hover {
+    &:hover:not(.button-disabled) {
       transform: translateY(-2px);
       box-shadow: 0 6px 25px rgba(79, 172, 254, 0.9);
 
@@ -297,13 +299,22 @@ body {
         background-position: left bottom;
       }
     }
+
+    &:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 10px rgba(79, 172, 254, 0.6);
+    }
+  }
+
+  .button-text {
+    transition: opacity 0.3s ease;
   }
 
   .button-disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    background: rgba(255, 255, 255, 0.8);
-  }
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: rgba(255, 255, 255, 0.8);
+}
 }
 
 .right-content {
@@ -344,7 +355,6 @@ body {
     text-align: center;
   }
 
-  /* 将登录框层级调至最高 */
   .left-content {
     position: relative;
     z-index: 3;
@@ -434,7 +444,7 @@ body {
     }
   }
 
-  /* 背景图片铺满页面，并添加黑色半透明蒙版 */
+
   .right-content {
     position: absolute;
     top: 0;

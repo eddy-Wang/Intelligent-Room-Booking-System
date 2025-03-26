@@ -38,8 +38,7 @@ class ClassroomScheduleScraper:
         self.driver = webdriver.Chrome(options=chrome_options)
         
         # Create output directory
-        # 第29行左右，在 __init__ 方法中
-        self.output_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "classroom_schedules")
+        self.output_dir = "classroom_schedules"
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
 
@@ -315,8 +314,8 @@ def main():
     """Main function to run the scraper"""
     try:
         # Login credentials
-        USERNAME = "7802220227"
-        PASSWORD = "040325ming"
+        USERNAME = "ADD_YOUR_CSU_ID_HERE"  # Replace with your CSU student ID
+        PASSWORD = "ADD_YOUR_CSU_PASSWORD_HERE"  # Replace with your CSU password
         
         # Initialize and run scraper
         scraper = ClassroomScheduleScraper(USERNAME, PASSWORD)

@@ -29,9 +29,11 @@
           <div class="time-slots-grid">
             <button
                 v-for="(slot, index) in timeSlots"
-                :key="index"
-                :disabled="slot.status === 0"
-                :class="['time-slot-button', { 'selected': slot.status === 2 }]"
+                :disabled="slot.status === 0 || isSlotDisabled(slot, index)"
+                :class="['time-slot-button', {
+      'selected': slot.status === 2,
+      'disabled': slot.status === 0 || isSlotDisabled(slot, index)
+    }]"
                 @click="toggleSlot(index)"
             >
               {{ formatTime(slot.start) }} - {{ formatTime(slot.end) }}
@@ -66,14 +68,14 @@ export default {
       console.log("new:", newVal);
 
       const combinedData = [...newVal, ...this.lessonData];
-      console.log("combined:",combinedData)
+      console.log("combined:", combinedData)
       this.updateBookings(combinedData);
 
       this.handleDateSelection();
 
     },
     roomSelected(newVal, oldVal) {
-      console.log("newVal:",newVal)
+      console.log("newVal:", newVal)
       if (newVal === 0) {
         this.timeSlots.forEach((timeSlot) => {
           timeSlot.status = 0
@@ -164,24 +166,37 @@ export default {
       return this.selectedDate && this.formatDate(this.selectedDate) === date;
     },
     handleDateSelection() {
-      console.log(this.selectedDate)
       if (!this.selectedDate) {
         this.timeSlots = this.timeSlots.map(slot => ({...slot, status: 1}));
-        console.log("return")
         return;
       }
-      console.log("timeSlots",this.timeSlots)
-
 
       const dateKey = this.formatDate(this.selectedDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const selectedDate = new Date(this.selectedDate);
+      selectedDate.setHours(0, 0, 0, 0);
 
       if (this.bookings[dateKey]) {
-        this.timeSlots = this.timeSlots.map((slot, index) => ({
-          ...slot,
-          status: this.bookings[dateKey][index]
-        }));
+        this.timeSlots = this.timeSlots.map((slot, index) => {
+          const isPast = selectedDate.getTime() === today.getTime() &&
+              this.isSlotDisabled(slot, index);
+
+          return {
+            ...slot,
+            status: isPast ? 0 : this.bookings[dateKey][index]
+          };
+        });
       } else {
-        this.timeSlots = this.timeSlots.map(slot => ({...slot, status: 1}));
+        this.timeSlots = this.timeSlots.map((slot, index) => {
+          const isPast = selectedDate.getTime() === today.getTime() &&
+              this.isSlotDisabled(slot, index);
+
+          return {
+            ...slot,
+            status: isPast ? 0 : 1
+          };
+        });
       }
 
       this.emitSelection();
@@ -239,6 +254,30 @@ export default {
         });
       });
     },
+
+    isSlotDisabled(slot, index) {
+      if (!this.selectedDate) return true;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);  // 00:00:00
+
+      const selectedDate = new Date(this.selectedDate);
+      selectedDate.setHours(0, 0, 0, 0);
+
+
+      if (selectedDate < today) return true;
+
+      if (selectedDate > today) return false;
+
+
+      const now = new Date();
+      console.log("now",now)
+      const [hours, minutes] = slot.start.split(':');
+      const slotTime = new Date();
+      slotTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      return slotTime < now;
+    }
   }
 };
 </script>

@@ -52,7 +52,7 @@ export default {
         {icon: 'mdiApplicationEditOutline', component: 'ReservationManagement'},
         {icon: 'mdiTools', component: 'RoomIssueManagement'},
         {icon: 'mdiClipboardTextOutline', component: 'RoomManagementView'},
-        {icon: 'mdiEmoticonPoopOutline', component: 'BlacklistView'},
+        {icon: 'mdiFileCancelOutline', component: 'BlacklistView'},
       ]
     };
   },
