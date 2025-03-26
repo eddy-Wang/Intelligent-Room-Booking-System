@@ -6,10 +6,12 @@ from app import create_app
 
 app = create_app()
 
+
 def run_crawler_periodically():
     while True:
         subprocess.run(["python", os.path.join("crawler", "main.py")])
         time.sleep(3600)
+
 
 if __name__ == '__main__':
     # only run crawler in the subprocess that is actually running

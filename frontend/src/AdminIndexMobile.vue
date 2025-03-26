@@ -20,13 +20,15 @@
 import RoomManagementViewMobile from "@/views/RoomManagementViewMobile.vue";
 import RoomIssueManagementMobile from "@/views/RoomIssueManagementMobile.vue";
 import ReservationManagementMobile from "@/views/ReservationManagementMobile.vue";
+import BlacklistViewMobile from "@/views/BlacklistViewMobile.vue";
 
 export default {
   name: 'IndexMobile',
   components: {
     RoomManagementViewMobile,
     RoomIssueManagementMobile,
-    ReservationManagementMobile
+    ReservationManagementMobile,
+    BlacklistViewMobile,
   },
   data() {
     return {
@@ -35,7 +37,8 @@ export default {
         {icon: 'mdiArrowLeft'},
         {icon: 'mdiApplicationEditOutline', component: 'ReservationManagementMobile'},
         {icon: 'mdiTools', component: 'RoomIssueManagementMobile'},
-        {icon: 'mdiClipboardTextOutline', component: 'RoomManagementViewMobile'}
+        {icon: 'mdiClipboardTextOutline', component: 'RoomManagementViewMobile'},
+        {icon: 'mdiFileCancelOutline', component: 'BlacklistViewMobile'}
       ]
     };
   },
