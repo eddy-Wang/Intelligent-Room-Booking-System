@@ -11,7 +11,7 @@ from .services import generate_verification_code, send_verification_email, verif
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
     get_all_room_data_for_user, add_room_issue, set_room_issue_reviewed, set_room_issue_report_info, get_booking_by_id, \
     get_bad_user_list, reset_missed_times_for_user, get_db_connection, get_permission_by_email
-
+from .utils import is_user_blacklisted
 
 bp = Blueprint('routes', __name__)
 
@@ -252,6 +252,10 @@ def book_room():
         return '', 200
 
     data = request.get_json()
+    user_email = data.get('user_email', 'test@example.com')
+    if is_user_blacklisted(user_email):
+        return create_response('007', 'you are in the blacklist')
+
     required_fields = ['roomId', 'date', 'timeSlots', 'purpose']
     for field in required_fields:
         if field not in data or not data[field]:
