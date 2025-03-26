@@ -1,9 +1,12 @@
 <template>
   <div class="room-repair-handling">
-    <div class="header">
-      <h2 class="page-title">Room Repair Handling</h2>
-      <el-button class="new-button" type="primary" @click="dialogVisible = true">Report New Issue</el-button>
-    </div>
+      <div class="header">
+          <h2 class="page-title">Room Repair Handling</h2>
+          <div class="button-group">
+              <el-button class="new-button" type="primary" @click="dialogVisible = true">Report New Issue</el-button>
+              <el-button class="export-button" type="success" @click="exportToExcel">Export to Excel</el-button>
+          </div>
+      </div>
     <el-dialog v-model="dialogVisible" title="Report New Issue" width="30%">
       <el-form :model="newReportForm" label-width="120px">
         <el-form-item label="Room Name">
@@ -149,7 +152,37 @@
 import {ref, computed, onMounted, getCurrentInstance} from 'vue';
 import {ElTable, ElTableColumn, ElSelect, ElOption, ElCard, ElButton, ElMessage, ElAutocomplete} from 'element-plus';
 import 'element-plus/dist/index.css';
+import * as XLSX from 'xlsx';
+const timestampToTime = (timestamp) => {
+    const timestampInSeconds = timestamp / 1000;
+    const time = new Date(timestampInSeconds * 1000);
 
+    const chinaOffset = 8 * 60 * 60 * 1000;
+    const chinaTime = new Date(time.getTime() + chinaOffset);
+
+    return chinaTime.toISOString().replace('T', ' ').slice(0, 19);
+};
+const exportToExcel = () => {
+    const dataForExport = filteredReports.value.map(report => {
+        return {
+            'Room Name': getRoomName(report.room_id),
+            'User Email': report.user_email,
+            'Report Info': report.reportInfo,
+            'Status': report.reviewed,
+            'Report time': timestampToTime(report.timestamp)
+        };
+    });
+
+    const ws = XLSX.utils.json_to_sheet(dataForExport);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Repair Reports");
+
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const fileName = `Repair_Reports_${dateStr}.xlsx`;
+
+    XLSX.writeFile(wb, fileName);
+};
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 
@@ -350,7 +383,36 @@ onMounted(() => {
   margin-bottom: 20px;
   padding: 10px;
 }
+.button-group {
+    display: flex;
+    gap: 10px;
+}
 
+.export-button {
+    width: 100%;
+    background-color: #28a745;
+    color: white;
+}
+
+.export-button:hover {
+    background-color: #218838;
+}
+
+.new-button {
+    width: 300%;
+    min-width: 10%;
+    height: 50%;
+    padding: 10px;
+    margin: 0;
+}
+
+.export-button {
+    width: 150%;
+    min-width: 10%;
+    height: 50%;
+    padding: 10px;
+    margin: 0;
+}
 .el-table {
   height: 700px;
   width: 100%;
@@ -411,8 +473,4 @@ onMounted(() => {
   width: 5%;
 }
 
-.new-button {
-  width: 10%;
-  height: 50%;
-}
 </style>
