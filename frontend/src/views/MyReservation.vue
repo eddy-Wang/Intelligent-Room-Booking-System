@@ -381,6 +381,8 @@ h1 {
 }
 
 .reservation-item {
+  height:80%;
+  width:100%;
   background-color: #ffffff;
   border-radius: 20px;
   padding: 40px;
@@ -446,6 +448,7 @@ h1 {
 }
 
 .action-button {
+  height:20%;
   width: 100%;
   padding: 8px 16px;
   border: none;
@@ -468,9 +471,9 @@ h1 {
 }
 
 .user-info {
-  width: 450px;
-  height: 660px;
-  padding: 20px;
+  width: 30%;
+  height: 20%;
+  padding: 80px;
   background-color: #eceef8;
   border-radius: 12px;
   text-align: center;
@@ -478,6 +481,7 @@ h1 {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
 }
 
 .user-avatar {
@@ -557,9 +561,9 @@ h1 {
   color: #fff;
 }
 
-.el-select {
+.el-select{
   border-radius: 10px;
-  width: 23.7%;
-  height: 15%;
+  width:22.5%;
+  height:15%;
 }
 </style>
