@@ -2,7 +2,10 @@
   <div class="booking-management">
     <div class="header">
       <h2 class="page-title">Reservation Management</h2>
-      <el-button class="new-button" type="primary" @click="openLimitUsageDialog">Limit usage time</el-button>
+        <div class="button-group">
+            <el-button class="new-button" type="primary" @click="openLimitUsageDialog">Limit usage time</el-button>
+            <el-button class="export-button" type="success" @click="exportToExcel">Export to Excel</el-button>
+        </div>
     </div>
     <el-card class="custom-card">
       <el-table :data="filteredBookings" border stripe style="width: 100%" class="el-table">
@@ -344,10 +347,39 @@
 </template>
 <script setup>
 import {ref, computed, onMounted, getCurrentInstance} from 'vue';
-
-import {ElTable, ElTableColumn, ElSelect, ElOption, ElCard, ElButton, ElMessage} from 'element-plus';
 import 'element-plus/dist/index.css';
+import * as XLSX from 'xlsx';
 
+
+const exportToExcel = () => {
+    // Prepare the data for export
+    const dataForExport = filteredBookings.value.map(booking => {
+        return {
+            'User': getUserDisplay(booking.user_email),
+            'Room Name': getRoomName(booking.room_id),
+            'Purpose': booking.purpose,
+            'Date': formatDate(booking.date),
+            'Time': convertTimeStrToTimeSlots(booking.time),
+            'Processing State': getProcessingState(booking.status),
+            'Status': booking.status,
+            'Application Time': timestampToTime(booking.booking_id)
+        };
+    });
+
+    // Create worksheet
+    const ws = XLSX.utils.json_to_sheet(dataForExport);
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Reservations");
+
+    // Generate file name with current date
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const fileName = `Reservations_${dateStr}.xlsx`;
+
+    // Export the file
+    XLSX.writeFile(wb, fileName);
+};
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 const userEmail = instance.appContext.config.globalProperties.$user.email;
@@ -774,16 +806,31 @@ const submitLimitUsage = async () => {
 
 <style>
 .header {
-  position: static;
-  padding: 1rem;
-  margin-bottom: 0;
+    display: flex;
+    justify-content: space-between; /* 这将使子元素分别靠左和靠右 */
+    align-items: center; /* 垂直居中 */
+    margin-bottom: 20px;
+    width: 100%; /* 确保 header 占据全部宽度 */
 }
 
 .page-title {
-  font-size: 40px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  padding: 10px;
+    font-size: 40px;
+    font-weight: bold;
+    padding: 10px;
+    margin: 0;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.new-button, .export-button {
+    width: auto;
+    min-width: 10%;
+    height: 50%;
+    padding: 10px;
+    margin: 0; /* 移除按钮的 margin */
 }
 
 .el-table {
@@ -856,12 +903,4 @@ const submitLimitUsage = async () => {
     text-align: center;
 }
 
-.new-button {
-  width: auto;
-  min-width: 10%;
-  height: 50%;
-  padding: 10px;
-  margin-left: 10px;
-  margin-bottom: 10px;
-}
 </style>
