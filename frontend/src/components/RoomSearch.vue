@@ -127,6 +127,7 @@
 import Vue3Datepicker from 'vue3-datepicker';
 import axios from 'axios';
 import {getCurrentInstance, inject} from "vue";
+import {ElMessage} from "element-plus";
 
 export default {
   name: 'RoomSearch',
@@ -342,17 +343,19 @@ export default {
         user_email: this.user_email
       };
       try {
-        const response = await axios.post(this.backendAddress+'/bookRoom', bookingData, {
+        const response = await axios.post(this.backendAddress + '/bookRoom', bookingData, {
           headers: {'Content-Type': 'application/json'}
         });
         if (response.data.code === '000') {
-          alert('Booking successful!');
+          ElMessage.info('Booking successful!');
+        } else if (response.data.code === '007') {
+          ElMessage.error('You are currently on the blacklist and cannot make bookings.');
         } else {
-          alert('Booking failed: ' + response.data.message);
+          ElMessage.error('Booking failed: ' + response.data.message);
         }
       } catch (error) {
         console.error('Error booking room:', error);
-        alert('An error occurred while booking the room.');
+        ElMessage.error('An error occurred while booking the room.');
       }
     }
   },
@@ -384,7 +387,7 @@ export default {
   height: 100%;
 }
 
-.panel1{
+.panel1 {
   font-family: 'Cambridge', sans-serif;
   border: none;
   border-radius: 20px;
@@ -398,6 +401,7 @@ export default {
   margin-bottom: 20px;
   height: 53%;
 }
+
 .panel2 {
   font-family: 'Cambridge', sans-serif;
   border: none;
@@ -411,6 +415,7 @@ export default {
   max-width: 400px;
   height: 47%;
 }
+
 .panel-footer1 {
   border: none;
   height: 10%;
@@ -425,6 +430,7 @@ export default {
   border-radius: 0 0 20px 20px;
   width: 100%;
 }
+
 .panel-footer2 {
   border: none;
   height: 12%;
