@@ -6,6 +6,7 @@ import IndexMobile from "@/IndexMobile.vue";
 import LoginView from "@/views/LoginView.vue";
 import AdminIndex from "@/AdminIndex.vue";
 import AdminIndexMobile from "@/AdminIndexMobile.vue";
+import AdminEnterPageMobile from "@/AdminEnterPageMobile.vue";
 
 
 const routes = [
@@ -43,6 +44,11 @@ const routes = [
         path: '/adminIndexMobile',
         name: 'AdminIndexMobile',
         component: AdminIndexMobile
+    },
+    {
+        path: '/adminEnterPageMobile',
+        name: 'AdminEnterPageMobile',
+        component: AdminEnterPageMobile
     }
 ]
 

@@ -66,7 +66,7 @@ const fetchData = async () => {
   try {
     const instance = getCurrentInstance();
     const userPermission = instance.appContext.config.globalProperties.$user.permission;
-    const url = backendAddress+`/allRoom?permission=`+userPermission;
+    const url = backendAddress + `/allRoom?permission=` + userPermission;
     const response = await fetch(url);
     const data = await response.json();
     roomsData.value = data.data;
@@ -111,19 +111,31 @@ const handleFilters = (filters) => {
           });
         case 'date-time':
           if (!filter.value.date || filter.value.slots.length === 0) return true;
-          console.log(filter.value.date)
-          console.log(filter.value.slots)
+          console.log("test filter date", filter.value.date)
+          console.log("slots", filter.value.slots)
           const selectedDate = formatDate(filter.value.date);
 
-          console.log("date:", selectedDate)
-          const hasConflict = room.booking.some(booking => {
-            if (booking.date === selectedDate) {
-              //TODO:class timetable filter
+          console.log("filter date after format:", selectedDate)
+          console.log("booking", room.booking)
+          // Check for booking conflicts
+          const hasBookingConflict = room.booking.some(booking => {
+            if (formatDate(booking.date) === selectedDate) {
               return booking.time.some(bookedSlot => filter.value.slots.includes(bookedSlot));
             }
             return false;
           });
 
+          // Check for lesson conflicts (if lessons exist)
+          const hasLessonConflict = room.lesson && room.lesson.some(lesson => {
+            if (formatDate(lesson.date) === selectedDate) {
+              return lesson.time.some(lessonSlot => filter.value.slots.includes(lessonSlot));
+            }
+            return false;
+          });
+
+          const hasConflict = hasBookingConflict || hasLessonConflict;
+
+          console.log("conflict", hasConflict)
           return !hasConflict;
         default:
           return true
@@ -147,7 +159,7 @@ const handleRoomSelected = async (room) => {
   selectedRoom.value = room;
   roomSelected.value = 1
   try {
-    const response = await fetch(backendAddress+`/requestRoomDetails?roomId=${room.id}`);
+    const response = await fetch(backendAddress + `/requestRoomDetails?roomId=${room.id}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -240,9 +252,11 @@ body {
   width: 28%;
   height: 100%;
 }
+
 .middle-column, .right-column {
   min-height: 100%;
 }
+
 html, body {
   height: 100%;
   overflow: auto;

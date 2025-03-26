@@ -442,6 +442,26 @@ def reset_missed_times_for_user(user_email):
         cursor.close()
         connection.close()
 
+def get_permission_by_email(email):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    try:
+        query = "SELECT permission FROM users WHERE email = %s"
+        cursor.execute(query, (email,))
+        res = cursor.fetchone()
+
+        if res:
+            return res[0]
+        else:
+            return None
+
+    except Exception as e:
+        print("Error fetching permission:", e)
+        return None
+
+    finally:
+        cursor.close()
+        connection.close()
 
 if __name__ == '__main__':
     get_room_detailed(1)

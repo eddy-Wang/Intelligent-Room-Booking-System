@@ -7,7 +7,7 @@
         </div>
         <div class="input-button-container">
           <h1 class="title">Verify your identification</h1>
-          <p class="subtitle">Please enter your Dundee email address to continue</p>
+          <p class="subtitle">Please enter your Dundee or CSU email address to continue</p>
 
           <div class="input-group">
             <input
@@ -18,11 +18,15 @@
                 :class="{ 'error': showError }"
                 @input="validateEmail"
             >
-            <span class="email-suffix">@dundee.ac.uk</span>
+
+            <select v-model="selectedSuffix" class="email-suffix">
+              <option value="@dundee.ac.uk">@dundee.ac.uk</option>
+              <option value="@csu.edu.cn">@csu.edu.cn</option>
+            </select>
           </div>
 
           <p class="error-message" v-if="showError">
-            Please enter a valid Dundee University email address
+            Please enter a valid email address
           </p>
 
           <div class="button-container">
@@ -52,6 +56,7 @@ import {useRouter} from 'vue-router'
 const router = useRouter()
 const email = ref('')
 const showError = ref(false)
+const selectedSuffix = ref('@dundee.ac.uk');
 
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
@@ -61,20 +66,23 @@ const isValidEmail = computed(() => {
 })
 
 const validateEmail = () => {
-  const emailPattern = /^[a-zA-Z0-9._%+-]+@dundee\.ac\.uk$/
-  showError.value = !emailPattern.test(email.value + '@dundee.ac.uk')
-}
+  const emailPattern = selectedSuffix.value === '@dundee.ac.uk'
+    ? /^[a-zA-Z0-9._%+-]+@dundee\.ac\.uk$/
+    : /^[a-zA-Z0-9._%+-]+@csu\.edu\.cn$/;
+  showError.value = !emailPattern.test(email.value + selectedSuffix.value);
+};
 
 const handleNext = async () => {
   if (isValidEmail.value) {
     try {
+      const fullEmail = email.value + selectedSuffix.value;
       const response = await fetch(backendAddress+'/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          email: email.value + "@dundee.ac.uk",
+          email: fullEmail,
         })
       });
 
@@ -84,7 +92,7 @@ const handleNext = async () => {
           await router.push({
             name: 'VerifyView',
             params: {
-              email: email.value + "@dundee.ac.uk"
+              email: fullEmail
             }
           })
         } else {
@@ -199,28 +207,53 @@ body {
     }
   }
 
-  .email-suffix {
-    color: #666;
-    font-size: 1rem;
-    padding: 0;
-    font-weight: 500;
-    width: 40%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+.email-suffix {
+  color: #666;
+  font-size: 1rem;
+  padding: 0 15px 0 0;
+  font-weight: 500;
+  width: 40%;
+  border: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 5px center;
+  background-size: 20px;
+  cursor: pointer;
+  border-radius: 50px 50px 50px 50px;
+}
+
+  .email-suffix option {
+  background: #fff; /* 选项背景色 */
+  color: #333; /* 文字颜色 */
+  padding: 0; /* 选项内边距 */
+  font-size: 1rem;
+}
+
+  .email-suffix option:checked {
+  background: #f0f0f0;
+}
+
+.email-suffix:hover {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23333333'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+}
 
   .error-message {
     color: #FFE5E5;
     font-size: 0.95rem;
-    margin-bottom: 1.5rem;
+    margin: 0.5rem auto 1.5rem;
     background: rgba(255, 255, 255, 0.1);
     padding: 1rem 1.5rem;
-    border-radius: 12px;
+    border-radius: 50px 50px 50px 50px;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     animation: fadeIn 0.3s ease-in-out;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: block;
+    max-width: 400px;
+    text-align: center;
   }
 
   .button-container {

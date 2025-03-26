@@ -63,7 +63,7 @@ def get_room_id(room_number):
 class CSVToDatabaseConverter:
     def __init__(self, csv_dir="classroom_schedules"):
         """Initialize the converter with directory for CSV files."""
-        self.csv_dir = csv_dir
+        self.csv_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "classroom_schedules")
         # Dictionary to store unique (room_id, date) combinations and their sections
         self.data_dict = {}
     
@@ -116,6 +116,9 @@ class CSVToDatabaseConverter:
             list: List of week numbers
         """
         week_list = []
+        if not weeks_str:
+            logger.warning(f"Empty weeks string")
+            return week_list
         
         # Split by comma
         week_segments = weeks_str.split(',')
@@ -165,12 +168,18 @@ class CSVToDatabaseConverter:
             filename (str): Path to CSV file
         """
         # Extract room number from filename
-        match = re.search(r'906_(\d+)\.csv$', filename)
+        match = re.search(r'906_(.+)\.csv$', filename)
         if not match:
-            logger.error(f"Could not extract room number from filename: {filename}")
+            logger.error(f"Could not extract room identifier from filename: {filename}")
             return
-            
-        room_number = match.group(1)[-3:]  # Last 3 digits
+        
+        raw_identifier = match.group(1)
+    
+        # If the last three digits are not numbers, map to 635, otherwise take the last three digits
+        if raw_identifier[-3:].isdigit():
+            room_number = raw_identifier[-3:]
+        else:
+            room_number = "635"    
         
         # Look up room_id from mapping
         room_id = get_room_id(room_number)
@@ -181,34 +190,44 @@ class CSVToDatabaseConverter:
         logger.info(f"Processing CSV for room {room_number} (ID: {room_id})")
         
         try:
-            with open(filename, 'r', encoding='utf-8') as csvfile:
+            with open(filename, 'r', encoding='utf-8', newline='') as csvfile:
                 reader = csv.DictReader(csvfile)
                 
                 for row in reader:
+                    logger.debug(f"Processing row: {row}")
+                    
                     # Verify location matches room number
                     location = row.get('location', '')
                     if location != room_number:
                         logger.warning(f"Location mismatch in {filename}: expected {room_number}, got {location}")
                     
                     # Parse timeslot
-                    day_of_week, periods = self.parse_timeslot(row.get('timeslot', ''))
+                    day_of_week, periods = self.parse_timeslot(row.get('time_slot', ''))
                     if not day_of_week or not periods:
+                        logger.debug(f"Skipping row due to invalid timeslot: {row.get('time_slot', '')}")
                         continue
                     
                     # Parse weeks
-                    weeks = self.parse_weeks(row.get('weeks', ''))
+                    weeks_str = row.get('weeks', '')
+                    logger.debug(f"Processing weeks string: '{weeks_str}'")
+                    weeks = self.parse_weeks(weeks_str)
                     if not weeks:
+                        logger.debug(f"Skipping row due to empty weeks list from: '{weeks_str}'")
                         continue
+                    
                     
                     # Get week type
                     week_type = row.get('week_type', 'full')
+                    logger.debug(f"Week type: {week_type}, original weeks: {weeks}")
                     
                     # Apply week type filter
                     filtered_weeks = self.apply_week_type_filter(weeks, week_type)
-                    
+                    logger.debug(f"After filter: {filtered_weeks}")
+
                     # Transform periods according to the mapping rule
                     transformed_periods = [int(p) for p in transform_sections(periods).split(',') if p]
                     if not transformed_periods:
+                        logger.debug(f"Skipping row due to empty transformed periods from: {periods}")
                         continue
                     
                     # Add data to dictionary for each week
@@ -225,6 +244,8 @@ class CSVToDatabaseConverter:
         
         except Exception as e:
             logger.error(f"Error processing file {filename}: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
 
     def process_all_files(self):
         """Process all CSV files in the specified directory."""
@@ -272,13 +293,13 @@ class CSVToDatabaseConverter:
 
 def main():
     # Initialize converter
-    converter = CSVToDatabaseConverter(csv_dir="classroom_schedules")
+    converter = CSVToDatabaseConverter(csv_dir=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "classroom_schedules"))
     
     # Process all files
     converter.process_all_files()
     
     # Save to CSV
-    converter.save_to_csv("all_lessons.csv")
+    converter.save_to_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "all_lessons.csv"))
     
     return 0
 

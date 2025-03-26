@@ -2,7 +2,7 @@
   <div class="container">
     <h1 class="title">Room Equipment Repair</h1>
 
-    <div class="room-list">
+    <div class="room-list-container">
       <div v-for="room in rooms" :key="room.id" class="room-card">
         <img :src="room.image_url" alt="Room Image" class="room-image">
         <h2 class="room-name">{{ room.name }}</h2>
@@ -113,7 +113,7 @@ onMounted(fetchRoomData);
   height: 12%;
 }
 
-.room-list {
+.room-list-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 50px;

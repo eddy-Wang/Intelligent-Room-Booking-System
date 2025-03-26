@@ -17,9 +17,6 @@
 </template>
 
 <script>
-import HomeViewMobile from '@/views/HomeViewMobile.vue';
-import MyReservationMobile from '@/views/MyReservationMobile.vue';
-import RoomRepairMobile from '@/views/RoomRepairMobile.vue';
 import RoomManagementViewMobile from "@/views/RoomManagementViewMobile.vue";
 import RoomIssueManagementMobile from "@/views/RoomIssueManagementMobile.vue";
 import ReservationManagementMobile from "@/views/ReservationManagementMobile.vue";
@@ -27,21 +24,17 @@ import ReservationManagementMobile from "@/views/ReservationManagementMobile.vue
 export default {
   name: 'IndexMobile',
   components: {
-    HomeViewMobile,
-    MyReservationMobile,
-    RoomRepairMobile,
     RoomManagementViewMobile,
     RoomIssueManagementMobile,
     ReservationManagementMobile
   },
   data() {
     return {
-      activeNav: 0,
+      activeNav: 1,
       navItems: [
-        {icon: 'mdiHomeOutline', component: 'HomeViewMobile'},
-        {icon: 'mdiAccountOutline', component: 'MyReservationMobile'},
-        {icon: 'mdiTools', component: 'RoomIssueManagementMobile'},
+        {icon: 'mdiArrowLeft'},
         {icon: 'mdiApplicationEditOutline', component: 'ReservationManagementMobile'},
+        {icon: 'mdiTools', component: 'RoomIssueManagementMobile'},
         {icon: 'mdiClipboardTextOutline', component: 'RoomManagementViewMobile'}
       ]
     };
@@ -53,7 +46,11 @@ export default {
   },
   methods: {
     setActiveNav(index) {
-      this.activeNav = index;
+      if (index === 0) {
+        this.$router.back();
+      } else {
+        this.activeNav = index;
+      }
     }
   },
 };

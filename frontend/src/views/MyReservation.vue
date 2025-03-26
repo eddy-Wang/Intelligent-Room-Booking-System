@@ -33,26 +33,45 @@
         </el-select>
       </div>
 
-      <div class="content-wrapper">
-        <div class="reservation-list">
-          <div
-              v-for="(reservation, index) in paginatedReservations"
-              :key="index"
-              class="reservation-item"
-          >
-            <div class="reservation-info">
-              <div class="reservation-name">{{ reservation.name }}</div>
-              <div class="reservation-time">
-                {{ reservation.date.split('00:00:00')[0] + convertTimeStrToTimeSlots(reservation.time) }}
-              </div>
-              <div class="reservation-capacity">Capacity: {{ reservation.capacity }}</div>
-              <div class="reservation-purpose">{{ reservation.purpose }}</div>
-            </div>
-            <div class="status-and-actions">
-              <div class="reservation-status">{{ reservation.status }}</div>
-              <div class="reservation-actions" v-if="reservation.status.toString() === 'Confirmed'">
-                <button @click="cancelReservation(index)" class="action-button">Cancel</button>
-              </div>
+            <div class="content-wrapper">
+                <div class="reservation-list">
+                    <div
+                            v-for="(reservation, index) in paginatedReservations"
+                            :key="index"
+                            class="reservation-item"
+                    >
+                        <div class="reservation-info">
+                            <div class="reservation-name">{{ reservation.name }}</div>
+                            <div class="reservation-time">
+                                {{ reservation.date.split('00:00:00')[0] + convertTimeStrToTimeSlots(reservation.time) }}
+                            </div>
+                            <div class="reservation-capacity">Capacity: {{ reservation.capacity }}</div>
+                            <div class="reservation-purpose">{{ reservation.purpose }}</div>
+                        </div>
+                        <div class="status-and-actions">
+                            <div class="reservation-status">{{ reservation.status }}</div>
+                            <div class="reservation-actions" v-if="reservation.status.toString() === 'Confirmed'">
+                                <button @click="checkIn(index)" class="action-button">Check In</button>
+                                <button @click="cancelReservation(index)" class="action-button">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pagination">
+                        <button @click="prevPage" :disabled="currentPage === 1" class="pagination-button">Previous</button>
+                        <button @click="nextPage" :disabled="currentPage === totalPages" class="pagination-button">Next</button>
+                    </div>
+                </div>
+
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <img :src="userAvatar" alt="User Avatar"/>
+                    </div>
+                    <div class="user-email">{{ user.name }}</div>
+                    <div class="user-email">{{ user.email }}</div>
+                    <div class="user-role">{{ user.permission }}</div>
+                    <button @click="downloadCalendar" class="download-button">Subscribe to Calendar</button>
+                </div>
+
             </div>
           </div>
           <div class="pagination">
@@ -173,8 +192,6 @@ export default {
           : "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
     },
   },
-
-
   methods: {
     showInstructions() {
       this.instructionsDialogVisible = true;
@@ -237,6 +254,23 @@ export default {
         }
       } catch (error) {
         console.error('Error fetching reservations:', error);
+      }
+    },
+    async checkIn(index) {
+      const bookingId = this.reservations[(this.currentPage - 1) * this.itemsPerPage + index].booking_id
+      try {
+        const response = await fetch(this.backendAddress + '/booking_check_in/' + bookingId, {
+          method: 'GET'
+        });
+        const data = await response.json();
+        if (data.code === '000') {
+          alert('Check-in successfully!');
+          await this.fetchReservations();
+        } else {
+          alert(data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
       }
     },
     async cancelReservation(index) {
