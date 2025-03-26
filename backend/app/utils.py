@@ -28,3 +28,22 @@ def update_booking_status_to_missed():
         cursor.close()
         connection.close()
 
+
+def is_user_blacklisted(user_email):
+    """Check if user is blacklisted"""
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    try:
+        query = """
+                    SELECT 1
+                    FROM user_blacklist
+                    WHERE user_email = %s
+                    LIMIT 1
+                """
+        cursor.execute(query, (user_email,))
+        return cursor.fetchone() is not None
+    except Exception as e:
+        return False
+    finally:
+        cursor.close()
+        connection.close()
