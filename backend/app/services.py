@@ -34,7 +34,7 @@ def send_verification_email(user_email, code):
         print("Verification email sent successfully.")
     except Exception as e:
         print("Error sending email:", e)
-import pyshorteners
+
 
 def sending_booking_email(user_email, room_id, date, time, status, purpose, message=''):
     """send booking email based on status"""
@@ -88,8 +88,6 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose, mess
         encoded_room_name = quote_plus(room_name)
         encoded_purpose = quote_plus(purpose)
         outlook_event_url = f"https://outlook.office.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent&startdt={start_time.isoformat()}&enddt={end_time.isoformat()}&subject={encoded_room_name}&body={encoded_purpose}&location={encoded_room_name}"
-        s = pyshorteners.Shortener()
-        short_url = s.tinyurl.short(outlook_event_url)
         body = f"""
         Dear User,
 
@@ -102,7 +100,7 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose, mess
         Purpose: {purpose}
         
         You can add this booking to your Outlook calendar by clicking the following link:
-        {short_url}
+        {outlook_event_url}
 
         Thank you for using booking service.
 
