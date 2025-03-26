@@ -12,7 +12,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(os.path.join(os.path.dirname(os.path.abspath(__file__)), "schedule_updater.log")),
+        logging.FileHandler("schedule_updater.log"),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -30,7 +30,7 @@ DB_CONFIG = {
 class ScheduleUpdater:
     def __init__(self, max_attempts=5):
         """Initialize the schedule updater with configuration."""
-        self.csv_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "all_lessons.csv")
+        self.csv_file = "./all_lessons.csv"
         self.max_attempts = max_attempts
         self.db_conn = None
         self.cursor = None
@@ -60,7 +60,7 @@ class ScheduleUpdater:
             logger.info(f"Running crawler (attempt {attempt}/{self.max_attempts})")
             try:
                 # Run the crawler script as a subprocess
-                result = subprocess.run(["python", os.path.join(os.path.dirname(os.path.abspath(__file__)), "crawler.py")], check=True, capture_output=True, text=True)
+                result = subprocess.run(["python", "./crawler/crawler.py"], check=True, capture_output=True, text=True)
                 logger.info(f"Crawler completed successfully: {result.stdout}")
                 return True
             except subprocess.CalledProcessError as e:
@@ -76,7 +76,7 @@ class ScheduleUpdater:
         """Run the converter script to process CSV files."""
         try:
             logger.info("Running converter script")
-            result = subprocess.run(["python", os.path.join(os.path.dirname(os.path.abspath(__file__)), "converter.py")], check=True, capture_output=True, text=True)
+            result = subprocess.run(["python", "./crawler/converter.py"], check=True, capture_output=True, text=True)
             logger.info(f"Converter completed successfully: {result.stdout}")
             return True
         except subprocess.CalledProcessError as e:
