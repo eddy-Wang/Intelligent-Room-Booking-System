@@ -94,7 +94,7 @@
           <input type="text" id="modify-room-name" v-model="modifiedRoom.name" required/>
 
           <label for="modify-room-capacity">Capacity:</label>
-          <input type="number" id="modify-room-capacity" v-model="modifiedRoom.capacity" required/>
+          <input type="number" id="modify-room-capacity" v-model="modifiedRoom.capacity" required min="0"/>
 
           <label for="modify-room-location">Location:</label>
           <input type="text" id="modify-room-location" v-model="modifiedRoom.location" required/>
@@ -382,7 +382,6 @@ export default {
           alert("upload successfully");
           this.newRoom.image_url = image_url;
           console.log(this.newRoom.image_url)
-          alert("upload successfully");
         } else {
           alert(`error：${result.message || "unknown error"}`);
         }

@@ -24,8 +24,7 @@
       <div
           v-for="(user, index) in filteredUsers"
           :key="index"
-          class="user-card"
-      >
+          class="user-card">
         <div class="card-header">
           <div class="user-info">
             <div class="user-name">{{ user.user_name }}</div>
