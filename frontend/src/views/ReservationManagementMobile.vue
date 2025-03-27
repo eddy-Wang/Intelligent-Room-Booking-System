@@ -724,6 +724,8 @@ onMounted(async () => {
   width: 45%;
   font-size: 1rem;
   height: 1.6rem;
+  background-color: #eceef8;
+  border: none;
 }
 
 .modal {
@@ -745,7 +747,7 @@ onMounted(async () => {
   overflow-y: auto;
   padding: 20px;
   margin: auto;
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .modal-content form {
