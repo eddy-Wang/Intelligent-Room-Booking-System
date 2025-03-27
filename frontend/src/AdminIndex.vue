@@ -136,7 +136,7 @@ export default {
     },
     handleLogout() {
       if (confirm('Are you sure you want to logout?')) {
-        router.push({ name: 'LoginView' });
+        router.push({name: 'LoginView'});
         console.log('User logged out')
       }
     }
@@ -246,7 +246,7 @@ export default {
   border-radius: 6px;
   font-size: 0.9rem;
   white-space: nowrap;
-  box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
   pointer-events: none;
   z-index: 100;
   font-family: Arial, sans-serif;
@@ -263,6 +263,7 @@ export default {
   border-top: 6px solid transparent;
   border-bottom: 6px solid transparent;
 }
+
 @keyframes pulse {
   0% {
     transform: scale(0.95);

@@ -5,13 +5,10 @@
       <h2><strong>Room Booking System</strong></h2>
     </div>
     <div class="user-info-container">
-      <div class="user-infor-header">
-        User Information
-      </div>
       <div class="user-avatar">
         <img
-          :src="'/src/assets/other.png'"
-          alt="User Avatar">
+            :src="'/src/assets/other.png'"
+            alt="User Avatar">
       </div>
       <div class="user-details">
         <div class="user-name">{{ currentUser.name || 'Unknown User' }}</div>
@@ -27,13 +24,17 @@
       Administrator System
       <span class="arrow">→</span>
     </button>
+    <button class="logout-button" @click="handleLogout">
+      <span class="arrow">←</span>
+      Logout
+    </button>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, getCurrentInstance } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import {ref, onMounted, getCurrentInstance} from 'vue'
+import {useRouter} from 'vue-router'
+import {ElMessage} from 'element-plus'
 
 import IndexMobile from '@/IndexMobile.vue'
 import AdminIndexMobile from '@/AdminIndexMobile.vue'
@@ -61,11 +62,19 @@ onMounted(() => {
 })
 
 const goToUserSystem = () => {
-  router.push({ name: 'IndexMobile' })
+  router.push({name: 'IndexMobile'})
 }
 
 const goToAdminSystem = () => {
-  router.push({ name: 'AdminIndexMobile' })
+  router.push({name: 'AdminIndexMobile'})
+}
+
+const handleLogout = () => {
+  if (confirm('Are you sure you want to logout?')) {
+    instance.appContext.config.globalProperties.$user = null
+    router.push({name: 'LoginView'})
+    console.log('User logged out')
+  }
 }
 </script>
 
@@ -99,7 +108,7 @@ const goToAdminSystem = () => {
 
 .user-info-container {
   width: 100%;
-  padding: 0 0 20px 0;
+  padding: 20px 0;
   background-color: white;
   border-radius: 20px;
   text-align: center;
@@ -177,5 +186,20 @@ const goToAdminSystem = () => {
   transform: translateY(-50%);
   display: flex;
   pointer-events: none;
+}
+
+.logout-button {
+  margin: 10px 0;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  background: #ef3131;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
 }
 </style>

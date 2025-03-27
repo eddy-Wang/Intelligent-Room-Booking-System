@@ -11,6 +11,12 @@
             @click="setActiveNav(index)">
           <svg-icon type="mdi" :path="$mdi[item.icon]"></svg-icon>
         </div>
+        <div
+            v-if="permission === 'Student'"
+            class="nav-item logout-item"
+            @click="handleLogout">
+          <svg-icon type="mdi" :path="$mdi.mdiExitToApp"></svg-icon>
+        </div>
       </nav>
     </div>
   </div>
@@ -61,6 +67,13 @@ export default {
         this.$router.back();
       } else {
         this.activeNav = index;
+      }
+    },
+    handleLogout() {
+      if (confirm('Are you sure you want to logout?')) {
+        this.$user = null;
+        this.$router.push({name: 'LoginView'});
+        console.log('User logged out');
       }
     }
   }
@@ -119,5 +132,21 @@ export default {
   color: #000;
   background: url('assets/nav-icon-selected.svg') no-repeat center bottom;
   background-size: 90% 90%;
+}
+
+.logout-item {
+  height: 100%;
+  width: 25%;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-item svg {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  height: 100%;
+  width: 100%;
+  color: #fff;
 }
 </style>
