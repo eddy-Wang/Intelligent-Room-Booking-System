@@ -260,6 +260,7 @@ def get_user_reservations(email):
 
 
 def get_user_reservations_in_confirm(email):
+    """Get user's reservations in confirm.'"""
     try:
         email = (email,)
         connection = get_db_connection()
@@ -286,6 +287,7 @@ def get_user_reservations_in_confirm(email):
             connection.close()
 
 def generate_ics_content(email):
+    """Generate the ICS content for the given email."""
     reservations = get_user_reservations_in_confirm(email)
     print(reservations)
 
@@ -333,8 +335,9 @@ END:VEVENT
     ics_data += "END:VCALENDAR"
     return ics_data
 
-# Cancel reservation by booking ID
+
 def cancel_reservation(booking_id):
+    """Cancel reservation."""
     connection = get_db_connection()
     cursor = connection.cursor()
     query = "UPDATE booking SET status = 'Declined' WHERE booking_id = %s AND status = 'Confirmed'"
@@ -353,8 +356,8 @@ def cancel_reservation(booking_id):
         connection.close()
 
 
-# Fetch users from the database
 def fetch_users():
+    """Fetch users."""
     connection = get_db_connection()
     cursor = connection.cursor()
     query = "SELECT * FROM users"
@@ -376,8 +379,8 @@ def fetch_users():
     return users
 
 
-# Fetch rooms from the database
 def fetch_rooms_id_and_name():
+    """Fetch room ID and name."""
     connection = get_db_connection()
     cursor = connection.cursor()
     query = "SELECT room_id, name FROM room where deleted = 0"
@@ -399,6 +402,7 @@ def fetch_rooms_id_and_name():
 
 
 def fetch_name_by_id(room_id):
+    """Fetch user's name.'"""
     connection = get_db_connection()
     cursor = connection.cursor()
     query = "SELECT name FROM room where room_id = %s"
@@ -410,9 +414,9 @@ def fetch_name_by_id(room_id):
         return result[0]
 
 
-# Fetch all bookings from the database
+
 def fetch_bookings():
-    # Fetch all bookings from the database
+    """Fetch all bookings from the database"""
     connection = get_db_connection()
     cursor = connection.cursor()
     query = "SELECT * FROM booking"
@@ -436,8 +440,8 @@ def fetch_bookings():
     return bookings
 
 
-# Update booking status
 def update_booking_status(booking_id, status):
+    """Update booking status."""
     connection = get_db_connection()
     cursor = connection.cursor()
     query = "UPDATE booking SET status = %s WHERE booking_id = %s"
@@ -447,8 +451,8 @@ def update_booking_status(booking_id, status):
     connection.close()
 
 
-# Delete a booking
 def delete_booking(booking_id):
+    """Delete booking."""
     connection = get_db_connection()
     cursor = connection.cursor()
     query = "DELETE FROM booking WHERE booking_id = %s"
@@ -459,6 +463,7 @@ def delete_booking(booking_id):
 
 
 def modify_booking(booking_data):
+    """Modify booking."""
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -519,6 +524,7 @@ def modify_booking(booking_data):
 
 
 def add_room(room_data):
+    """Add room."""
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -554,6 +560,7 @@ def add_room(room_data):
 
 
 def modify_room(room_id, room_data):
+    """Modify room."""
     connection = get_db_connection()
     cursor = connection.cursor()
     room_name = room_data["name"]
@@ -589,6 +596,7 @@ def modify_room(room_id, room_data):
 
 
 def delete_room(room_id):
+    """Delete room."""
     connection = get_db_connection()
     cursor = connection.cursor()
     query = "UPDATE room SET deleted = 1 WHERE room_id = %s"
@@ -605,6 +613,7 @@ def delete_room(room_id):
 
 
 def fetch_room():
+    """Fetch room."""
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -650,8 +659,8 @@ def fetch_room():
     return False, None
 
 
-# Get all room issue reports
 def get_all_room_issue_reports():
+    """Get all room issue reports."""
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -677,8 +686,8 @@ def get_all_room_issue_reports():
     return reports
 
 
-# Create a new room issue report
 def create_room_issue_report(timestamp, room_id, user_email, reportInfo, reviewed="Unreviewed"):
+    """Create room issue report as unreviewed."""
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -699,8 +708,8 @@ def create_room_issue_report(timestamp, room_id, user_email, reportInfo, reviewe
         connection.close()
 
 
-# Update a room issue report
 def update_room_issue_report(timestamp, reviewed=None):
+    """Update room issue report."""
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -728,8 +737,8 @@ def update_room_issue_report(timestamp, reviewed=None):
         connection.close()
 
 
-# Delete a room issue report
 def delete_room_issue_report(timestamp):
+    """Delete room issue report."""
     connection = get_db_connection()
     cursor = connection.cursor()
     report_id = timestamp
@@ -748,6 +757,7 @@ def delete_room_issue_report(timestamp):
         connection.close()
 
 def booking_check_in_service(booking_id):
+    """Booking check in service."""
     connection = get_db_connection()
     cursor = connection.cursor()
 

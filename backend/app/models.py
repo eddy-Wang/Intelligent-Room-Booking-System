@@ -6,8 +6,11 @@ from .config import Config
 from mysql.connector import Error
 
 
-# Database connection setup
+
 def get_db_connection():
+    """
+    Database connection setup
+    """
     connection = mysql.connector.connect(
         host=Config.DB_HOST,
         port=Config.DB_PORT,
@@ -19,8 +22,12 @@ def get_db_connection():
     return connection
 
 
-# Check if the email exists
+
 def check_email_exists(email):
+    """
+    Check  if the email exists in the database
+    :param email:
+    """
     connection = get_db_connection()
     cursor = connection.cursor()
     query = "SELECT email FROM users WHERE email = %s"
@@ -31,8 +38,13 @@ def check_email_exists(email):
     return result is not None
 
 
-# Get user data by email
+
 def get_user_data_by_email(email):
+    """
+    Get user data by email
+    :param email:
+    :return: all data of the user
+    """
     connection = get_db_connection()
     cursor = connection.cursor()
     query = "SELECT email, name, permission FROM users WHERE email = %s"
@@ -46,8 +58,13 @@ def get_user_data_by_email(email):
     return None
 
 
-# Get all room data
+
 def get_all_room_data_for_user(permission):
+    """
+    Get all room data by user's permission.
+    :param permission:
+    :return: the room data accessed to the user
+    """
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -110,6 +127,10 @@ def get_all_room_data_for_user(permission):
     return None
 
 def get_all_booking_records():
+    """
+    Get all booking records
+    :return: all booking records
+    """
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -147,6 +168,10 @@ def get_all_booking_records():
 
 
 def get_all_lessons():
+    """
+    Get all lessons
+    :return: all lessons
+    """
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -181,6 +206,10 @@ def get_all_lessons():
 
 
 def get_all_report():
+    """
+    Get all issue reports
+    :return: all issue reports
+    """
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -207,6 +236,11 @@ def get_all_report():
     return report_dict
 
 def get_booking_by_id(booking_id):
+    """
+    Get the specific booking by booking id
+    :param booking_id:
+    :return: booking details
+    """
     connection = get_db_connection()
     cursor = connection.cursor()
     try:
@@ -240,8 +274,13 @@ def get_booking_by_id(booking_id):
         }
     return booking
 
-# Get lesson of a room
+
 def get_lesson_of_a_room(room_id):
+    """
+    Get the lesson of a specific room
+    :param room_id:
+    :return: the lesson of a specific room
+    """
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -277,6 +316,11 @@ def get_lesson_of_a_room(room_id):
 
 
 def get_room_report(room_id):
+    """
+    Get the specific room report by room id
+    :param room_id:
+    :return:
+    """
     connection = get_db_connection()
     cursor = connection.cursor()
     try:
@@ -297,8 +341,13 @@ def get_room_report(room_id):
     return ujson.dumps(report, default=str)
 
 
-# Get booking details of a room
+
 def get_room_detailed(room_id):
+    """
+    Combine the details of specific room
+    :param room_id:
+    :return: details of specific room
+    """
     this_room = {"booking": ujson.loads(get_booking_record_of_a_room(room_id)),
                  "lesson": ujson.loads(get_lesson_of_a_room(room_id)),
                  "report": ujson.loads(get_room_report(room_id)),}
@@ -307,8 +356,13 @@ def get_room_detailed(room_id):
     return this_room
 
 
-# Get booking records of a room and return as JSON
+
 def get_booking_record_of_a_room(room_id):
+    """
+    Get the booking record of a specific room
+    :param room_id:
+    :return: the booking record of a specific room
+    """
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -342,6 +396,14 @@ def get_booking_record_of_a_room(room_id):
 
 
 def add_room_issue(room_id, user_email, report_info, user_permission):
+    """
+    Add a room issue
+    :param room_id:
+    :param user_email:
+    :param report_info:
+    :param user_permission:
+    :return: True / False with message
+    """
     if not report_info or report_info == "":
         return False, "Empty report info."
 
@@ -363,6 +425,12 @@ def add_room_issue(room_id, user_email, report_info, user_permission):
         connection.close()
 
 def set_room_issue_reviewed(report_id, value):
+    """
+    Set the status of room issue
+    :param report_id:
+    :param value:
+    :return: True / False with message
+    """
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -379,6 +447,12 @@ def set_room_issue_reviewed(report_id, value):
         connection.close()
 
 def set_room_issue_report_info(report_id, value):
+    """
+    Set the info of room issue
+    :param report_id:
+    :param value:
+    :return: True / False with message
+    """
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -395,6 +469,10 @@ def set_room_issue_report_info(report_id, value):
         connection.close()
 
 def get_bad_user_list():
+    """
+    Get the black list
+    :return: True / False with data
+    """
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -427,6 +505,11 @@ def get_bad_user_list():
         connection.close()
 
 def reset_missed_times_for_user(user_email):
+    """
+    Reset missed times for user
+    :param user_email:
+    :return: True / False with message
+    """
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -443,6 +526,11 @@ def reset_missed_times_for_user(user_email):
         connection.close()
 
 def get_permission_by_email(email):
+    """
+    Get the permission of specific user
+    :param email:
+    :return: permission of specific user
+    """
     connection = get_db_connection()
     cursor = connection.cursor()
     try:
@@ -462,6 +550,3 @@ def get_permission_by_email(email):
     finally:
         cursor.close()
         connection.close()
-
-if __name__ == '__main__':
-    get_room_detailed(1)

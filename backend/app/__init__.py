@@ -7,6 +7,9 @@ mail = Mail()
 
 
 def create_app():
+    """
+    To create the app
+    """
     app = Flask(__name__)
     app.config.from_object(Config)
     app.secret_key = 'SK_test'
@@ -17,8 +20,10 @@ def create_app():
     )
 
     mail.init_app(app)
+    # set the CORS with address
     CORS(app,
-         origins=["http://localhost:5173","http://127.0.0.1:5173","http://192.168.110.139:5173"],
+         origins=["http://localhost:5173","http://127.0.0.1:5173",
+              "http://192.168.125.1:5173"],
          supports_credentials=True)
 
     from .routes import bp as routes_bp

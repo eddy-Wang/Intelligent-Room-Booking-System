@@ -13,6 +13,7 @@ from .models import check_email_exists, get_user_data_by_email, get_room_detaile
     get_bad_user_list, reset_missed_times_for_user, get_db_connection, get_permission_by_email
 from .utils import is_user_blacklisted
 
+# Set the blueprint
 bp = Blueprint('routes', __name__)
 
 
@@ -26,6 +27,10 @@ def create_response(code, message, data=None):
 
 @bp.route('/login', methods=['POST', 'OPTIONS'])
 def login():
+    """
+    Login
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
 
@@ -48,6 +53,10 @@ def login():
 
 @bp.route('/verify-code', methods=['POST', 'OPTIONS'])
 def verify_code():
+    """
+    Verify the code for login
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
 
@@ -85,6 +94,10 @@ def verify_code():
 
 @bp.route('/me', methods=['GET', 'OPTIONS'])
 def me():
+    """
+    Verify the user by seesion
+    :return: message
+    """
     if 'user_data' not in session:
         return 'Unauthorized', 401
     else:
@@ -93,6 +106,10 @@ def me():
 
 @bp.route('/allRoom', methods=['GET', 'OPTIONS'])
 def allRoom():
+    """
+    Get the data of all rooms
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
 
@@ -110,6 +127,10 @@ def allRoom():
 
 @bp.route('/requestRoomDetails', methods=['GET', 'OPTIONS'])
 def requestRoomDetails():
+    """
+    Get all data of the room (by ID)
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
 
@@ -124,6 +145,10 @@ def requestRoomDetails():
 
 @bp.route('/get-reservations', methods=['POST', 'OPTIONS'])
 def get_reservations():
+    """
+    Get the data of all reservations
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
     data = request.get_json()
@@ -138,6 +163,10 @@ def get_reservations():
 
 @bp.route('/cancel-reservation', methods=['POST', 'OPTIONS'])
 def cancel_reservation_route():
+    """
+    Cancel reservation with booking_id
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
     data = request.get_json()
@@ -161,9 +190,13 @@ def cancel_reservation_route():
         return create_response('002', 'Failed to cancel reservation. It may already be processed or does not exist.')
 
 
-# Fetch users route
+
 @bp.route('/users', methods=['GET'])
 def get_users():
+    """
+    Fetch the data of all users
+    :return: message
+    """
     try:
         users = fetch_users()
         return create_response('000', 'Users fetched successfully!', users)
@@ -171,9 +204,13 @@ def get_users():
         return create_response('500', f'Error: {str(e)}')
 
 
-# Fetch rooms route
+
 @bp.route('/rooms_id_and_name', methods=['GET'])
 def get_rooms_id_and_name():
+    """
+    Fetch the id and name of all rooms
+    :return: message
+    """
     try:
         rooms = fetch_rooms_id_and_name()
         print(rooms)
@@ -182,7 +219,7 @@ def get_rooms_id_and_name():
         return create_response('500', f'Error: {str(e)}')
 
 
-# Fetch bookings route
+
 @bp.route('/bookings', methods=['GET'])
 def get_bookings():
     try:
@@ -196,6 +233,11 @@ def get_bookings():
 # Update booking status route
 @bp.route('/bookings/<int:id>', methods=['PUT'])
 def update_booking(id):
+    """
+    Update the data of one booking
+    :param id:
+    :return: message
+    """
     data=request.json
     status = data.get('status')
 
@@ -223,9 +265,14 @@ def update_booking(id):
         return create_response('500', f'Error: {str(e)}')
 
 
-# Delete booking route
+
 @bp.route('/bookings/<int:id>', methods=['DELETE'])
 def delete_booking_route(id):
+    """
+    Delete the data of one booking
+    :param id:
+    :return: message
+    """
     try:
         delete_booking(id)
         return create_response('000', 'Booking deleted successfully!')
@@ -235,6 +282,10 @@ def delete_booking_route(id):
 
 @bp.route('/modifyBooking', methods=['PUT', 'OPTIONS'])
 def modify_booking_route():
+    """
+    Modify the data of one booking
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
     booking_data = request.get_json()
@@ -257,6 +308,10 @@ def modify_booking_route():
 
 @bp.route('/bookRoom', methods=['POST', 'OPTIONS'])
 def book_room():
+    """
+    Book a room
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
 
@@ -278,6 +333,7 @@ def book_room():
     user_email = data.get('user_email', 'test@example.com')
 
     try:
+        # Check if the time is OK
         from .models import get_db_connection
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -330,6 +386,10 @@ def book_room():
 
 @bp.route('/getRooms', methods=['GET', 'OPTIONS'])
 def rooms():
+    """
+    Fetch rooms
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
 
@@ -342,7 +402,11 @@ def rooms():
 
 
 @bp.route('/rooms', methods=['POST', 'OPTIONS'])
-def getRooms():
+def addRooms():
+    """
+    Add a room
+    :return:
+    """
     if request.method == 'OPTIONS':
         return '', 200
 
@@ -362,6 +426,11 @@ def getRooms():
 
 @bp.route('/subscribe_calendar/<string:email>', methods=['GET'])
 def subscribe_calendar(email):
+    """
+    Subscribe to calendar
+    :param email:
+    :return: the ics file
+    """
     try:
         ics_content = generate_ics_content(email)
         print(1)
@@ -378,6 +447,11 @@ def subscribe_calendar(email):
 
 @bp.route('/download_calendar/<string:email>', methods=['GET'])
 def download_calendar(email):
+    """
+    Download calendar
+    :param email:
+    :return: the ics file
+    """
     try:
         ics_content = generate_ics_content(email)
         return ics_content
@@ -387,6 +461,10 @@ def download_calendar(email):
 
 @bp.route('/ban', methods=['POST', 'OPTIONS'])
 def set_ban_period():
+    """
+    Ban the room for a period of time
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
 
@@ -433,6 +511,7 @@ def set_ban_period():
               AND status IN ('Pending','Confirmed')
         """, (room_id, date))
 
+        # Cancel all related booking
         conflict_count = 0
         for (bid, email, exist_time) in cursor.fetchall():
             exist_slots = set(map(int, exist_time.split(',')))
@@ -466,6 +545,11 @@ def set_ban_period():
 
 @bp.route('/rooms/<int:room_id>', methods=['PUT'])
 def modify_room_route(room_id):
+    """
+    Modify room details
+    :param room_id:
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
 
@@ -485,6 +569,11 @@ def modify_room_route(room_id):
 
 @bp.route('/rooms/<int:room_id>', methods=['DELETE'])
 def delete_room_route(room_id):
+    """
+    Delete room (soft way)
+    :param room_id:
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
 
@@ -497,6 +586,10 @@ def delete_room_route(room_id):
 
 @bp.route('/room_issue', methods=['PUT'])
 def put_room_issue():
+    """
+    Report the issue.
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
     data = request.get_json()
@@ -516,6 +609,10 @@ def put_room_issue():
 
 @bp.route('/room_issue/status', methods=['POST'])
 def modify_room_issue_status():
+    """
+    Modify the room issue status
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
 
@@ -536,6 +633,10 @@ def modify_room_issue_status():
 
 @bp.route('/room_issue/report_info', methods=['POST'])
 def modify_room_issue_report_info():
+    """
+    Modify the room issue report info
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
 
@@ -554,9 +655,12 @@ def modify_room_issue_report_info():
         return create_response('002', message)
 
 
-# Get all room issue reports
 @bp.route('/room_issue_reports', methods=['GET'])
 def get_reports():
+    """
+    Get all room issue reports
+    :return: message
+    """
     try:
         reports = get_all_room_issue_reports()
         return create_response('000', 'Reports fetched successfully!', reports)
@@ -564,9 +668,9 @@ def get_reports():
         return create_response('500', f'Error: {str(e)}')
 
 
-# Create a new room issue report
 @bp.route('/room_issue_reports', methods=['POST'])
 def create_report():
+    """Create new issue report for admin"""
     data = request.json
     try:
         timestamp = str(int(time.time() * 1000))
@@ -583,9 +687,13 @@ def create_report():
         return create_response('500', f'Error: {str(e)}')
 
 
-# Update a room issue report
 @bp.route('/room_issue_reports/<string:report_id>', methods=['PUT'])
 def update_report(report_id):
+    """
+    Update room issue report
+    :param report_id:
+    :return: message
+    """
     data = request.json
     try:
         if update_room_issue_report(
@@ -599,9 +707,13 @@ def update_report(report_id):
         return create_response('500', f'Error: {str(e)}')
 
 
-# Delete a room issue report
 @bp.route('/room_issue_reports/<string:timestamp>', methods=['DELETE'])
 def delete_report(timestamp):
+    """
+    Delete room issue report
+    :param timestamp:
+    :return: message
+    """
     try:
         if delete_room_issue_report(timestamp):
             return create_response('000', 'Report deleted successfully!')
@@ -612,6 +724,10 @@ def delete_report(timestamp):
 
 @bp.route('/bad_users', methods=['GET'])
 def get_bad_users():
+    """
+    Get all blacklisted users
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
 
@@ -624,6 +740,11 @@ def get_bad_users():
 
 @bp.route('/reset_missed_times/<string:user_email>', methods=['GET'])
 def reset_missed_times(user_email):
+    """
+    Reset missed times of a user
+    :param user_email:
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
 
@@ -636,6 +757,11 @@ def reset_missed_times(user_email):
 
 @bp.route('/booking_check_in/<string:booking_id>', methods=['GET'])
 def booking_check_in(booking_id):
+    """
+    Check in
+    :param booking_id:
+    :return: message
+    """
     if request.method == 'OPTIONS':
         return '', 200
 

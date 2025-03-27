@@ -1,7 +1,7 @@
-import os
 
 
 class Config:
+    # 163 mail config
     DEBUG = True
     MAIL_SERVER = 'smtp.163.com'
     MAIL_PORT = 465

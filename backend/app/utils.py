@@ -40,6 +40,7 @@ def update_booking_status_to_missed():
 
 
 def blacklist_check_and_set(user_email):
+    """Check and update the blacklist"""
     connection = get_db_connection()
     cursor = connection.cursor()
 
