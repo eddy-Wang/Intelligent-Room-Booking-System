@@ -11,8 +11,8 @@ def create_app():
     app.config.from_object(Config)
     app.secret_key = 'SK_test'
     app.config.update(
-        SESSION_COOKIE_SECURE=False,  # 允许 HTTP 传输 Cookie
-        SESSION_COOKIE_SAMESITE='Lax'  # 允许跨域 Cookie（需配合 Secure=False）
+        SESSION_COOKIE_SECURE=False,  # Allows HTTP to transfer cookies
+        SESSION_COOKIE_SAMESITE='Lax'  # Allow cross-domain cookies (with Secure=False)
     )
 
     mail.init_app(app)

@@ -64,6 +64,8 @@ class ClassroomScheduleScraper:
             # Click on undergraduate academic affairs button
             logger.info("Clicking on undergraduate academic affairs button...")
             bkjjw_item = WebDriverWait(self.driver, 10).until(
+                # '本科生教务' refers to "Undergraduate affairs", is the Chinese button text in the page, and by clicking this button crawler can enter the educational administration system. 
+                # As the page displays the Chinese text of the button, so the element must be found in Chinese in the code.
                 EC.element_to_be_clickable((By.XPATH, "//li[@title='本科生教务']"))
             )
             bkjjw_item.click()
@@ -161,7 +163,13 @@ class ClassroomScheduleScraper:
             
             # Find total pages
             try:
+                # '页' means page
+                # Get the pagination text, which contains the Chinese characters '页['. This is part of the pagination system in the webpage,
+                # where the total number of pages is displayed. Since the pagination information is presented in Chinese on the page,
+                # it is necessary to use these Chinese characters in order to correctly extract the page count.
                 pagination_text = self.driver.find_element(By.XPATH, "//td[contains(text(), '页[')]").text
+                # Parse the total page count, where '页[' and '页' are Chinese characters. These characters cannot be avoided
+                # and are essential for properly splitting the string and extracting the page number.
                 total_pages = int(pagination_text.split('/')[1].split('页')[0])
                 logger.info(f"Total pages: {total_pages}")
             except Exception as e:
@@ -198,10 +206,16 @@ class ClassroomScheduleScraper:
                                 
                                 # Process week type conversion
                                 week_type_text = cells[10].text.strip()
+                                # '全周' means "full week" in Chinese. It refers to a course that occurs throughout the entire week.
+                                # This is necessary to identify courses that span the whole week as part of the course schedule.
                                 if '全周' in week_type_text:
                                     week_type = 'full'
+                                # '单周' means "odd week" in Chinese. It refers to courses that occur only in odd-numbered weeks (e.g., week 1, 3, 5, etc.).
+                                # The Chinese text is used to match the course schedule data, as the webpage displays week types in Chinese.
                                 elif '单周' in week_type_text:
                                     week_type = 'odd'
+                                # '双周' means "even week" in Chinese. It refers to courses that occur only in even-numbered weeks (e.g., week 2, 4, 6, etc.).
+                                # Since the webpage uses these Chinese terms to indicate course weeks, they must be handled in the script for accurate extraction.
                                 elif '双周' in week_type_text:
                                     week_type = 'even'
                                 else:
