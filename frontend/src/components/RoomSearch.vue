@@ -135,13 +135,15 @@ export default {
     Vue3Datepicker
   },
 
-  setup() {
+  async mounted() {
     let instance = getCurrentInstance()
     const backendAddress = instance.appContext.config.globalProperties.$backendAddress
-    const user_email = instance.appContext.config.globalProperties.$user.email
+    let me = await instance.appContext.config.globalProperties.$me()
+    const user_email = me.data.email
     const bookDate = inject('bookDate');
     const bookTimeSlots = inject('bookTimeSlots')
 
+    document.addEventListener('click', this.handleClickOutside);
     return {
       bookDate, bookTimeSlots, user_email, backendAddress
     };
@@ -358,9 +360,6 @@ export default {
         ElMessage.error('An error occurred while booking the room, please try again later');
       }
     }
-  },
-  mounted() {
-    document.addEventListener('click', this.handleClickOutside);
   },
   beforeDestroy() {
     document.removeEventListener('click', this.handleClickOutside);

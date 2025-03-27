@@ -347,7 +347,7 @@ import {User, Calendar, Clock, Document} from '@element-plus/icons-vue'
 
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
-const userEmail = instance.appContext.config.globalProperties.$user.email;
+const userEmail = ref("")
 
 const bookings = ref([])
 const rooms = ref([])
@@ -440,7 +440,7 @@ const limitUsageForm = ref({
       room_id: '',
       date: '',
       time: [],
-      user_email: userEmail,
+      user_email: userEmail.value,
       purpose: ''
     })
 ;
@@ -741,6 +741,9 @@ onBeforeUnmount(() => {
 })
 
 onMounted(async () => {
+  let me = await instance.appContext.config.globalProperties.$me()
+  let user = me.data
+  userEmail.value = user.email
   await Promise.all([fetchBookings(), fetchRooms(), fetchUsers()])
 })
 </script>

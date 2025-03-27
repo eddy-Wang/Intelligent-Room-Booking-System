@@ -217,7 +217,7 @@ import {ElMessage} from 'element-plus';
 /* ===== Global Variables ===== */
 const instance = getCurrentInstance();
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress;
-
+const user = ref({})
 /* ===== Reactive Data ===== */
 const roomIds = ref([]);
 const roomsData = ref([]);
@@ -633,7 +633,7 @@ async function handleBook() {
     date: formatDate(bookDate.value),
     timeSlots: selectedSlots.value.map(slot => slot.index),
     purpose: bookingPurpose.value,
-    user_email: instance.appContext.config.globalProperties.$user.email
+    user_email: user.value.email
   };
   try {
     const response = await axios.post(backendAddress + '/bookRoom', bookingData, {
@@ -667,10 +667,12 @@ function handleClickOutside(event) {
 
 /* ===== Lifecycle Hooks ===== */
 onMounted(async () => {
+  let me = await instance.appContext.config.globalProperties.$me()
+  user.value = me.data
   // Fetch room data from backend
   try {
     const response = await axios.get(backendAddress + '/allRoom', {
-      params: {permission: instance.appContext.config.globalProperties.$user.permission}
+      withCredentials: true
     });
     if (response.data.code === '001') {
       roomsData.value = response.data.data.map(room => {

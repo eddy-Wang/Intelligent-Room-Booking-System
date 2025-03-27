@@ -89,11 +89,9 @@ const handleVerify = async () => {
       const data = await response.json();
       if (data.code === "000") {
         console.log(data)
-        vueInstance.appContext.config.globalProperties.$user.email = data.data.email
-        vueInstance.appContext.config.globalProperties.$user.name = data.data.name
-        const userPermission = vueInstance.appContext.config.globalProperties.$user.permission = data.data.permission
-
-        console.log(vueInstance.appContext.config.globalProperties.$user)
+        // vueInstance.appContext.config.globalProperties.$user.email = data.data.email
+        // vueInstance.appContext.config.globalProperties.$user.name = data.data.name
+        const userPermission = data.data.permission
 
         if (window.innerWidth <= 768) {
           if (userPermission === "Admin") {

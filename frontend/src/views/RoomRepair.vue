@@ -38,8 +38,8 @@ const rooms = ref([]);
 const showDialog = ref(false);
 const selectedRoom = ref(null);
 const reportInfo = ref("");
-const userEmail = instance.appContext.config.globalProperties.$user.email;
-const userPermission = instance.appContext.config.globalProperties.$user.permission;
+const userEmail = ref("")
+const userPermission = ref("")
 
 const fetchRoomData = async () => {
   try {
@@ -65,9 +65,9 @@ const submitRepair = async () => {
 
       const repairData = {
         room_id: selectedRoom.value.id,
-        user_email: userEmail,
+        user_email: userEmail.value,
         report_info: reportInfo.value,
-        user_permission: userPermission,
+        user_permission: userPermission.value,
       };
 
       console.log("Repair data:", repairData);
@@ -95,7 +95,13 @@ const submitRepair = async () => {
     }
 ;
 
-onMounted(fetchRoomData);
+onMounted(async () => {
+  let me = await instance.appContext.config.globalProperties.$me()
+  let user = me.data
+  userEmail.value = user.email
+  userPermission.value = user.permission
+  await fetchRoomData()
+});
 </script>
 
 <style scoped>

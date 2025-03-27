@@ -256,10 +256,11 @@ export default {
           .join(" ");
     }
   },
-  mounted() {
+  async mounted() {
     const instance = getCurrentInstance();
     if (instance) {
-      this.user = instance.appContext.config.globalProperties.$user;
+      let me = await instance.appContext.config.globalProperties.$me()
+      this.user = me.data
     }
     this.fetchReservations();
   }

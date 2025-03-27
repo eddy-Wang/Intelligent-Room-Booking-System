@@ -88,7 +88,7 @@ def me():
     if 'user_data' not in session:
         return 'Unauthorized', 401
     else:
-        return create_response('000',session.get('user_data'))
+        return create_response('000', "", session.get('user_data'))
 
 
 @bp.route('/allRoom', methods=['GET', 'OPTIONS'])
@@ -282,7 +282,7 @@ def book_room():
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        query_check = "SELECT time FROM booking WHERE room_id = %s AND date = %s AND status = 'Confirmed'"
+        query_check = "SELECT time FROM booking WHERE room_id = %s AND date = %s AND status IN ('Confirmed','Banned')"
         cursor.execute(query_check, (room_id, date))
         existing_bookings = cursor.fetchall()
 

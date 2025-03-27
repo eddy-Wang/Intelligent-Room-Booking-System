@@ -383,8 +383,7 @@ const exportToExcel = () => {
 };
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
-const userEmail = instance.appContext.config.globalProperties.$user.email;
-
+const userEmail = ref("")
 // Reject dialog related data
 const rejectDialogVisible = ref(false);
 const rejectForm = ref({
@@ -643,10 +642,13 @@ const deleteBooking = async (booking_id) => {
 
 
 // Fetch data on component mount
-onMounted(() => {
-  fetchBookings();
-  fetchRooms();
-  fetchUsers();
+onMounted(async () => {
+  let me = await instance.appContext.config.globalProperties.$me()
+  let user = me.data
+  userEmail.value = user.email
+  await fetchBookings();
+  await fetchRooms();
+  await fetchUsers();
 });
 
 // Function to convert timestamp to a readable time format
@@ -760,7 +762,7 @@ const limitUsageForm = ref({
       room_id: '',
       date: '',
       time: [],
-      user_email: userEmail,
+      user_email: userEmail.value,
       purpose: ''
     })
 ;

@@ -41,7 +41,11 @@ import AdminIndexMobile from '@/AdminIndexMobile.vue'
 const instance = getCurrentInstance()
 const router = useRouter()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
-const currentUser = ref(instance.appContext.config.globalProperties.$user)
+const currentUser = ref({
+  name: "user",
+  email: "user@dundee.ac.uk",
+  permission: "Admin"
+})
 const users = ref([])
 
 const fetchUsers = async () => {
@@ -56,8 +60,10 @@ const fetchUsers = async () => {
   }
 }
 
-onMounted(() => {
-  fetchUsers()
+onMounted(async () => {
+  let me = await instance.appContext.config.globalProperties.$me()
+  currentUser.value = me.data
+  await fetchUsers()
 })
 
 const goToUserSystem = () => {

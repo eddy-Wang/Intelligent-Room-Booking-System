@@ -109,8 +109,8 @@ export default {
     }
   },
   methods: {
-    setActiveNav() {
-      this.activeNav = 0;
+    setActiveNav(index) {
+      this.activeNav = index;
     },
     handleLogout() {
       if (confirm('Are you sure you want to logout?')) {

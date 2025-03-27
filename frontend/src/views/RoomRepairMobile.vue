@@ -60,6 +60,8 @@ const roomsData = ref([]);
 const searchQuery = ref('');
 const showRepairDialog = ref(false);
 const repairDescription = ref('');
+const userEmail = ref("")
+const userPermission = ref("")
 
 const filteredRooms = computed(() => {
   const query = searchQuery.value.toLowerCase().replace(/\s+/g, '');
@@ -70,9 +72,13 @@ const filteredRooms = computed(() => {
 });
 
 onMounted(async () => {
+  let me = await instance.appContext.config.globalProperties.$me()
+  let user = me.data
+  userEmail.value = user.email
+  userPermission.value = user.permission
   try {
     const response = await axios.get(backendAddress+'/allRoom', {
-      params: {permission: instance.appContext.config.globalProperties.$user.permission}
+      withCredentials: true
     });
     if (response.data.code === '001') {
       roomsData.value = response.data.data.map(room => ({
@@ -122,9 +128,9 @@ async function submitRepair() {
 
   const repairData = {
     room_id: selectedRoom.value.id,
-    user_email: instance.appContext.config.globalProperties.$user.email,
+    user_email: userEmail.value,
     report_info: repairDescription.value,
-    user_permission: instance.appContext.config.globalProperties.$user.permission
+    user_permission: userPermission.value
   };
 
   try {

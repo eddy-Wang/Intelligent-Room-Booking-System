@@ -24,11 +24,11 @@ const vuetify = createVuetify({
 
 const app = createApp(App)
 
-app.config.globalProperties.$user = {
-  email: '',
-  name: '',
-  permission: '',
-};
+// app.config.globalProperties.$user = {
+//   email: '',
+//   name: '',
+//   permission: '',
+// };
 app.config.globalProperties.$backendAddress = "/api"
 app.config.globalProperties.$me = async () => {
     let response = await fetch('/api/me',{
