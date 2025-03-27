@@ -21,9 +21,9 @@
             <div>Capacity: {{ room.capacity }}</div>
             <div>Location: {{ room.location }}</div>
             <div>Access: {{ accessMap[room.access] }}</div>
+            <div>Equipment: {{ formatEquipment(room.equipment) }}</div>
           </div>
-          <div class="room-equipment">Equipment: {{ formatEquipment(room.equipment) }}</div>
-          <div class="room-information">{{ room.information || 'No additional info' }}</div>
+          <div class="room-information">{{ room.information || '' }}</div>
         </div>
 
         <div class="room-actions">
@@ -501,25 +501,19 @@ export default {
 
 .room-info > div {
   margin: 6px 0;
-  font-size: 14px;
+  gap: 0;
 }
 
 .room-name {
   font-size: 1.1rem;
-  font-weight: 600;
-  color: #2c3e50;
+  font-weight: bold;
 }
 
 .room-meta {
   display: flex;
+  flex-direction: column;
   flex-wrap: wrap;
-  gap: 8px;
   color: #666;
-}
-
-.room-equipment {
-  color: #4a5568;
-  font-size: 13px;
 }
 
 .room-actions {

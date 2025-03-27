@@ -6,18 +6,18 @@
     </div>
     <div class="filter-container">
       <div class="filter-row">
-        <el-select v-model="filters.date" multiple clearable placeholder="Filter by Date">
+        <el-select v-model="filters.date" multiple clearable placeholder="Date">
           <el-option v-for="value in uniqueDates" :key="value" :label="value" :value="value"/>
         </el-select>
-        <el-select v-model="filters.time" multiple clearable placeholder="Filter by Time">
+        <el-select v-model="filters.time" multiple clearable placeholder="Time">
           <el-option v-for="timeSlot in timeSlots" :key="timeSlot" :label="timeSlot" :value="timeSlot"/>
         </el-select>
       </div>
       <div class="filter-row">
-        <el-select v-model="filters.name" multiple clearable placeholder="Filter by Room">
+        <el-select v-model="filters.name" multiple clearable placeholder="Room">
           <el-option v-for="value in uniqueRooms" :key="value" :label="value" :value="value"/>
         </el-select>
-        <el-select v-model="filters.status" multiple clearable placeholder="Filter by Status">
+        <el-select v-model="filters.status" multiple clearable placeholder="Status">
           <el-option v-for="value in uniqueStatusValues" :key="value" :label="value" :value="value"/>
         </el-select>
       </div>
@@ -360,7 +360,11 @@ export default {
   margin: 20px 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .filter-row {
@@ -501,21 +505,19 @@ export default {
 }
 
 .reservation-actions {
-  margin-top: 1rem;
+  margin: 8px 10px auto 10px;
   display: flex;
+  justify-content: space-between;
   gap: 0.5rem;
-  justify-content: flex-end;
 }
 
 .action-button {
-  padding: 6px 12px;
+  width: 45%;
+  font-size: 1rem;
+  height: 1.6rem;
+  background-color: #eceef8;
   border: none;
   border-radius: 10px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: bold;
-  background-color: #eceef8;
-  color: #333;
 }
 
 :deep(.el-card__body) {

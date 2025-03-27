@@ -353,7 +353,7 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 
 .room-name {
@@ -400,7 +400,7 @@ onBeforeUnmount(() => {
 }
 
 .user-email {
-  color: #3498db;
+  color: #566c94;
   font-size: 0.9rem;
   margin: 0;
 }
@@ -416,6 +416,8 @@ onBeforeUnmount(() => {
   width: 45%;
   font-size: 1rem;
   height: 1.6rem;
+  background-color: #eceef8;
+  border: none;
 }
 
 .status-unreviewed {
