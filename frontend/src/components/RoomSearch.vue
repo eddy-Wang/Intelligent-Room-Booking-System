@@ -135,17 +135,24 @@ export default {
     Vue3Datepicker
   },
 
+  setup() {
+    const bookDate = inject('bookDate');
+    const bookTimeSlots = inject('bookTimeSlots')
+
+    return {
+      bookDate, bookTimeSlots,
+    }
+  },
+
   async mounted() {
     let instance = getCurrentInstance()
     const backendAddress = instance.appContext.config.globalProperties.$backendAddress
     let me = await instance.appContext.config.globalProperties.$me()
     const user_email = me.data.email
-    const bookDate = inject('bookDate');
-    const bookTimeSlots = inject('bookTimeSlots')
 
     document.addEventListener('click', this.handleClickOutside);
     return {
-      bookDate, bookTimeSlots, user_email, backendAddress
+      user_email, backendAddress
     };
   },
   watch: {
@@ -549,6 +556,7 @@ export default {
   transform: translateY(0);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
+
 .booking-info {
   font-size: 14px;
   line-height: 1.5;
