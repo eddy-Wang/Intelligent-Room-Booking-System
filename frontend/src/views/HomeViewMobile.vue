@@ -187,6 +187,7 @@
 import {ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance} from 'vue';
 import Vue3Datepicker from 'vue3-datepicker';
 import axios from 'axios';
+import {ElMessage} from "element-plus";
 
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
@@ -619,18 +620,18 @@ async function handleBook() {
       headers: {'Content-Type': 'application/json'}
     });
     if (response.data.code === '000') {
-      alert('Booking successful!');
+      ElMessage.success('Booking successful!');
       selectedRoom.value = null;
       selectedDate.value = null;
       bookDate.value = null;
       selectedSlots.value = [];
       bookingPurpose.value = '';
     } else {
-      alert('Booking failed: ' + response.data.message);
+      ElMessage.error('Booking failed: ' + response.data.message);
     }
   } catch (error) {
     console.error('Error booking room:', error);
-    alert('An error occurred while booking the room.');
+    ElMessage.error('An error occurred while booking the room, please try again later');
   }
 }
 

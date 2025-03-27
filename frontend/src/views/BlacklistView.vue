@@ -241,7 +241,7 @@ export default {
 .page-title {
   font-size: 40px;
   font-weight: bold;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   padding: 10px;
 }
 
@@ -256,14 +256,13 @@ export default {
   width: 100%;
   padding: 20px;
   background-color: #f8f9fa;
-  overflow: auto;
 }
 
 .custom-card {
   width: 100%;
   padding: 20px;
   border-radius: 12px;
-  overflow: auto;
+  overflow-y: auto;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
