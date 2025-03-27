@@ -15,6 +15,6 @@ def run_crawler_periodically():
 
 if __name__ == '__main__':
     # only run crawler in the subprocess that is actually running
-    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-        threading.Thread(target=run_crawler_periodically, daemon=True).start()
+    # if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+    #     threading.Thread(target=run_crawler_periodically, daemon=True).start()
     app.run(host="0.0.0.0", port=8080)

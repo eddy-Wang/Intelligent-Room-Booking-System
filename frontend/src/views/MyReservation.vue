@@ -109,9 +109,6 @@
             <el-button @click="instructionsDialogVisible = false">Close</el-button>
           </template>
         </el-dialog>
-      </div>
-    </div>
-  </div>
 </template>
 <script>
 import {getCurrentInstance} from "vue";

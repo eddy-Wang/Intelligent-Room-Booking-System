@@ -9,9 +9,16 @@ mail = Mail()
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    app.secret_key = 'SK_test'
+    app.config.update(
+        SESSION_COOKIE_SECURE=False,  # 允许 HTTP 传输 Cookie
+        SESSION_COOKIE_SAMESITE='Lax'  # 允许跨域 Cookie（需配合 Secure=False）
+    )
 
     mail.init_app(app)
-    CORS(app)
+    CORS(app,
+         origins=["http://localhost:5173"],
+         supports_credentials=True)
 
     from .routes import bp as routes_bp
     app.register_blueprint(routes_bp)

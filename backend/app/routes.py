@@ -1,7 +1,7 @@
 import os
 import time
 
-from flask import Blueprint, request, jsonify, Response, url_for, redirect
+from flask import Blueprint, request, jsonify, Response, url_for, redirect, session
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code, \
     get_user_reservations, cancel_reservation, fetch_users, fetch_rooms_id_and_name, fetch_bookings, \
     update_booking_status, \
@@ -74,6 +74,7 @@ def verify_code():
             user_data = get_user_data_by_email(user_email)
             if user_data:
                 remove_verification_code(user_email)
+                session['user_data'] = user_data
                 return create_response('000', 'Login successful!', user_data)
             else:
                 return create_response('005', 'Failed to retrieve user data.')
@@ -81,6 +82,14 @@ def verify_code():
             return create_response('004', 'Invalid code, please try again.')
     else:
         return create_response('007', 'No verification code sent. Please request a new code.')
+
+
+@bp.route('/me', methods=['GET', 'OPTIONS'])
+def me():
+    if 'user_data' not in session:
+        return 'Unauthorized', 401
+    else:
+        return create_response('000',session.get('user_data'))
 
 
 @bp.route('/allRoom', methods=['GET', 'OPTIONS'])

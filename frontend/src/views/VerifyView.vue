@@ -71,6 +71,7 @@ const handleVerify = async () => {
     try {
       const response = await fetch(backendAddress + '/verify-code', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         },
