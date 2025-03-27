@@ -24,6 +24,7 @@
     <div class="right-column">
       <room-search
           @filters-updated="handleFilters"
+
           :selected-room="selectedRoom"
           :book-date="bookDate"
           :selected-date="selectedDate"

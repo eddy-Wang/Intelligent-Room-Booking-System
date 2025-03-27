@@ -146,14 +146,13 @@ export default {
 
   async mounted() {
     let instance = getCurrentInstance()
-    const backendAddress = instance.appContext.config.globalProperties.$backendAddress
+    this.backendAddress = instance.appContext.config.globalProperties.$backendAddress
     let me = await instance.appContext.config.globalProperties.$me()
-    const user_email = me.data.email
+    this.user_email = me.data.email
 
     document.addEventListener('click', this.handleClickOutside);
-    return {
-      user_email, backendAddress
-    };
+
+
   },
   watch: {
     combinedFilters(newFilters) {
@@ -181,6 +180,8 @@ export default {
       ],
       activeAccessFilter: 'all',
       bookingPurpose: "",
+      backendAddress: "",
+      user_email: "",
 
       // Capacity
       capacityFilters: [
@@ -342,7 +343,6 @@ export default {
         ElMessage.error('Please select a room, date, and time slots.');
         return;
       }
-      console.log(this.selectedRoom, this.bookDate, this.bookTimeSlots)
       const bookingData = {
         roomId: this.selectedRoom.id,
         roomName: this.selectedRoom.name,
@@ -357,6 +357,8 @@ export default {
         });
         if (response.data.code === '000') {
           ElMessage.success('Booking successful!');
+          this.bookingPurpose = ""
+          window.location.reload()
         } else if (response.data.code === '007') {
           ElMessage.error('You are currently on the blacklist and cannot make bookings.');
         } else {
