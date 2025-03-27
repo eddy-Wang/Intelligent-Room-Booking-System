@@ -10,7 +10,7 @@
       </div>
       <div class="user-avatar">
         <img
-          :src="currentUser.avatar || 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=2070&auto=format&fit=crop'"
+          :src="'/src/assets/other.png'"
           alt="User Avatar">
       </div>
       <div class="user-details">
