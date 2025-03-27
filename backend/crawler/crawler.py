@@ -314,8 +314,8 @@ def main():
     """Main function to run the scraper"""
     try:
         # Login credentials
-        USERNAME = "ADD_YOUR_CSU_ID_HERE"  # Replace with your CSU student ID
-        PASSWORD = "ADD_YOUR_CSU_PASSWORD_HERE"  # Replace with your CSU password
+        USERNAME = "7802220127"  # Replace with your CSU student ID
+        PASSWORD = "20040104cjs"  # Replace with your CSU password
         
         # Initialize and run scraper
         scraper = ClassroomScheduleScraper(USERNAME, PASSWORD)
