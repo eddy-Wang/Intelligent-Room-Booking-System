@@ -190,6 +190,7 @@
     </div>
 
     <div v-if="modifyDialogVisible" class="modal" @click.self="modifyDialogVisible = false">
+
       <div class="modal-content">
         <h2>Modify Booking</h2>
         <form @submit.prevent="saveModifiedBooking">

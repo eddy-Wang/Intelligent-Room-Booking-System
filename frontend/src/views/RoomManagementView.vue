@@ -160,6 +160,7 @@
 </template>
 <script>
 import {getCurrentInstance} from "vue";
+import {ElMessage} from "element-plus";
 
 export default {
   name: 'RoomManagement',
@@ -380,12 +381,12 @@ export default {
     async handleImageUpload(event) {
       const file = event.target.files[0];
       if (!file) {
-        alert("Please select an image to upload");
+        ElMessage.info("Please select an image to upload");
         return;
       }
       const maxFileSize = 5 * 1024 * 1024;
       if (file.size > maxFileSize) {
-        alert("The max size is 5MB");
+        ElMessage.info("The max size is 5MB");
         return;
       }
 
@@ -412,15 +413,14 @@ export default {
           } else {
             this.newRoom.image_url = image_url;
           }
-          alert("upload successfully");
           this.newRoom.image_url = image_url;
           console.log(this.newRoom.image_url)
-          alert("upload successfully");
+          ElMessage.success("Upload successfully");
         } else {
-          alert(`error：${result.message || "unknown error"}`);
+          ElMessage.error(`Error：${result.message || "Unknown error"}`);
         }
       } catch (error) {
-        alert("Upload failed, please check network connection");
+        ElMessage.error("Upload failed, please check network connection");
       }
     },
 
@@ -495,10 +495,10 @@ h1 {
 }
 
 .admin-actions {
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: flex-end;
-  padding-right: 20px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 20px;
 }
 
 .room-list-container {

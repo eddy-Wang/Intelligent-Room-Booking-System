@@ -127,6 +127,7 @@
 import Vue3Datepicker from 'vue3-datepicker';
 import axios from 'axios';
 import {getCurrentInstance, inject} from "vue";
+import {ElMessage} from "element-plus";
 
 export default {
   name: 'RoomSearch',
@@ -329,7 +330,7 @@ export default {
 
     async handleBook() {
       if (!this.selectedRoom || !this.bookDate || this.bookTimeSlots.length === 0) {
-        alert('Please select a room, date, and time slots.');
+        ElMessage.error('Please select a room, date, and time slots.');
         return;
       }
       console.log(this.selectedRoom, this.bookDate, this.bookTimeSlots)
@@ -346,13 +347,13 @@ export default {
           headers: {'Content-Type': 'application/json'}
         });
         if (response.data.code === '000') {
-          alert('Booking successful!');
+          ElMessage.success('Booking successful!');
         } else {
-          alert('Booking failed: ' + response.data.message);
+          ElMessage.error('Booking failed: ' + response.data.message);
         }
       } catch (error) {
         console.error('Error booking room:', error);
-        alert('An error occurred while booking the room.');
+        ElMessage.error('An error occurred while booking the room, please try again later');
       }
     }
   },
@@ -522,7 +523,7 @@ export default {
   display: block;
   margin-left: auto;
   margin-top: 10px;
-  background-color: #7e7c7c;
+  background-color: #3155ef;
   color: white;
   padding: 10px 25px;
   border: none;
@@ -535,7 +536,7 @@ export default {
 }
 
 .book-button:hover {
-  background-color: #404040;
+  background-color: #026efb;
   transform: translateY(-1px);
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 }
@@ -544,7 +545,6 @@ export default {
   transform: translateY(0);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
-
 .booking-info {
   font-size: 14px;
   line-height: 1.5;

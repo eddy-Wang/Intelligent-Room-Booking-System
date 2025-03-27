@@ -361,7 +361,9 @@ const submitNewReport = async () => {
     console.error('Error submitting report:', error);
     ElMessage.error('Failed to submit report');
   }
-};// Fetch data on component mount
+};
+
+// Fetch data on component mount
 onMounted(() => {
   fetchRooms();
   fetchUsers();
@@ -374,7 +376,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 1%;
+  width: 100%;
 }
 
 .page-title {
@@ -385,7 +388,7 @@ onMounted(() => {
 }
 .button-group {
     display: flex;
-    gap: 10px;
+    gap: 30px;
 }
 
 .export-button {
@@ -399,7 +402,6 @@ onMounted(() => {
 }
 
 .new-button {
-    width: 300%;
     min-width: 10%;
     height: 50%;
     padding: 10px;
@@ -407,12 +409,24 @@ onMounted(() => {
 }
 
 .export-button {
-    width: 150%;
     min-width: 10%;
     height: 50%;
     padding: 10px;
     margin: 0;
 }
+
+.el-button.el-button--success.export-button{
+  width: 100%;
+  margin-top: 10%;
+  height: 43px;
+}
+
+.el-button.el-button--primary.new-button{
+  width: 120%;
+  margin-top: 10%;
+  height: 43px;
+}
+
 .el-table {
   height: 700px;
   width: 100%;
@@ -422,9 +436,9 @@ onMounted(() => {
 .room-repair-handling {
   font-family: 'Cambria', serif;
   width: 100%;
+  height: 100%;
   padding: 20px;
   background-color: #f8f9fa;
-  overflow: auto;
 }
 
 .custom-card {
