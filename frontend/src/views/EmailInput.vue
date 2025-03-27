@@ -205,7 +205,7 @@ body {
 
   .email-suffix {
     color: #666;
-    font-size: 1rem;
+    font-size: 0.9rem;
     padding: 0 15px 0 0;
     font-weight: 500;
     width: 40%;
