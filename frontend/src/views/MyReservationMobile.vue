@@ -155,7 +155,7 @@ export default {
           }
         }
         if (this.filters.name && this.filters.name.length > 0) {
-          if (!this.filters.name.includes(reservation.room)) {
+          if (!this.filters.name.includes(reservation.name)) {
             return false;
           }
         }
