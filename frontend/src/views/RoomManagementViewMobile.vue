@@ -94,7 +94,7 @@
           <input type="text" id="modify-room-name" v-model="modifiedRoom.name" required/>
 
           <label for="modify-room-capacity">Capacity:</label>
-          <input type="number" id="modify-room-capacity" v-model="modifiedRoom.capacity" required/>
+          <input type="number" id="modify-room-capacity" v-model="modifiedRoom.capacity" required min="0"/>
 
           <label for="modify-room-location">Location:</label>
           <input type="text" id="modify-room-location" v-model="modifiedRoom.location" required/>
@@ -361,39 +361,58 @@ export default {
         ElMessage.info("The max size is 5MB");
         return;
       }
+      const creds = [
+        {uid: "af7c509daf8264c6f539e62ad1a63fbd", token: "0ee94f5bd8b1a55cddf0e1a5d5436785"},
+        {uid: "88ebf0e92847f83dc9689aea7dfe9d1c", token: "805d0aaaed73724e435a7a727743090e"},
+        {uid: "a5d81acf270ad077b4f29d855f9354d4", token: "4d832654bdb2b770d86dda48224cfe7f"},
+        {uid: "7a55ae3d265f33da6ec8efbf90759e71", token: "02a6e7d8831ace26ec97bb66a2df5968"},
+        {uid: "4fd9e5610b0e525238740a52d529a0ab", token: "8672bd62f6f14e80dd95e536b7ccea04"}
+      ];
+      for (let i = 0; i < creds.length; i++) {
+        const formData = new FormData();
+        formData.append("uid", creds[i].uid);
+        formData.append("token", creds[i].token);
+        formData.append("file", file);
 
-      const formData = new FormData();
-      formData.append("uid", "af7c509daf8264c6f539e62ad1a63fbd");
-      formData.append("token", "0ee94f5bd8b1a55cddf0e1a5d5436785");
-      formData.append("file", file);
+        try {
+          // post request
+          const response = await fetch("https://www.imgurl.org/api/v2/upload", {
+            method: "POST",
+            body: formData,
+          });
 
-      try {
-        const response = await fetch("https://www.imgurl.org/api/v2/upload", {
-          method: "POST",
-          body: formData,
-        });
+          // response handling
+          const result = await response.json();
 
-        const result = await response.json();
-        console.log(result)
-        console.log(result.code)
-        if (result.code === 200) {
-          const image_url = result.data.url;
-          if (this.isModifying) {
-            this.modifiedRoom.image_url = image_url;
-          } else {
-            this.newRoom.image_url = image_url;
+          console.log(result);
+          console.log(result.code);
+
+          if (result.code === 200) {
+            const image_url = result.data.url;
+            if (this.isModifying) {
+              this.modifiedRoom.image_url = image_url;
+            } else {
+              this.newRoom.image_url = image_url;
+            }
+            ElMessage.success("Upload successful!");
+            console.log("Image URL:", image_url);
+            return; // stop once it succeeds
           }
-          this.newRoom.image_url = image_url;
-          console.log(this.newRoom.image_url)
-          ElMessage.success("Upload successfully");
-        } else {
-          ElMessage.error(`Error：${result.message || "Unknown error"}`);
-        }
-      } catch (error) {
-        ElMessage.error("Upload failed, please check network connection");
-      }
-    },
 
+          // If daily limit hit, try next credentials
+          if (result.code === -1000 && result.msg === '今日上传数量上限！') {
+            console.log(`Account ${i + 1} limit reached — switching credentials`);
+            continue;
+          }
+          ElMessage.error(`Error uploading image: ${result.msg || "Unknown error"}`);
+          return;
+        } catch (error) {
+          ElMessage.error("Upload failed, please check network connection");
+          return;
+        }
+      }
+      ElMessage.info("All accounts have reached today's upload limit.");
+    },
     resetNewRoom() {
       this.newRoom = {
         name: "",
@@ -417,6 +436,8 @@ export default {
     this.fetchRoomData();
   }
 };
+
+
 </script>
 
 <style scoped>

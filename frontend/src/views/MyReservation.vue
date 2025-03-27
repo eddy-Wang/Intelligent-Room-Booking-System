@@ -7,28 +7,28 @@
       <div class="filter-container">
         <el-select v-model="roomFilter" placeholder="Filter by Room" clearable>
           <el-option
-            v-for="room in uniqueRooms"
-            :key="room"
-            :label="room"
-            :value="room"
+              v-for="room in uniqueRooms"
+              :key="room"
+              :label="room"
+              :value="room"
           />
         </el-select>
 
         <el-select v-model="dateFilter" placeholder="Filter by Date" clearable>
           <el-option
-            v-for="date in uniqueDates"
-            :key="date"
-            :label="date"
-            :value="date"
+              v-for="date in uniqueDates"
+              :key="date"
+              :label="date"
+              :value="date"
           />
         </el-select>
 
         <el-select v-model="statusFilter" placeholder="Filter by Status" clearable>
           <el-option
-            v-for="status in uniqueStatuses"
-            :key="status"
-            :label="status"
-            :value="status"
+              v-for="status in uniqueStatuses"
+              :key="status"
+              :label="status"
+              :value="status"
           />
         </el-select>
       </div>
@@ -36,10 +36,11 @@
       <div class="content-wrapper">
         <div class="reservation-list">
           <div
-            v-for="(reservation, index) in paginatedReservations"
-            :key="reservation.booking_id"
-            class="reservation-item"
+              v-for="(reservation, index) in paginatedReservations"
+              :key="reservation.booking_id"
+              class="reservation-item"
           >
+
             <div class="reservation-info">
               <div class="reservation-name">{{ reservation.name }}</div>
               <div class="reservation-time">
@@ -50,6 +51,9 @@
             </div>
             <div class="status-and-actions">
               <div class="reservation-status">{{ reservation.status }}</div>
+              <div class="check-in-hint" v-if="reservation.status === 'Confirmed'">
+                You can check in 10 minutes before or after the reservation starts.
+              </div>
               <div v-if="reservation.status === 'Confirmed'" class="reservation-actions">
                 <button @click="checkIn(index)" class="action-button">Check In</button>
                 <button @click="cancelReservation(index)" class="action-button">Cancel</button>
@@ -65,7 +69,7 @@
 
         <div class="user-info">
           <div class="user-avatar">
-            <img :src="userAvatar" alt="User Avatar" />
+            <img :src="userAvatar" alt="User Avatar"/>
           </div>
           <div class="user-email">{{ user.name }}</div>
           <div class="user-email">{{ user.email }}</div>
@@ -77,12 +81,12 @@
 
       <!-- Import Calendar Instructions Dialog -->
       <el-dialog
-        v-model="instructionsDialogVisible"
-        title="Import Calendar Instructions"
-        width="50%"
+          v-model="instructionsDialogVisible"
+          title="Import Calendar Instructions"
+          width="50%"
       >
         <el-form label-width="120px">
-          <el-input v-model="instructionsText" type="textarea" :rows="7" readonly />
+          <el-input v-model="instructionsText" type="textarea" :rows="7" readonly/>
         </el-form>
         <template #footer>
           <el-button @click="instructionsDialogVisible = false">Close</el-button>
@@ -167,9 +171,8 @@ export default {
     },
     userAvatar() {
       return this.user.permission === 'Student'
-
-          ? "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D":
-          "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+          ? '/src/assets/student.png'
+          : '/src/assets/other.png';
     },
   },
   methods: {
@@ -361,8 +364,8 @@ h1 {
 }
 
 .reservation-item {
-  height:80%;
-  width:100%;
+  height: 50%;
+  width: 100%;
   background-color: #ffffff;
   border-radius: 20px;
   padding: 40px;
@@ -417,19 +420,27 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 10px;
 }
 
 .reservation-actions {
-  width: 105%;
+  width: 80%;
   display: flex;
   flex-direction: row;
   gap: 5px;
+  justify-content: flex-end;
+  margin-right: 20px;
+}
+
+.check-in-hint {
+  font-size: 1rem;
+  color: #7f8c8d;
+  margin-bottom: 5px;
+  margin-right: 20px;
 }
 
 .action-button {
-  height:20%;
-  width: 100%;
+  height: 20%;
+  width: 30%;
   padding: 8px 16px;
   border: none;
   border-radius: 6px;
@@ -438,6 +449,7 @@ h1 {
   background-color: #eceef8;
   color: #333;
   transition: background-color 0.2s ease;
+  flex-direction: row;
 }
 
 .action-button:disabled {
@@ -493,7 +505,6 @@ h1 {
 .pagination {
   display: flex;
   justify-content: center;
-  margin-top: 10px;
   gap: 10px;
 }
 
@@ -519,7 +530,7 @@ h1 {
 }
 
 .download-button {
-  padding: 8px 16px;
+  padding: 12px 16px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -528,7 +539,9 @@ h1 {
   color: #333;
   transition: background-color 0.2s ease;
   margin-top: 20px;
-  width: 60%;
+  width: 65%;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .download-button:disabled {
@@ -541,9 +554,9 @@ h1 {
   color: #fff;
 }
 
-.el-select{
+.el-select {
   border-radius: 10px;
-  width:22.5%;
-  height:15%;
+  width: 22.5%;
+  height: 15%;
 }
 </style>
