@@ -52,6 +52,7 @@
 <script setup>
 import {ref, computed, getCurrentInstance} from 'vue'
 import {useRouter} from 'vue-router'
+import {ElMessage} from "element-plus";
 
 const router = useRouter()
 const email = ref('')
@@ -67,8 +68,8 @@ const isValidEmail = computed(() => {
 
 const validateEmail = () => {
   const emailPattern = selectedSuffix.value === '@dundee.ac.uk'
-    ? /^[a-zA-Z0-9._%+-]+@dundee\.ac\.uk$/
-    : /^[a-zA-Z0-9._%+-]+@csu\.edu\.cn$/;
+      ? /^[a-zA-Z0-9._%+-]+@dundee\.ac\.uk$/
+      : /^[a-zA-Z0-9._%+-]+@csu\.edu\.cn$/;
   showError.value = !emailPattern.test(email.value + selectedSuffix.value);
 };
 
@@ -76,7 +77,7 @@ const handleNext = async () => {
   if (isValidEmail.value) {
     try {
       const fullEmail = email.value + selectedSuffix.value;
-      const response = await fetch(backendAddress+'/login', {
+      const response = await fetch(backendAddress + '/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -96,9 +97,8 @@ const handleNext = async () => {
             }
           })
         } else {
-          alert(data.message)
+          ElMessage.error(data.message)
         }
-
       }
     } catch (error) {
       console.error('Error:', error);
@@ -135,13 +135,12 @@ body {
 
 .left-content {
   flex: 0 0 50%;
-  padding: 0 4rem;
   position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding-top: 40px;
+  padding: 40px 4rem 0;
 
   .header {
     max-width: 400px;
@@ -207,45 +206,45 @@ body {
     }
   }
 
-.email-suffix {
-  color: #666;
-  font-size: 1rem;
-  padding: 0 15px 0 0;
-  font-weight: 500;
-  width: 40%;
-  border: none;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 5px center;
-  background-size: 20px;
-  cursor: pointer;
-  border-radius: 50px 50px 50px 50px;
-}
+  .email-suffix {
+    color: #666;
+    font-size: 1rem;
+    padding: 0 15px 0 0;
+    font-weight: 500;
+    width: 40%;
+    border: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 5px center;
+    background-size: 20px;
+    cursor: pointer;
+    border-radius: 50px 50px 50px 50px;
+  }
 
   .email-suffix option {
-  background: #fff; /* 选项背景色 */
-  color: #333; /* 文字颜色 */
-  padding: 0; /* 选项内边距 */
-  font-size: 1rem;
-}
+    background: #fff;
+    color: #333;
+    padding: 0;
+    font-size: 1rem;
+  }
 
   .email-suffix option:checked {
-  background: #f0f0f0;
-}
+    background: #f0f0f0;
+  }
 
-.email-suffix:hover {
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23333333'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
-}
+  .email-suffix:hover {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23333333'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  }
 
   .error-message {
     color: #FFE5E5;
-    font-size: 0.95rem;
-    margin: 0.5rem auto 1.5rem;
+    font-size: 1.1rem;
+    margin: 1.5rem auto 0.5rem;
     background: rgba(255, 255, 255, 0.1);
-    padding: 1rem 1.5rem;
+    padding: 1rem 1rem;
     border-radius: 50px 50px 50px 50px;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -283,47 +282,15 @@ body {
     width: 100%;
     max-width: 400px;
 
-    &:before {
-      content: '';
-      display: block;
-      background: linear-gradient(to left, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.4) 50%);
-      background-size: 210% 100%;
-      background-position: right bottom;
-      height: 100%;
-      width: 100%;
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      left: 0;
-      border-radius: 50px;
-      transition: all 1s;
-      -webkit-transition: all 1s;
+    .button-text {
+      transition: opacity 0.3s ease;
     }
 
-    &:hover:not(.button-disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 25px rgba(79, 172, 254, 0.9);
-
-      &:before {
-        background-position: left bottom;
-      }
+    .button-disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: rgba(255, 255, 255, 0.8);
     }
-
-    &:active {
-      transform: translateY(1px);
-      box-shadow: 0 2px 10px rgba(79, 172, 254, 0.6);
-    }
-  }
-
-  .button-text {
-    transition: opacity 0.3s ease;
-  }
-
-  .button-disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    background: rgba(255, 255, 255, 0.8);
   }
 }
 
@@ -358,17 +325,10 @@ body {
     position: relative;
   }
 
-  .header {
-    position: static;
-    padding: 1rem;
-    margin-bottom: 0;
-    text-align: center;
-  }
-
   .left-content {
     position: relative;
     z-index: 3;
-    padding: 2rem;
+    padding: 5%;
     border-radius: 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     max-width: 400px;
@@ -378,7 +338,22 @@ body {
     top: 50%;
     transform: translateY(-50%);
 
+    .header {
+      max-width: 400px;
+      left: 60px;
+      width: 100%;
+      margin-bottom: 30%;
+      margin-top: 5%;
+    }
+
+    .header-logo {
+      height: 45px;
+      width: auto;
+    }
+
     .input-button-container {
+      width: 100%;
+      height: 50%;
       padding: 2rem 2.5rem 2.5rem 2rem;
       background-color: rgba(49, 85, 239, 0.68);
       border-radius: 2.5rem;
@@ -399,6 +374,7 @@ body {
       width: 100%;
       max-width: 300px;
       padding: 0.4rem 1rem;
+      height: auto;
     }
 
     .email-input {
@@ -422,16 +398,33 @@ body {
       padding: 0;
     }
 
+    .error-message {
+      color: #FFE5E5;
+      font-size: 0.9rem;
+      margin: 5% auto 5%;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1rem 1rem;
+      border-radius: 50px 50px 50px 50px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: fadeIn 0.3s ease-in-out;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      display: block;
+      max-width: 400px;
+      text-align: center;
+    }
+
     .next-button {
       text-align: center;
       width: 100%;
       max-width: 300px;
-      height: 30px;
+      height: 23%;
       padding: 1rem 2rem;
       font-size: 1rem;
       display: flex;
       justify-content: center;
       align-items: center;
+      margin: 0;
     }
 
     .button-disabled {

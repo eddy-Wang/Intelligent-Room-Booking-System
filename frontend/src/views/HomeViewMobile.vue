@@ -633,7 +633,7 @@ async function handleBook() {
     }
   } catch (error) {
     console.error('Error booking room:', error);
-    alert('An error occurred while booking the room.');
+    ElMessage.error('An error occurred while booking the room, please try again later');
   }
 }
 

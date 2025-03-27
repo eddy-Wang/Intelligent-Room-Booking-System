@@ -49,10 +49,10 @@ export default {
       navItems: [
         {icon: 'mdiHomeOutline', component: 'HomeView'},
         {icon: 'mdiAccountOutline', component: 'MyReservation'},
-        {icon: 'mdiApplicationEditOutline', component: 'ReservationManagement'},
-        {icon: 'mdiTools', component: 'RoomIssueManagement'},
         {icon: 'mdiClipboardTextOutline', component: 'RoomManagementView'},
         {icon: 'mdiFileCancelOutline', component: 'BlacklistView'},
+        {icon: 'mdiApplicationEditOutline', component: 'ReservationManagement'},
+        {icon: 'mdiTools', component: 'RoomIssueManagement'},
       ]
     };
   },

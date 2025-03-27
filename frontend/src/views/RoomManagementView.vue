@@ -160,6 +160,7 @@
 </template>
 <script>
 import {getCurrentInstance} from "vue";
+import {ElMessage} from "element-plus";
 
 export default {
   name: 'RoomManagement',
@@ -380,12 +381,12 @@ export default {
     async handleImageUpload(event) {
       const file = event.target.files[0];
       if (!file) {
-        alert("Please select an image to upload");
+        ElMessage.info("Please select an image to upload");
         return;
       }
       const maxFileSize = 5 * 1024 * 1024;
       if (file.size > maxFileSize) {
-        alert("The max size is 5MB");
+        ElMessage.info("The max size is 5MB");
         return;
       }
       const creds = [
@@ -431,15 +432,16 @@ export default {
             console.log(`Account ${i + 1} limit reached — switching credentials`);
             continue;
           }
-
-          // Other errors
-          alert(`Error uploading image: ${result.msg || "Unknown error"}`);
+          this.newRoom.image_url = image_url;
+          console.log(this.newRoom.image_url)
+          ElMessage.success("Upload successfully");
+           } else {
+          ElMessage.error(`Error uploading image: ${result.msg || "Unknown error"}`);
           return;
-
+          }
         } catch (error) {
-          alert("Upload failed — please check network connection");
-          return;
-        }
+        ElMessage.error("Upload failed, please check network connection");
+        return;
       }
       alert("All accounts have reached today's upload limit.");
     },
@@ -515,10 +517,10 @@ h1 {
 }
 
 .admin-actions {
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: flex-end;
-  padding-right: 20px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 20px;
 }
 
 .room-list-container {

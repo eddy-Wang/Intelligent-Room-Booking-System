@@ -349,6 +349,7 @@
 import {ref, computed, onMounted, getCurrentInstance} from 'vue';
 import 'element-plus/dist/index.css';
 import * as XLSX from 'xlsx';
+import {ElMessage} from "element-plus";
 
 
 const exportToExcel = () => {
@@ -792,7 +793,7 @@ const submitLimitUsage = async () => {
 
     if (result.code === '200') {
       ElMessage.success(`Prohibited time slots are set successfully, affecting ${result.data.conflict_count} reservation`);
-      fetchBookings();
+      await fetchBookings();
       limitUsageDialogVisible.value = false;
     } else {
       ElMessage.error(result.message);
@@ -804,13 +805,13 @@ const submitLimitUsage = async () => {
 };
 </script>
 
-<style>
+<style scoped>
 .header {
     display: flex;
-    justify-content: space-between; /* 这将使子元素分别靠左和靠右 */
-    align-items: center; /* 垂直居中 */
-    margin-bottom: 20px;
-    width: 100%; /* 确保 header 占据全部宽度 */
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2%;
+    width: 100%;
 }
 
 .page-title {
@@ -822,15 +823,27 @@ const submitLimitUsage = async () => {
 
 .button-group {
     display: flex;
-    gap: 10px;
+    gap: 30px;
 }
 
 .new-button, .export-button {
-    width: auto;
+    width: 30px;
     min-width: 10%;
     height: 50%;
     padding: 10px;
-    margin: 0; /* 移除按钮的 margin */
+    margin: 0;
+}
+
+.el-button.el-button--success.export-button{
+  width: 100%;
+  margin-top: 10%;
+  height: 43px;
+}
+
+.el-button.el-button--primary.new-button{
+  width: 120%;
+  margin-top: 10%;
+  height: 43px;
 }
 
 .el-table {
@@ -844,14 +857,12 @@ const submitLimitUsage = async () => {
   width: 100%;
   padding: 20px;
   background-color: #f8f9fa;
-  overflow: auto;
 }
 
 .custom-card {
   width: 100%;
   padding: 20px;
   border-radius: 12px;
-  overflow: auto;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 

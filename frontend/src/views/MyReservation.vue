@@ -207,11 +207,11 @@ export default {
             })
             .catch(error => {
               console.error('Error downloading calendar:', error);
-              alert('Error downloading calendar. Please try again later.');
+              ElMessage.error('Error downloading calendar. Please try again later.');
             });
       } catch (error) {
         console.error('Error downloading calendar:', error);
-        alert('Error downloading calendar. Please try again later.');
+        ElMessage.error('Error downloading calendar, please try again later.');
       }
     },
     async fetchReservations() {
@@ -243,10 +243,10 @@ export default {
         });
         const data = await response.json();
         if (data.code === '000') {
-          alert('Check-in successfully!');
+          ElMessage.success('Check-in successfully!');
           await this.fetchReservations();
         } else {
-          alert(data.message);
+          ElMessage.error(data.message);
         }
       } catch (error) {
         console.error('Error:', error);
@@ -266,7 +266,7 @@ export default {
         });
         const data = await response.json();
         if (data.code === '000') {
-          alert('Reservation cancelled successfully!');
+          ElMessage.success('Reservation cancelled successfully!');
           await this.fetchReservations();
         } else {
           ElMessage.error(data.message);
@@ -527,7 +527,7 @@ h1 {
   color: #333;
   transition: background-color 0.2s ease;
   margin-top: 20px;
-  width: 52%;
+  width: 60%;
 }
 
 .download-button:disabled {

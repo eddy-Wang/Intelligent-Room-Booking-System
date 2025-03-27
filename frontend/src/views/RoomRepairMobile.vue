@@ -22,7 +22,7 @@
         <div class="room-details">
           {{ room.name }}
         </div>
-        <button class="repair-button" @click.stop="openRepairDialog(room)">Repair</button>
+        <button class="repair-button" @click.stop="openRepairDialog(room)">Report</button>
       </div>
     </div>
 
@@ -50,6 +50,7 @@
 <script setup>
 import {ref, onMounted, computed, getCurrentInstance} from 'vue';
 import axios from 'axios';
+import {ElMessage} from "element-plus";
 
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
@@ -115,7 +116,7 @@ function closeRepairDialog() {
 
 async function submitRepair() {
   if (repairDescription.value.trim().length === 0) {
-    alert("Please enter repair description.");
+    ElMessage.info("Please enter repair description.");
     return;
   }
 
@@ -132,14 +133,14 @@ async function submitRepair() {
     });
 
     if (response.data.code === "000") {
-      alert("Repair request submitted successfully!");
+      ElMessage.success("Repair request submitted successfully!");
       showRepairDialog.value = false;
     } else {
-      alert(response.data.message);
+      ElMessage.error(response.data.message);
     }
   } catch (error) {
     console.error("Error submitting repair:", error);
-    alert("Error submitting repair.");
+    ElMessage.error("Error submitting repair.");
   }
 }
 </script>
@@ -201,7 +202,7 @@ async function submitRepair() {
 
 .room-card {
   position: relative;
-  height: 230px;
+  height: 240px;
   border-radius: 10px;
   overflow: hidden;
   background: #fff;
