@@ -4,11 +4,11 @@
     <div class="nav-container">
       <nav class="bottom-nav">
         <div
-          v-for="(item, index) in navItems"
-          :key="index"
-          class="nav-item"
-          :class="{ active: activeNav === index }"
-          @click="setActiveNav(index)">
+            v-for="(item, index) in navItems"
+            :key="index"
+            class="nav-item"
+            :class="{ active: activeNav === index }"
+            @click="setActiveNav(index)">
           <svg-icon type="mdi" :path="$mdi[item.icon]"></svg-icon>
         </div>
       </nav>
@@ -30,23 +30,23 @@ export default {
   },
   data() {
     return {
-      activeNav: 1,
+      activeNav: this.$user && this.$user.permission === 'Admin' ? 1 : 0,
       adminNavItems: [
-        { icon: 'mdiArrowLeft' },
-        { icon: 'mdiHomeOutline', component: 'HomeViewMobile' },
-        { icon: 'mdiAccountOutline', component: 'MyReservationMobile' },
-        { icon: 'mdiTools', component: 'RoomRepairMobile' }
+        {icon: 'mdiArrowLeft'},
+        {icon: 'mdiHomeOutline', component: 'HomeViewMobile'},
+        {icon: 'mdiAccountOutline', component: 'MyReservationMobile'},
+        {icon: 'mdiTools', component: 'RoomRepairMobile'}
       ],
       userNavItems: [
-        { icon: 'mdiHomeOutline', component: 'HomeViewMobile' },
-        { icon: 'mdiAccountOutline', component: 'MyReservationMobile' },
-        { icon: 'mdiTools', component: 'RoomRepairMobile' }
+        {icon: 'mdiHomeOutline', component: 'HomeViewMobile'},
+        {icon: 'mdiAccountOutline', component: 'MyReservationMobile'},
+        {icon: 'mdiTools', component: 'RoomRepairMobile'}
       ]
     };
   },
   computed: {
     permission() {
-      return this.$user ? this.$user.permission : 'user';
+      return this.$user ? this.$user.permission : 'Student';
     },
     navItems() {
       return this.permission === 'Admin' ? this.adminNavItems : this.userNavItems;
