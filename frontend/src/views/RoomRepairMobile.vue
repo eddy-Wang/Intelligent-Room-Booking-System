@@ -177,7 +177,7 @@ async function submitRepair() {
   width: 100%;
   background-color: #fff;
   border-radius: 20px;
-  height: 30px;
+  height: 35px;
   display: flex;
   align-items: center;
   padding: 0 10px;

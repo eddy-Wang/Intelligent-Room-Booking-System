@@ -4,6 +4,7 @@
       <h1><strong>DRBS</strong></h1>
       <h2><strong>Reservation Management</strong></h2>
     </div>
+
     <div class="filter-controls">
       <el-autocomplete
           v-model="filters.userInput"
@@ -99,8 +100,7 @@
           v-for="booking in filteredBookings"
           :key="booking.booking_id"
           class="booking-card"
-          :class="statusClass(booking.status)"
-      >
+          :class="statusClass(booking.status)">
         <div class="card-header">
           <div class="room-info">
             <div class="room-name">{{ getRoomName(booking.room_id) }}</div>
@@ -110,8 +110,7 @@
                 :type="statusTagType(booking.status)"
                 size="mini"
                 class="booking-status-tag"
-                :data-status="booking.status"
-            >
+                :data-status="booking.status">
               {{ booking.status }}
             </el-tag>
           </div>
@@ -725,6 +724,8 @@ onMounted(async () => {
   width: 45%;
   font-size: 1rem;
   height: 1.6rem;
+  background-color: #eceef8;
+  border: none;
 }
 
 .modal {
@@ -746,7 +747,7 @@ onMounted(async () => {
   overflow-y: auto;
   padding: 20px;
   margin: auto;
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .modal-content form {

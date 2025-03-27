@@ -6,7 +6,6 @@
         <h2><strong>Room Booking System</strong></h2>
       </div>
       <div class="middle-row">
-        <!--        <room-display :room-ids="roomIds"/>-->
         <room-display
             :room-ids="roomIds"
             :rooms="roomsData"
@@ -15,7 +14,6 @@
         />
       </div>
       <div class="bottom-row">
-        <!--        <time-table/>-->
         <time-table
             @time-selected="handleTimeSelection"
         />
@@ -65,9 +63,12 @@ provide('bookTimeSlots', bookTimeSlots)
 const fetchData = async () => {
   try {
     const instance = getCurrentInstance();
-    const userPermission = instance.appContext.config.globalProperties.$user.permission;
-    const url = backendAddress + `/allRoom?permission=` + userPermission;
-    const response = await fetch(url);
+    const user = instance.appContext.config.globalProperties.$me()
+    // const userPermission = instance.appContext.config.globalProperties.$user.permission;
+    const url = backendAddress + `/allRoom`;
+    const response = await fetch(url,{
+      credentials: 'include'
+    });
     const data = await response.json();
     roomsData.value = data.data;
     console.log('Fetched data:', roomsData.value);
