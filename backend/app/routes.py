@@ -24,7 +24,6 @@ def create_response(code, message, data=None):
         'data': data if data is not None else {}
     })
 
-
 @bp.route('/login', methods=['POST', 'OPTIONS'])
 def login():
     if request.method == 'OPTIONS':

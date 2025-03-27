@@ -29,9 +29,9 @@ app.config.globalProperties.$user = {
   name: '',
   permission: '',
 };
-app.config.globalProperties.$backendAddress = "http://127.0.0.1:8080"
+app.config.globalProperties.$backendAddress = "/api"
 app.config.globalProperties.$me = async () => {
-    let response = await fetch('http://127.0.0.1:8080/me',{
+    let response = await fetch('/api/me',{
         credentials: 'include'
     })
 
