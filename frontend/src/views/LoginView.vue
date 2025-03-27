@@ -12,11 +12,9 @@
           Sign In
         </button>
       </div>
-
       <div class="right-content">
         <img src="../assets/DIICSUPicture.png" alt="DIICSU Building" class="diicsu-picture">
       </div>
-
     </div>
   </div>
 </template>

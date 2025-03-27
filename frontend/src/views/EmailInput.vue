@@ -6,29 +6,25 @@
           <img src="../assets/header-logo.png" alt="DIICSU Header Logo" class="header-logo">
         </div>
         <div class="input-button-container">
-          <h1 class="title">Verify your identification</h1>
+          <h1 class="title">Verify Your Identification</h1>
           <p class="subtitle">Please enter your Dundee or CSU email address to continue</p>
-
           <div class="input-group">
             <input
                 type="email"
                 v-model="email"
                 class="email-input"
-                placeholder="your email address"
+                placeholder="E-mail Address"
                 :class="{ 'error': showError }"
                 @input="validateEmail"
             >
-
             <select v-model="selectedSuffix" class="email-suffix">
               <option value="@dundee.ac.uk">@dundee.ac.uk</option>
               <option value="@csu.edu.cn">@csu.edu.cn</option>
             </select>
           </div>
-
           <p class="error-message" v-if="showError">
             Please enter a valid email address
           </p>
-
           <div class="button-container">
             <button
                 @click="handleNext"
@@ -130,8 +126,9 @@ body {
 .main-content {
   flex: 1;
   display: flex;
-  align-items: stretch;
+  align-items: center;
 }
+
 
 .left-content {
   flex: 0 0 50%;
@@ -270,7 +267,7 @@ body {
     border: 0;
     margin: 20px auto;
     text-transform: uppercase;
-    font-size: 20px;
+    font-size: 1.1rem;
     font-weight: bold;
     padding: 15px 50px;
     border-radius: 50px;
@@ -327,8 +324,8 @@ body {
 
   .left-content {
     position: relative;
-    z-index: 3;
-    padding: 5%;
+    z-index: 2;
+    padding: 2rem;
     border-radius: 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     max-width: 400px;
@@ -343,7 +340,6 @@ body {
       left: 60px;
       width: 100%;
       margin-bottom: 30%;
-      margin-top: 5%;
     }
 
     .header-logo {
@@ -378,15 +374,15 @@ body {
     }
 
     .email-input {
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       padding: 0.3rem 0 0.3rem 0.3rem;
-      width: 60%;
+      width: 50%;
     }
 
     .email-suffix {
-      font-size: 0.6rem;
+      font-size: 0.9rem;
       padding: 0;
-      width: 40%;
+      width: 50%;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;

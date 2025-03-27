@@ -6,7 +6,7 @@
           <img src="../assets/header-logo.png" alt="DIICSU Header Logo" class="header-logo">
         </div>
         <div class="input-button-container">
-          <h1 class="title">Verify your code</h1>
+          <h1 class="title">Verify Your Code</h1>
           <p class="subtitle">Please enter the verification code sent to your email</p>
 
           <div class="input-group">
@@ -52,6 +52,7 @@ import {useRouter, useRoute} from 'vue-router'
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import {faBackward} from '@fortawesome/free-solid-svg-icons';
 import {ElMessage} from "element-plus";
+
 
 const vueInstance = getCurrentInstance()
 const backendAddress = vueInstance.appContext.config.globalProperties.$backendAddress
@@ -135,16 +136,16 @@ body {
 
 .app-container {
   font-family: 'Cambria', serif;
+  min-height: 100vh;
   background: #3155ef;
   display: flex;
   justify-content: space-between;
-  min-height: 100vh;
 }
 
 .main-content {
   flex: 1;
   display: flex;
-  align-items: stretch;
+  align-items: center;
 }
 
 
@@ -317,7 +318,7 @@ body {
 
   .left-content {
     position: relative;
-    z-index: 3;
+    z-index: 2;
     padding: 2rem;
     border-radius: 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -333,7 +334,6 @@ body {
       left: 60px;
       width: 100%;
       margin-bottom: 30%;
-      margin-top: 5%;
     }
 
     .header-logo {
