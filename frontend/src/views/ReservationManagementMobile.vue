@@ -4,7 +4,110 @@
       <h1><strong>DRBS</strong></h1>
       <h2><strong>Reservation Management</strong></h2>
     </div>
+    <button @click="openLimitUsageDialog" class="limit-usage-time-button">Limit Usage Time</button>
+    <!-- Limit Usage Time Dialog -->
+    <el-dialog
+        v-model="limitUsageDialogVisible"
+        title="Limit Usage Time"
+        width="80%"
+        :before-close="handleCloseLimitUsageDialog"
+    >
+      <el-form :model="limitUsageForm" label-width="100px">
+        <!-- Room Name -->
+        <el-form-item label="Room Name">
+          <el-select v-model="limitUsageForm.room_id" placeholder="Select Room">
+            <el-option
+                v-for="room in rooms"
+                :key="room.room_id"
+                :label="room.name"
+                :value="room.room_id"
+            />
+          </el-select>
+        </el-form-item>
 
+        <!-- Date -->
+        <el-form-item label="Date">
+          <el-date-picker
+              v-model="limitUsageForm.date"
+              type="date"
+              placeholder="Select Date"
+              value-format="YYYY-MM-DD"
+              :disabled-date="disabledDate"
+          />
+        </el-form-item>
+
+        <!-- Time Slots -->
+        <el-form-item label="Time Slots">
+          <el-select
+              v-model="limitUsageForm.time"
+              multiple
+              placeholder="Select Time Slots"
+          >
+            <el-option
+                v-for="(timeSlot, index) in timeSlots.sort()"
+                :key="index"
+                :label="timeSlot"
+                :value="index.toString()"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Purpose">
+          <el-input
+              v-model="limitUsageForm.purpose"
+              placeholder="Enter purpose"
+          />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <el-button @click="limitUsageDialogVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="submitLimitUsage">Submit</el-button>
+      </template>
+    </el-dialog>
+    <!-- Cancel Reason Dialog -->
+    <el-dialog
+        v-model="cancelDialogVisible"
+        title="Cancel Booking"
+        width="80%"
+    >
+      <el-form :model="cancelForm" label-width="60px">
+        <el-form-item label="Reason">
+          <el-input
+              v-model="cancelForm.reason"
+              type="textarea"
+              :rows="2"
+              placeholder="Please enter the reason for cancellation"
+          />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <el-button @click="cancelDialogVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="confirmCancelBooking">Confirm</el-button>
+      </template>
+    </el-dialog>
+    <!-- Reject Reason Dialog -->
+    <el-dialog
+        v-model="rejectDialogVisible"
+        title="Reject Booking"
+        width="80%"
+    >
+      <el-form :model="rejectForm" label-width="60px">
+        <el-form-item label="Reason">
+          <el-input
+              v-model="rejectForm.reason"
+              type="textarea"
+              :rows="4"
+              placeholder="Please enter the reason for rejection"
+          />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <el-button @click="rejectDialogVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="confirmRejectBooking">Confirm</el-button>
+      </template>
+    </el-dialog>
     <div class="filter-controls">
       <el-autocomplete
           v-model="filters.userInput"
@@ -244,6 +347,7 @@ import {User, Calendar, Clock, Document} from '@element-plus/icons-vue'
 
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
+const userEmail = instance.appContext.config.globalProperties.$user.email;
 
 const bookings = ref([])
 const rooms = ref([])
@@ -278,7 +382,107 @@ const reverseTimeSlotMap = {
   11: '19:55-20:40'
 }
 const timeSlots = Object.values(reverseTimeSlotMap)
+const rejectDialogVisible = ref(false);
+const rejectForm = ref({
+  booking_id: null,
+  reason: ''
+});
+const confirmRejectBooking = async () => {
+  try {
+    const response = await fetch(backendAddress + `/bookings/${rejectForm.value.booking_id}`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        status: 'Declined',
+        cancel_reason: rejectForm.value.reason
+      })
+    });
 
+    if (!response.ok) throw new Error('Failed to reject booking');
+
+    ElMessage.success('Booking rejected successfully');
+    rejectDialogVisible.value = false;
+    fetchBookings(); // Refresh data
+  } catch (error) {
+    console.error('Error rejecting booking:', error);
+    ElMessage.error(error.message || 'Failed to reject booking');
+  }
+};
+// Cancel dialog related data
+const cancelDialogVisible = ref(false);
+const cancelForm = ref({
+  booking_id: null,
+  reason: ''
+});
+const confirmCancelBooking = async () => {
+  try {
+    const response = await fetch(backendAddress + `/bookings/${cancelForm.value.booking_id}`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        status: 'Declined',
+        cancel_reason: cancelForm.value.reason
+      })
+    });
+    console.log(cancelForm.value.reason)
+    if (!response.ok) throw new Error('Failed to cancel booking');
+
+    ElMessage.success('Booking canceled successfully');
+    cancelDialogVisible.value = false;
+    fetchBookings(); // Refresh data
+  } catch (error) {
+    console.error('Error canceling booking:', error);
+    ElMessage.error(error.message || 'Failed to cancel booking');
+  }
+};
+const limitUsageDialogVisible = ref(false);
+const limitUsageForm = ref({
+      room_id: '',
+      date: '',
+      time: [],
+      user_email: userEmail,
+      purpose: ''
+    })
+;
+const openLimitUsageDialog = () => {
+  limitUsageDialogVisible.value = true;
+};
+
+const handleCloseLimitUsageDialog = () => {
+  limitUsageDialogVisible.value = false;
+};
+
+const disabledDate = (time) => {
+  return time.getTime() < Date.now() - 8.64e7;
+}
+const submitLimitUsage = async () => {
+  try {
+    const payload = {
+      ...limitUsageForm.value,
+    };
+    console.log(payload);
+    const response = await fetch(backendAddress + '/ban', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) throw new Error('Failed to limit usage time');
+
+    const result = await response.json();
+
+    if (result.code === '200') {
+      ElMessage.success(`Prohibited time slots are set successfully, affecting ${result.data.conflict_count} reservation`);
+      await fetchBookings();
+      limitUsageDialogVisible.value = false;
+    } else {
+      ElMessage.error(result.message);
+    }
+  } catch (error) {
+    console.error('Error limiting usage time:', error);
+    ElMessage.error('Failed to limit usage time');
+  }
+};
 const uniqueDates = computed(() => {
   return [...new Set(bookings.value.map(b => b.date))]
 })
@@ -472,19 +676,12 @@ const saveModifiedBooking = async () => {
   }
 }
 const cancelBooking = async (booking_id) => {
-  try {
-    const response = await fetch(backendAddress + `/bookings/${booking_id}`, {
-      method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({status: 'Declined'})
-    })
-    if (!response.ok) throw new Error('Failed to cancel booking')
-    ElMessage.success('Booking canceled successfully')
-    fetchBookings()
-  } catch (error) {
-    ElMessage.error('Failed to cancel booking')
-  }
-}
+  cancelForm.value = {
+    booking_id: booking_id,
+    reason: ''
+  };
+  cancelDialogVisible.value = true;
+};
 const approveBooking = async (booking_id) => {
   try {
     const response = await fetch(backendAddress + `/bookings/${booking_id}`, {
@@ -500,19 +697,12 @@ const approveBooking = async (booking_id) => {
   }
 }
 const rejectBooking = async (booking_id) => {
-  try {
-    const response = await fetch(backendAddress + `/bookings/${booking_id}`, {
-      method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({status: 'Declined'})
-    })
-    if (!response.ok) throw new Error('Failed to reject booking')
-    ElMessage.success('Booking rejected successfully')
-    fetchBookings()
-  } catch (error) {
-    ElMessage.error('Failed to reject booking')
-  }
-}
+  rejectForm.value = {
+    booking_id: booking_id,
+    reason: ''
+  };
+  rejectDialogVisible.value = true;
+};
 const deleteBooking = async (booking_id) => {
   try {
     const response = await fetch(backendAddress + `/bookings/${booking_id}`, {
@@ -568,7 +758,7 @@ onMounted(async () => {
 }
 
 .title-container {
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 
 .title-container h1 {
@@ -581,6 +771,19 @@ onMounted(async () => {
   margin: 5px;
   font-size: 2.25rem;
   color: #555;
+}
+
+.limit-usage-time-button {
+  margin: 20px 0;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: #3155ef;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .filter-controls {
