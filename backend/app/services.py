@@ -1,7 +1,6 @@
 import random
 import string
 from datetime import datetime, timedelta
-from pipes import quote
 from urllib.parse import quote_plus
 
 
@@ -34,7 +33,6 @@ def send_verification_email(user_email, code):
         print("Verification email sent successfully.")
     except Exception as e:
         print("Error sending email:", e)
-
 
 def sending_booking_email(user_email, room_id, date, time, status, purpose, message=''):
     """send booking email based on status"""

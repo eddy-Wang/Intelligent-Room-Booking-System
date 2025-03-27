@@ -26,5 +26,4 @@ if __name__ == '__main__':
         threading.Thread(target=run_crawler_periodically, daemon=True).start()
         
     start_scheduler()
-    
     app.run(host="0.0.0.0", port=8080)

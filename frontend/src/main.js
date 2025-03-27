@@ -6,8 +6,8 @@ import 'element-plus/dist/index.css';
 
 // about Vuetify
 import 'vuetify/styles'
-import { createVuetify } from 'vuetify'
-import { aliases, mdi } from 'vuetify/iconsets/mdi'
+import {createVuetify} from 'vuetify'
+import {aliases, mdi} from 'vuetify/iconsets/mdi'
 
 // about SvgIcon
 import SvgIcon from '@jamescoyle/vue-icon';
@@ -29,7 +29,22 @@ app.config.globalProperties.$user = {
   name: '',
   permission: '',
 };
-app.config.globalProperties.$backendAddress = "http://127.0.0.1:8080"
+app.config.globalProperties.$backendAddress = "http://localhost:8080"
+app.config.globalProperties.$me = async () => {
+    let response = await fetch('http://localhost:8080/me',{
+        credentials: 'include'
+    })
+
+    if (response.status === 401) {
+        alert('请先登录！')
+        window.location.href = './'
+        return
+    }
+    const user = await response.json()
+    console.log(user)
+    return user
+}
+
 
 // use vuetify and router
 app.use(vuetify)
