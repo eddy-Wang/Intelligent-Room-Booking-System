@@ -26,16 +26,46 @@
           class="room-info"
           @click.stop
       >
-        <h2>{{ selectedRoom.name }}</h2>
-        <p>Capacity: {{ selectedRoom.capacity }}</p>
-        <p>Equipment: {{ selectedRoom.equipment }}</p>
-        <p>Access: {{  accessMap[selectedRoom.access] }}</p>
-        <div v-if="selectedRoom.report && selectedRoom.report.length > 0" class="warning-messages">
-          <div class="warning-message" v-for="(warning, index) in selectedRoom.report" :key="index">
-            Warning {{ index + 1 }}: {{ warning }}
+        <div class="room-header">
+          <h2 class="room-title">{{ selectedRoom.name }}</h2>
+          <button class="close-btn" @click="resetSelection">×</button>
+        </div>
+
+        <div class="room-details">
+          <div class="detail-item">
+            <span class="label">Capacity: </span>
+            <span class="value">{{ selectedRoom.capacity }}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="label">Equipment: </span>
+            <div class="equipment-list">
+              <div
+                  class="equipment-item"
+                  v-for="equipment in parsedEquipment"
+                  :key="equipment"
+              >
+                <span class="equipment-icon">{{ getEquipmentIcon(equipment) }}</span>
+                <span class="equipment-name">{{ equipment }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <span class="label">Access: </span>
+            <span class="value">{{ accessMap[selectedRoom.access] }}</span>
           </div>
         </div>
-        <button class="close-btn" @click="resetSelection">×</button>
+
+        <div
+            v-if="selectedRoom.report && selectedRoom.report.length > 0"
+            class="warning-container"
+        >
+          <div class="warning-item">
+            <span class="warning-title">⚠️ Warnings:  </span>
+            <span class="warning-message">{{ selectedRoom.report[0] }}</span>
+          </div>
+        </div>
       </div>
     </transition>
   </div>
@@ -56,11 +86,33 @@ const props = defineProps({
     default: () => []
   }
 })
+const getEquipmentIcon = (equipment) => {
+  const icons = {
+    'Power Outlets': '🔌',
+    'Projector': '📽️',
+    'Microphone': '🎤',
+    'Computer': '💻',
+    'Whiteboard': '📝',
+    'Wi-Fi': '📶'
+  };
+  return icons[equipment] || '✨';
+}
+const parsedEquipment = computed(() => {
+  if (!selectedRoom.value || !selectedRoom.value.equipment) {
+    return [];
+  }
+  return selectedRoom.value.equipment
+      .replace(/[{}']/g, '')
+      .split(',')
+      .map(item => item.trim())
+      .filter(item => item);
+});
+
 const accessMap = ref({
-      0: "All",
-      1: "Staff Only",
-      2: "Selected Staff"
-    });
+  0: "All",
+  1: "Staff Only",
+  2: "Selected Staff"
+});
 const filteredRooms = computed(() => {
   return props.rooms.filter(room => props.roomIds.includes(room.id))
 })
@@ -142,6 +194,35 @@ watch(filteredRooms, (newValue, oldValue) => {
 </script>
 
 <style scoped>
+.room-info {
+  position: absolute;
+  left: 33.5%;
+  width: 66.5%;
+  height: 88%;
+  background: white;
+  border-radius: 12px;
+  padding-left: 20px;
+  padding-top: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.room-title {
+  color: #2c3e50;
+  font-size: 1.3rem;
+  margin: 0;
+  font-weight: 600;
+}
+
 .close-btn {
   position: absolute;
   top: 43%;
@@ -153,31 +234,82 @@ watch(filteredRooms, (newValue, oldValue) => {
   color: #666;
 }
 
-.room-info {
-  position: absolute;
-  left: 33.5%;
-  width: 66.5%;
-  height: 90%;
-  background: white;
-  border-radius: 12px;
-  padding: 10px 20px 10px 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 2;
-  overflow-y: auto;
+.close-btn:hover {
+  color: #e74c3c;
+  transform: scale(1.2);
+}
+
+.room-details {
+  flex: 1;
+}
+
+.detail-item {
+  margin-bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.label {
+  font-weight: 600;
+  color: #34495e;
+  min-width: 80px;
+  align-content: center;
+}
+
+.value {
+  color: #2c3e50;
+}
+
+.equipment-list {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-left: 16px;
+}
+
+.equipment-item {
+  display: flex;
+  background-color: #f8f9fa;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.equipment-icon {
+  margin-right: 8px;
+  font-size: 1.2rem;
+}
+
+.equipment-name {
+  color: #34495e;
+  align-content: center;
+}
+
+.warning-container {
+  background-color: #fff8e1;
+  border-left: 4px solid #f39c12;
+  padding-left: 16px;
+  border-radius: 8px;
+  width: 90%;
+  margin-bottom: 8px;
+}
+
+.warning-item {
+  display: flex;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  align-items: baseline;
+}
+
+.warning-title {
+  font-weight: 600;
+  min-width: 110px;
+  color: #34495e;
 }
 
 .warning-message {
-  color: red;
-  background-color: #ffe6e6;
-  padding: 10px;
-  border: 1px solid red;
-  border-radius: 5px;
-  margin-top: 0.8%;
-  height: 20%;
-  max-width: 90%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: #e67e22;
+  flex: 1;
 }
 
 .room-display {
@@ -185,7 +317,6 @@ watch(filteredRooms, (newValue, oldValue) => {
   height: 100%;
   overflow: hidden;
   position: relative;
-  background: #eceef8;
   display: flex;
   padding: 16px 0 16px 0;
 }
@@ -251,13 +382,6 @@ watch(filteredRooms, (newValue, oldValue) => {
   background: #eceef8;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-
-@media (max-width: 768px) {
-  .room-card {
-    min-width: 280px;
-  }
 }
 
 </style>
