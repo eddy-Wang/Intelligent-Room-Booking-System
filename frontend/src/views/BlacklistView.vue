@@ -1,12 +1,11 @@
 <template>
   <div class="room-repair-handling">
     <div class="header">
-      <h2 class="page-title">User Blacklist Management</h2>
+      <h2 class="page-title">User Blacklist</h2>
     </div>
 
     <el-card class="custom-card">
       <el-table :data="filteredUsers" border stripe style="width: 100%" class="el-table">
-        <!-- User Email Column -->
         <el-table-column class="el-table-column" label="User Email">
           <template #header>
             <div class="filter-header">
@@ -23,8 +22,6 @@
             {{ row.user_email }}
           </template>
         </el-table-column>
-
-        <!-- User Name Column -->
         <el-table-column class="el-table-column" label="User Name">
           <template #header>
             <div class="filter-header">
@@ -41,18 +38,10 @@
             {{ row.user_name }}
           </template>
         </el-table-column>
-
-        <!-- Violation Count Column -->
         <el-table-column class="el-table-column" label="Missed Time" prop="missed_time" sortable>
         </el-table-column>
-
-        <!-- Ban Start Time -->
         <el-table-column class="el-table-column" label="Ban Start Date" prop="ban_start" sortable/>
-
-        <!-- Ban End Time -->
         <el-table-column class="el-table-column" label="Ban End Date" prop="ban_end" sortable/>
-
-        <!-- Actions Column -->
         <el-table-column class="el-table-column" label="Actions" width="180">
           <template #default="{ row }">
             <div class="action-buttons">

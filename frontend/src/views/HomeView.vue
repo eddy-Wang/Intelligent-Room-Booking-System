@@ -6,7 +6,6 @@
         <h2><strong>Room Booking System</strong></h2>
       </div>
       <div class="middle-row">
-        <!--        <room-display :room-ids="roomIds"/>-->
         <room-display
             :room-ids="roomIds"
             :rooms="roomsData"
@@ -15,7 +14,6 @@
         />
       </div>
       <div class="bottom-row">
-        <!--        <time-table/>-->
         <time-table
             @time-selected="handleTimeSelection"
         />
