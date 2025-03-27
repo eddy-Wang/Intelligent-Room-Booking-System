@@ -196,6 +196,7 @@ export default {
       };
       return typeMap[status] || "info";
     },
+
     generateICSContent() {
       let icsData =
           "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//DIICSU Room Booking System//Reservation Calendar//EN\n";
@@ -259,7 +260,7 @@ export default {
         if (data.code === "000") {
           this.reservations = data.data.sort((a, b) => new Date(b.date) - new Date(a.date));
         } else {
-          alert(data.message);
+          ElMessage.error(data.message);
         }
       } catch (error) {
         console.error("Error fetching reservations:", error);
@@ -276,11 +277,11 @@ export default {
           body: JSON.stringify({booking_id: bookingId})
         });
         const data = await response.json();
-        if (data.code === "000") {
-          alert("Reservation cancelled successfully!");
+        if (data.code === '000') {
+          ElMessage.success('Reservation cancelled successfully!');
           await this.fetchReservations();
         } else {
-          alert(data.message);
+          ElMessage.error(data.message);
         }
       } catch (error) {
         console.error("Error cancelling reservation:", error);
@@ -293,11 +294,11 @@ export default {
           method: "GET"
         });
         const data = await response.json();
-        if (data.code === "000") {
-          alert("Check-in successfully!");
+        if (data.code === '000') {
+          ElMessage.success('Check-in successfully!');
           await this.fetchReservations();
         } else {
-          alert(data.message);
+          ElMessage.error(data.message);
         }
       } catch (error) {
         console.error("Error:", error);

@@ -1,16 +1,17 @@
+import os
 import time
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response, url_for, redirect
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code, \
     get_user_reservations, cancel_reservation, fetch_users, fetch_rooms_id_and_name, fetch_bookings, \
     update_booking_status, \
     delete_booking, modify_booking, add_room, modify_room, delete_room, fetch_room, update_room_issue_report, \
     create_room_issue_report, delete_room_issue_report, get_all_room_issue_reports, sending_booking_email, \
-    send_conflict_email, send_ban_email, booking_check_in_service
+    send_conflict_email, send_ban_email, booking_check_in_service, generate_ics_content
 from .models import check_email_exists, get_user_data_by_email, get_room_detailed, \
     get_all_room_data_for_user, add_room_issue, set_room_issue_reviewed, set_room_issue_report_info, get_booking_by_id, \
     get_bad_user_list, reset_missed_times_for_user, get_db_connection, get_permission_by_email
-
+from .utils import is_user_blacklisted
 
 bp = Blueprint('routes', __name__)
 
@@ -251,6 +252,10 @@ def book_room():
         return '', 200
 
     data = request.get_json()
+    user_email = data.get('user_email', 'test@example.com')
+    if is_user_blacklisted(user_email):
+        return create_response('007', 'you are in the blacklist')
+
     required_fields = ['roomId', 'date', 'timeSlots', 'purpose']
     for field in required_fields:
         if field not in data or not data[field]:
@@ -345,6 +350,31 @@ def getRooms():
         return create_response('000', message)
     else:
         return create_response('002', message)
+
+@bp.route('/subscribe_calendar/<string:email>', methods=['GET'])
+def subscribe_calendar(email):
+    try:
+        ics_content = generate_ics_content(email)
+        print(1)
+        print(ics_content)
+
+        ics_file_path = os.path.join('static', f'{email}.ics')
+        os.makedirs(os.path.dirname(ics_file_path), exist_ok=True)
+        with open(ics_file_path, 'w') as file:
+            file.write(ics_content)
+
+        return ics_content
+    except Exception as e:
+        return str(e), 500
+
+@bp.route('/download_calendar/<string:email>', methods=['GET'])
+def download_calendar(email):
+    try:
+        ics_content = generate_ics_content(email)
+        return ics_content
+    except Exception as e:
+        print(f"Error downloading calendar: {e}")
+        return str(e), 500
 
 @bp.route('/ban', methods=['POST', 'OPTIONS'])
 def set_ban_period():

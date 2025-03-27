@@ -1,6 +1,9 @@
 import random
 import string
 from datetime import datetime, timedelta
+from pipes import quote
+from urllib.parse import quote_plus
+
 
 from flask_mail import Message
 from mysql.connector import Error
@@ -80,6 +83,11 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose, mess
     subject = subject_map.get(status, 'System notification')
 
     if status == "Confirmed":
+        start_time = datetime.strptime(f"{formatted_date} {time_slots[0].split('-')[0]}", "%Y-%m-%d %H:%M")
+        end_time = datetime.strptime(f"{formatted_date} {time_slots[-1].split('-')[1]}", "%Y-%m-%d %H:%M")
+        encoded_room_name = quote_plus(room_name)
+        encoded_purpose = quote_plus(purpose)
+        outlook_event_url = f"https://outlook.office.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent&startdt={start_time.isoformat()}&enddt={end_time.isoformat()}&subject={encoded_room_name}&body={encoded_purpose}&location={encoded_room_name}"
         body = f"""
         Dear User,
 
@@ -90,6 +98,9 @@ def sending_booking_email(user_email, room_id, date, time, status, purpose, mess
         Date: {formatted_date}
         Time: {formatted_time}
         Purpose: {purpose}
+        
+        You can add this booking to your Outlook calendar by clicking the following link:
+        {outlook_event_url}
 
         Thank you for using booking service.
 
@@ -249,6 +260,80 @@ def get_user_reservations(email):
     connection.close()
     return reservations
 
+
+def get_user_reservations_in_confirm(email):
+    try:
+        email = (email,)
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        query = """
+        SELECT b.booking_id, b.date, b.time, b.purpose, b.status, r.name, r.capacity
+        FROM booking b
+        JOIN room r ON b.room_id = r.room_id
+        WHERE b.user_email = %s AND b.status = 'Confirmed'
+        ORDER BY b.date, b.time
+        """
+        cursor.execute(query, email)
+        reservations = cursor.fetchall()
+
+        return reservations
+    except Exception as e:
+        print(f"Error fetching reservations: {e}")
+        return []
+    finally:
+        if 'cursor' in locals() and cursor:
+            cursor.close()
+        if 'connection' in locals() and connection:
+            connection.close()
+
+def generate_ics_content(email):
+    reservations = get_user_reservations_in_confirm(email)
+    print(reservations)
+
+    reverse_time_slot_map = {
+        0: '08:00-08:45',
+        1: '08:55-09:45',
+        2: '10:00-10:45',
+        3: '10:55-11:40',
+        4: '12:00-12:45',
+        5: '12:55-13:40',
+        6: '14:00-14:45',
+        7: '14:55-15:40',
+        8: '16:00-16:45',
+        9: '16:55-17:40',
+        10: '19:00-19:45',
+        11: '19:55-20:40'
+    }
+
+    ics_data = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//DIICSU Room Booking System//Reservation Calendar//EN\n"
+    for reservation in reservations:
+        try:
+            start_date = reservation["date"].strftime("%Y%m%d")
+            time_slots = reservation["time"].split(",")
+            for time_slot_index in time_slots:
+                time_slot = reverse_time_slot_map[int(time_slot_index)]
+                start, end = time_slot.split("-")
+                start_date_time = f"{start_date}T{start.replace(':', '')}00Z"
+                end_date_time = f"{start_date}T{end.replace(':', '')}00Z"
+                ics_data += f"""
+BEGIN:VEVENT
+UID:{reservation["name"]}-{start_date_time}
+DTSTAMP:{datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")}
+DTSTART:{start_date_time}
+DTEND:{end_date_time}
+SUMMARY:{'DIICSU Room Booking'}
+DESCRIPTION:Purpose: {reservation["purpose"]}
+LOCATION:{reservation["name"]}
+STATUS:{reservation["status"]}
+END:VEVENT
+"""
+        except (KeyError, ValueError, TypeError) as e:
+            print(f"Error processing reservation {reservation}: {e}")
+            continue
+
+    ics_data += "END:VCALENDAR"
+    return ics_data
 
 # Cancel reservation by booking ID
 def cancel_reservation(booking_id):

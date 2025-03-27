@@ -2,7 +2,10 @@
   <div class="booking-management">
     <div class="header">
       <h2 class="page-title">Reservation Management</h2>
-      <el-button class="new-button" type="primary" @click="openLimitUsageDialog">Limit usage time</el-button>
+        <div class="button-group">
+            <el-button class="new-button" type="primary" @click="openLimitUsageDialog">Limit usage time</el-button>
+            <el-button class="export-button" type="success" @click="exportToExcel">Export to Excel</el-button>
+        </div>
     </div>
     <el-card class="custom-card">
       <el-table :data="filteredBookings" border stripe style="width: 100%" class="el-table">
@@ -344,10 +347,40 @@
 </template>
 <script setup>
 import {ref, computed, onMounted, getCurrentInstance} from 'vue';
-
-import {ElTable, ElTableColumn, ElSelect, ElOption, ElCard, ElButton, ElMessage} from 'element-plus';
 import 'element-plus/dist/index.css';
+import * as XLSX from 'xlsx';
+import {ElMessage} from "element-plus";
 
+
+const exportToExcel = () => {
+    // Prepare the data for export
+    const dataForExport = filteredBookings.value.map(booking => {
+        return {
+            'User': getUserDisplay(booking.user_email),
+            'Room Name': getRoomName(booking.room_id),
+            'Purpose': booking.purpose,
+            'Date': formatDate(booking.date),
+            'Time': convertTimeStrToTimeSlots(booking.time),
+            'Processing State': getProcessingState(booking.status),
+            'Status': booking.status,
+            'Application Time': timestampToTime(booking.booking_id)
+        };
+    });
+
+    // Create worksheet
+    const ws = XLSX.utils.json_to_sheet(dataForExport);
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Reservations");
+
+    // Generate file name with current date
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const fileName = `Reservations_${dateStr}.xlsx`;
+
+    // Export the file
+    XLSX.writeFile(wb, fileName);
+};
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 const userEmail = instance.appContext.config.globalProperties.$user.email;
@@ -760,7 +793,7 @@ const submitLimitUsage = async () => {
 
     if (result.code === '200') {
       ElMessage.success(`Prohibited time slots are set successfully, affecting ${result.data.conflict_count} reservation`);
-      fetchBookings();
+      await fetchBookings();
       limitUsageDialogVisible.value = false;
     } else {
       ElMessage.error(result.message);
@@ -772,18 +805,45 @@ const submitLimitUsage = async () => {
 };
 </script>
 
-<style>
+<style scoped>
 .header {
-  position: static;
-  padding: 1rem;
-  margin-bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2%;
+    width: 100%;
 }
 
 .page-title {
-  font-size: 40px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  padding: 10px;
+    font-size: 40px;
+    font-weight: bold;
+    padding: 10px;
+    margin: 0;
+}
+
+.button-group {
+    display: flex;
+    gap: 30px;
+}
+
+.new-button, .export-button {
+    width: 30px;
+    min-width: 10%;
+    height: 50%;
+    padding: 10px;
+    margin: 0;
+}
+
+.el-button.el-button--success.export-button{
+  width: 100%;
+  margin-top: 10%;
+  height: 43px;
+}
+
+.el-button.el-button--primary.new-button{
+  width: 120%;
+  margin-top: 10%;
+  height: 43px;
 }
 
 .el-table {
@@ -797,14 +857,12 @@ const submitLimitUsage = async () => {
   width: 100%;
   padding: 20px;
   background-color: #f8f9fa;
-  overflow: auto;
 }
 
 .custom-card {
   width: 100%;
   padding: 20px;
   border-radius: 12px;
-  overflow: auto;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -856,12 +914,4 @@ const submitLimitUsage = async () => {
     text-align: center;
 }
 
-.new-button {
-  width: auto;
-  min-width: 10%;
-  height: 50%;
-  padding: 10px;
-  margin-left: 10px;
-  margin-bottom: 10px;
-}
 </style>

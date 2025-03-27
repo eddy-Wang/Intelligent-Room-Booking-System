@@ -83,6 +83,7 @@ body {
     font-size: 3.5rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
+    margin-left: 20%;
   }
 
   .system-name {
@@ -91,6 +92,7 @@ body {
     font-size: 2.5rem;
     font-weight: 500;
     margin-bottom: 1rem;
+    margin-left: 20%;
   }
 
   .slogan {
@@ -100,13 +102,13 @@ body {
     margin-bottom: 3rem;
     font-style: italic;
     opacity: 0.9;
+    margin-left: 20%;
   }
 
   .sign-in-button {
-    background-image: linear-gradient(to right, #319efd, #9ed2ff, #319efd);
+    background: #5fb2fa;
     box-shadow: 0 4px 15px 0 rgba(41, 44, 225, 0.75);
     border: 0;
-    margin: 20px;
     text-transform: uppercase;
     font-size: 20px;
     font-weight: bold;
@@ -117,6 +119,8 @@ body {
     position: relative;
     cursor: pointer;
     transition: all 0.3s ease;
+    width: 60%;
+    margin-left: 20%;
   }
 
   .sign-in-button:hover {
@@ -163,10 +167,15 @@ body {
   }
 
   .header {
-    position: static;
-    padding: 1rem;
-    margin-bottom: 0;
-    text-align: center;
+    max-width: 400px;
+    left: 60px;
+    width: 100%;
+    margin-bottom: 30%;
+  }
+
+  .header-logo {
+    height: 45px;
+    width: auto;
   }
 
   .left-content {
@@ -185,16 +194,19 @@ body {
     .welcome-text {
       font-size: 2.2rem;
       margin-bottom: 1rem;
+      margin-left: 0 ;
     }
 
     .system-name {
       font-size: 2rem;
       margin-bottom: 2rem;
+      margin-left: 0 ;
     }
 
     .slogan {
       font-size: 1.1rem;
       margin-bottom: 2rem;
+      margin-left: 0 ;
     }
 
     .sign-in-button {
@@ -202,7 +214,7 @@ body {
       max-width: 300px;
       padding: 1rem 2rem;
       font-size: 1rem;
-      margin: 0 auto;
+      margin: 20% auto 20% 0;
     }
   }
 
