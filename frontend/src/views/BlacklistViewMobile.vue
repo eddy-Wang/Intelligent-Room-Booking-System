@@ -2,7 +2,7 @@
   <div class="blacklist-management-mobile-container">
     <div class="title-container">
       <h1><strong>DRBS</strong></h1>
-      <h2><strong>User Blacklist Management</strong></h2>
+      <h2><strong>User Blacklist</strong></h2>
     </div>
     <div class="filter-controls">
       <el-autocomplete
@@ -260,7 +260,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.1rem;
 }
 
 .user-info {
@@ -269,14 +269,14 @@ export default {
 }
 
 .user-name {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: bold;
   color: #333;
 }
 
 .user-email {
   font-size: 1rem;
-  color: #555;
+  color: #566c94;
 }
 
 .card-content {
@@ -284,21 +284,32 @@ export default {
 }
 
 .card-body {
-  flex: 0 0 60%;
+  flex: 0 0 70%;
 }
 
 .card-actions {
-  margin-bottom: 30px;;
-  flex: 0 0 53%;
+  margin-bottom: 30px;
+  margin-right: 20px;
+  flex: 0 0 30%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+.card-actions .el-button {
+  width: 100%;
+  font-size: 1rem;
+  height: 1.6rem;
+  background-color: #eceef8;
+  border: none;
+  border-radius: 10px;
+}
+
 .card-body .info-row {
   justify-content: space-between;
   font-size: 1rem;
-  margin-bottom: 0.3rem;
+  color: #666;
+  margin: 0;
 }
 
 </style>
