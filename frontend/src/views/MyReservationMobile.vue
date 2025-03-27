@@ -86,6 +86,7 @@
 
 <script>
 import { getCurrentInstance } from "vue";
+import {ElMessage} from "element-plus";
 export default {
   name: 'MyReservationMobile',
   setup() {
@@ -171,11 +172,6 @@ export default {
         return true;
       });
     },
-    userAvatar() {
-      return this.user.permission === 'student'
-          ? "https://images.unsplash.com/photo-1609561505734-7c42d1bbafc9?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDJ8fHxlbnwwfHx8fHw%3D"
-          : "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHN0YWZmfGVufDB8fDB8fHww";
-    }
   },
   methods: {
     getStatusColor(status) {
@@ -187,56 +183,6 @@ export default {
         'Pending': '#b58d54'
       };
       return statusColors[status] || '#000';
-    },
-    generateICSContent() {
-      let icsData = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//DIICSU Room Booking System//Reservation Calendar//EN\n";
-      this.reservations.forEach(reservation => {
-        let startDate = new Date(reservation.date).toISOString().replace(/[-:]/g, '').split('T')[0];
-        let timeSlots = reservation.time.split(',').map(Number).map(index => this.reverseTimeSlotMap[index]);
-        timeSlots.forEach(timeSlot => {
-          let [start, end] = timeSlot.split('-');
-          let startDateTime = `${startDate}T${start.replace(':', '')}00Z`;
-          let endDateTime = `${startDate}T${end.replace(':', '')}00Z`;
-          icsData +=
-            `BEGIN:VEVENT
-UID:${reservation.name}-${startDateTime}
-DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z
-DTSTART:${startDateTime}
-DTEND:${endDateTime}
-SUMMARY:${reservation.name}
-DESCRIPTION:Purpose: ${reservation.purpose}
-LOCATION:Capacity: ${reservation.room || reservation.name}
-STATUS:${reservation.status}
-END:VEVENT
-`;
-        });
-      });
-      icsData += "END:VCALENDAR";
-      return icsData;
-    },
-    downloadCalendar() {
-      try {
-        const icsContent = this.generateICSContent();
-        const blob = new Blob([icsContent], { type: "text/calendar" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${this.user.name}_my_reservation.ics`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        alert(
-          'Calendar file downloaded!\n\n' +
-          'To import the calendar:\n' +
-          '1. Open your calendar app (e.g., Outlook, Google Calendar, Apple Calendar).\n' +
-          '2. Find the "Import" or "Subscribe" option.\n' +
-          '3. Select the downloaded .ics file.\n' +
-          '4. Follow the prompts to complete the import.'
-        );
-      } catch (error) {
-        console.error("Error generating calendar:", error);
-        alert("Failed to generate calendar.");
-      }
     },
     async fetchReservations() {
       try {
@@ -251,7 +197,7 @@ END:VEVENT
         if (data.code === '000') {
           this.reservations = data.data.sort((a, b) => new Date(b.date) - new Date(a.date));
         } else {
-          alert(data.message);
+          ElMessage.error(data.message);
         }
       } catch (error) {
         console.error('Error fetching reservations:', error);
@@ -269,10 +215,10 @@ END:VEVENT
         });
         const data = await response.json();
         if (data.code === '000') {
-          alert('Reservation cancelled successfully!');
+          ElMessage.success('Reservation cancelled successfully!');
           await this.fetchReservations();
         } else {
-          alert(data.message);
+          ElMessage.error(data.message);
         }
       } catch (error) {
         console.error('Error cancelling reservation:', error);
@@ -286,10 +232,10 @@ END:VEVENT
         });
         const data = await response.json();
         if (data.code === '000') {
-          alert('Check-in successfully!');
+          ElMessage.success('Check-in successfully!');
           await this.fetchReservations();
         } else {
-          alert(data.message);
+          ElMessage.error(data.message);
         }
       } catch (error) {
         console.error('Error:', error);
