@@ -18,7 +18,6 @@
                 maxlength="6"
             >
           </div>
-
           <div class="button-container">
             <button
                 @click="handleVerify"
@@ -29,14 +28,14 @@
               <span class="button-text">VERIFY</span>
             </button>
           </div>
-        </div>
-        <div class="back-button-container">
-          <button
-              @click="handleBack"
-              class="back-button"
-          >
-            <FontAwesomeIcon :icon="faBackward" class="back-icon"/>
-          </button>
+          <div class="back-button-container">
+            <button
+                @click="handleBack"
+                class="back-button"
+            >
+              <FontAwesomeIcon :icon="faBackward" class="back-icon"/>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -52,6 +51,7 @@ import {ref, computed, getCurrentInstance} from 'vue'
 import {useRouter, useRoute} from 'vue-router'
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import {faBackward} from '@fortawesome/free-solid-svg-icons';
+import {ElMessage} from "element-plus";
 
 const vueInstance = getCurrentInstance()
 const backendAddress = vueInstance.appContext.config.globalProperties.$backendAddress
@@ -106,10 +106,8 @@ const handleVerify = async () => {
             await router.push({path: "../Index"})
           }
         }
-
-
       } else {
-        alert(data.message)
+        ElMessage.error(data.message)
       }
     } catch (error) {
       console.error('Error:', error);
@@ -272,38 +270,6 @@ body {
     display: block;
     width: 100%;
     max-width: 400px;
-
-    &:before {
-      content: '';
-      display: block;
-      background: linear-gradient(to left, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.4) 50%);
-      background-size: 210% 100%;
-      background-position: right bottom;
-      height: 100%;
-      width: 100%;
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      left: 0;
-      border-radius: 50px;
-      transition: all 1s;
-      -webkit-transition: all 1s;
-    }
-
-    &:hover:not(.button-disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 25px rgba(79, 172, 254, 0.9);
-
-      &:before {
-        background-position: left bottom;
-      }
-    }
-
-    &:active {
-      transform: translateY(1px);
-      box-shadow: 0 2px 10px rgba(79, 172, 254, 0.6);
-    }
   }
 
   .button-text {
@@ -311,10 +277,10 @@ body {
   }
 
   .button-disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background-color: rgba(255, 255, 255, 0.8);
-}
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: rgba(255, 255, 255, 0.8);
+  }
 }
 
 .right-content {
@@ -348,13 +314,6 @@ body {
     position: relative;
   }
 
-  .header {
-    position: static;
-    padding: 1rem;
-    margin-bottom: 0;
-    text-align: center;
-  }
-
   .left-content {
     position: relative;
     z-index: 3;
@@ -368,7 +327,23 @@ body {
     top: 50%;
     transform: translateY(-50%);
 
+    .header {
+      max-width: 400px;
+      left: 60px;
+      width: 100%;
+      margin-bottom: 30%;
+      margin-top: 5%;
+    }
+
+    .header-logo {
+      height: 45px;
+      width: auto;
+    }
+
+
     .input-button-container {
+      width: 100%;
+      height: 50%;
       padding: 2rem 2.5rem 2.5rem 2rem;
       background-color: rgba(49, 85, 239, 0.68);
       border-radius: 2.5rem;
@@ -407,7 +382,7 @@ body {
       text-align: center;
       width: 100%;
       max-width: 300px;
-      height: 30px;
+      height: 30%;
       padding: 1rem 2rem;
       font-size: 1rem;
       display: flex;
@@ -426,8 +401,8 @@ body {
     }
 
     .back-button {
-      margin-left: -2.5rem;
-      margin-bottom: 2rem;
+      margin-left: 2.5rem;
+      margin-bottom: 80%;
       background: none;
       border: none;
       padding: 0;
