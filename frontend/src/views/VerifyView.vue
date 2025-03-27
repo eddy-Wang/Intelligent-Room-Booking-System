@@ -33,7 +33,7 @@
                 @click="handleBack"
                 class="back-button"
             >
-              <FontAwesomeIcon :icon="faBackward" class="back-icon"/>
+              <svg-icon type="mdi" :path="path" class="back-icon"></svg-icon>
             </button>
           </div>
         </div>
@@ -49,9 +49,9 @@
 <script setup>
 import {ref, computed, getCurrentInstance} from 'vue'
 import {useRouter, useRoute} from 'vue-router'
-import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
-import {faBackward} from '@fortawesome/free-solid-svg-icons';
 import {ElMessage} from "element-plus";
+import SvgIcon from '@jamescoyle/vue-icon';
+import {mdiKeyboardBackspace} from '@mdi/js';
 
 
 const vueInstance = getCurrentInstance()
@@ -61,6 +61,7 @@ const route = useRoute()
 const email = route.params.email
 
 const verificationCode = ref('')
+const path = ref(mdiKeyboardBackspace)
 
 const isValidCode = computed(() => {
   return verificationCode.value.length === 6
@@ -235,10 +236,12 @@ body {
   }
 
   .back-icon {
-    font-size: 4rem;
+    width: 3.5em;
+    height: 3.5em;
     color: white;
     transition: color 0.3s ease;
   }
+
 
   .back-button:hover .back-icon {
     color: rgba(255, 255, 255, 0.8);
@@ -342,7 +345,7 @@ body {
 
     .input-button-container {
       width: 100%;
-      height: 50%;
+      height: 47%;
       padding: 2rem 2.5rem 2.5rem 2rem;
       background-color: rgba(49, 85, 239, 0.68);
       border-radius: 2.5rem;
@@ -396,12 +399,12 @@ body {
     }
 
     .back-button-container {
-      margin-top: 1.5rem;
+      margin-top: 0.5rem;
     }
 
     .back-button {
-      margin-left: 2.5rem;
-      margin-bottom: 80%;
+      margin-left: 1.5rem;
+      margin-bottom: 85%;
       background: none;
       border: none;
       padding: 0;
@@ -409,6 +412,8 @@ body {
     }
 
     .back-icon {
+      width: 1.4em;
+      height: 1.4em;
       font-size: 2.5rem;
       color: #ffffff;
     }

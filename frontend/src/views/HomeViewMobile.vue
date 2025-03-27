@@ -89,11 +89,11 @@
             :key="room.id"
             class="room-card"
             :class="{ selected: selectedRoom && selectedRoom.id === room.id }"
-            @click="selectRoom(room)"
+            @click="() => { selectRoom(room); handleRoomSelected(room) }"
         >
           <div class="room-card-content">
             <div class="room-image">
-              <img :src="room.image" :alt="room.name"/>
+              <img :src="room.image_url" :alt="room.name"/>
             </div>
             <div class="room-details">
               <h2>{{ room.name }}</h2>
@@ -146,7 +146,10 @@
                 v-for="(slot, index) in timeSlots"
                 :key="index"
                 :disabled="slot.status === 0"
-                :class="['time-slot-button', { selected: slot.status === 2 }]"
+                :class="['time-slot-button', {
+      'selected': slot.status === 2,
+      'disabled': slot.status === 0 || isSlotDisabled(slot, index)
+    }]"
                 @click="toggleSlot(index)"
             >
               {{ formatTime(slot.start) }} - {{ formatTime(slot.end) }}
@@ -213,6 +216,7 @@ import {ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance} fr
 import Vue3Datepicker from 'vue3-datepicker';
 import axios from 'axios';
 import {ElMessage} from 'element-plus';
+import * as today from "date-fns";
 
 /* ===== Global Variables ===== */
 const instance = getCurrentInstance();
@@ -221,6 +225,11 @@ const user = ref({})
 /* ===== Reactive Data ===== */
 const roomIds = ref([]);
 const roomsData = ref([]);
+
+const childData = ref([]);
+const lessonData = ref([]);
+const combinedData = ref([]);
+
 const selectedRoom = ref(null);
 const selectedDate = ref(null);
 const bookDate = ref(null);
@@ -295,6 +304,7 @@ const capacityFilters = ref([
   {label: '46 - 60', value: '46-60'}
 ]);
 const activeCapacityFilter = ref('');
+const roomSelected = ref(0)
 const equipmentFilters = ref([
   {label: 'Projector', value: 'Projector'},
   {label: 'Whiteboard', value: 'Whiteboard'},
@@ -345,29 +355,80 @@ function formatTime(time) {
 
 // Format date object to 'yyyy-MM-dd'
 function formatDate(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
-// Get room image URL based on room id
-function getRoomImage(room) {
-  switch (room.id) {
-    case 1:
-      return new URL('@/assets/622---seminar-room.png', import.meta.url).href;
-    case 2:
-      return new URL('@/assets/room1.png', import.meta.url).href;
-    case 3:
-      return new URL('@/assets/635---multipurpose-teaching-room.png', import.meta.url).href;
-    case 16:
-      return new URL('@/assets/formal-meeting-room.png', import.meta.url).href;
-    case 17:
-      return new URL('@/assets/informal-meeting-room.png', import.meta.url).href;
-    default:
-      return new URL('@/assets/english-room.png', import.meta.url).href;
+//
+watch(selectedRoom, (newRoom) => {
+  if (newRoom && newRoom.booking) {
+    console.log("999")
+    selectedDate.value = ""
+    timeSlots.value = timeSlots.value.map(slot => ({...slot, status: 0}));
   }
+});
+
+// 更新预订数据的方法
+const updateBookings = (bookingsArray) => {
+  let tmp = {}
+  console.log(4)
+  bookingsArray.forEach(booking => {
+    console.log(3)
+    const date = new Date(booking.date);
+    const timeSlots = booking.time;
+    console.log(2)
+    const dateKey = formatDate(date);
+    console.log("dateKey ", dateKey)
+
+    if (!tmp[dateKey]) {
+      tmp[dateKey] = new Array(12).fill(1);
+    }
+
+    timeSlots.forEach(slot => {
+      if (slot >= 0 && slot < 12) {
+        tmp[dateKey][slot] = 0;
+      }
+    });
+  });
+
+  bookings.value = tmp
+  console.log(bookings)
 }
+
+const handleRoomSelected = async (room) => {
+  console.log("start handleRoomSelected")
+  selectedRoom.value = room;
+  roomSelected.value = 1;
+
+  try {
+    const response = await fetch(`${backendAddress}/requestRoomDetails?roomId=${room.id}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    childData.value = data.data.booking;
+    lessonData.value = data.data.lesson;
+    console.log("Received room details:", childData.value);
+    console.log("Received lesson details:", lessonData.value);
+    combinedData.value = [
+      ...childData.value,
+      ...lessonData.value
+    ];
+    console.log("Combined data:", combinedData.value);
+    console.log(1)
+    updateBookings(combinedData.value)
+  } catch (error) {
+    //console.error("Error fetching room details:", error);
+    childData.value = null;
+    lessonData.value = null;
+    combinedData.value = null;
+  }
+};
 
 // Parse equipment string to an array
 function parseEquipment(equipStr) {
@@ -409,22 +470,46 @@ function isSelected(date) {
 }
 
 // Update time slots status based on selected date and room bookings
-function handleDateSelection() {
-  if (!selectedDate.value) {
-    timeSlots.value = timeSlots.value.map(slot => ({...slot, status: 1}));
+const handleDateSelection = () => {
+  if (!selectedRoom.value || !selectedDate.value) {
+    timeSlots.value = timeSlots.value.map(slot => ({...slot, status:0}));
     return;
   }
-  const dateKey = formatDate(selectedDate.value);
-  if (bookings.value[dateKey]) {
-    timeSlots.value = timeSlots.value.map((slot, index) => ({
-      ...slot,
-      status: bookings.value[dateKey][index]
-    }));
+  console.log(bookings.value)
+
+  const key = formatDate(selectedDate.value);
+  console.log(key)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  // const sel = new Date(selectedDate.value);
+  // sel.setHours(0, 0, 0, 0);
+
+  if (bookings.value[key]) {
+    console.log(bookings.value)
+    timeSlots.value = timeSlots.value.map((slot, index) => {
+      const isPast = selectedDate.value.getTime() === today.getTime() &&
+          this.isSlotDisabled(slot, index);
+
+      return {
+        ...slot,
+        status: isPast ? 0 : bookings.value[key][index]
+      };
+    });
   } else {
-    timeSlots.value = timeSlots.value.map(slot => ({...slot, status: 1}));
+    timeSlots.value = timeSlots.value.map((slot, index) => {
+      const isPast = selectedDate.value.getTime() === today.getTime() &&
+          this.isSlotDisabled(slot, index);
+
+      return {
+        ...slot,
+        status: isPast ? 0 : 1
+      };
+    });
   }
-  emitSelection();
+
+  this.emitSelection();
 }
+
 
 /* ===== Time Slot Functions ===== */
 const timeSlots = ref(
@@ -511,13 +596,31 @@ function handleFilters(filters) {
           return filter.value.every(equip => room.equipment.includes(equip));
         case 'date-time':
           if (!filter.value.date || filter.value.slots.length === 0) return true;
-          const selectedDateStr = formatDate(new Date(filter.value.date));
-          const hasConflict = room.booking.some(booking => {
-            if (booking.date === selectedDateStr) {
+          console.log("test filter date", filter.value.date)
+          console.log("slots", filter.value.slots)
+          const selectedDate = formatDate(filter.value.date);
+
+          console.log("filter date after format:", selectedDate)
+          console.log("booking", room.booking)
+          // Check for booking conflicts
+          const hasBookingConflict = room.booking.some(booking => {
+            if (formatDate(booking.date) === selectedDate) {
               return booking.time.some(bookedSlot => filter.value.slots.includes(bookedSlot));
             }
             return false;
           });
+
+          // Check for lesson conflicts (if lessons exist)
+          const hasLessonConflict = room.lesson && room.lesson.some(lesson => {
+            if (formatDate(lesson.date) === selectedDate) {
+              return lesson.time.some(lessonSlot => filter.value.slots.includes(lessonSlot));
+            }
+            return false;
+          });
+
+          const hasConflict = hasBookingConflict || hasLessonConflict;
+
+          console.log("conflict", hasConflict)
           return !hasConflict;
         default:
           return true;
@@ -665,6 +768,32 @@ function handleClickOutside(event) {
   }
 }
 
+function isSlotDisabled(slot, index) {
+  // 没选日期 ⇒ 全部禁用
+  if (!selectedDate.value) return true;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const sel = new Date(selectedDate.value);
+  sel.setHours(0, 0, 0, 0);
+
+  // 选的日期在今天之前 ⇒ 禁用
+  if (sel < today) return true;
+
+  // 选的日期在今天之后 ⇒ 可用
+  if (sel > today) return false;
+
+  // 选的日期就是今天 ⇒ 比较时段开始时间
+  const now = new Date();
+  const [h, m] = slot.start.split(':').map(Number);
+  const slotTime = new Date(sel);
+  slotTime.setHours(h, m, 0, 0);
+
+  return slotTime < now;
+}
+
+
 /* ===== Lifecycle Hooks ===== */
 onMounted(async () => {
   let me = await instance.appContext.config.globalProperties.$me()
@@ -678,7 +807,7 @@ onMounted(async () => {
       roomsData.value = response.data.data.map(room => {
         const newRoom = {...room};
         newRoom.equipment = parseEquipment(room.equipment);
-        newRoom.image = getRoomImage(newRoom);
+        newRoom.image = room.image_url;
         return newRoom;
       });
       roomIds.value = roomsData.value.map(room => room.id);
@@ -695,6 +824,8 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
 });
+
+
 </script>
 
 <style scoped>
@@ -1131,10 +1262,10 @@ body {
   padding-right: 10px;
 }
 
-.book-information-content textarea{
+.book-information-content textarea {
   background-color: #fdf8f6;
   border-radius: 10px;
-  padding:5px 10px;
+  padding: 5px 10px;
 }
 
 /* ===== Book Button ===== */

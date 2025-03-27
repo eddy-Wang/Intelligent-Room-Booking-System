@@ -1,0 +1,112 @@
+2025-03-27 17:12:44,066 - INFO - Starting classroom schedule update process
+2025-03-27 17:12:44,066 - INFO - Running crawler (attempt 1/5)
+2025-03-27 17:12:44,218 - ERROR - Crawler failed (attempt 1): None
+2025-03-27 17:12:44,219 - INFO - Retrying in 10 seconds...
+2025-03-27 17:12:54,220 - INFO - Running crawler (attempt 2/5)
+2025-03-27 17:12:54,347 - ERROR - Crawler failed (attempt 2): None
+2025-03-27 17:12:54,348 - INFO - Retrying in 10 seconds...
+2025-03-27 17:13:04,348 - INFO - Running crawler (attempt 3/5)
+2025-03-27 17:13:04,475 - ERROR - Crawler failed (attempt 3): None
+2025-03-27 17:13:04,497 - INFO - Retrying in 10 seconds...
+2025-03-27 17:13:14,498 - INFO - Running crawler (attempt 4/5)
+2025-03-27 17:13:14,636 - ERROR - Crawler failed (attempt 4): None
+2025-03-27 17:13:14,636 - INFO - Retrying in 10 seconds...
+2025-03-27 17:13:24,637 - INFO - Running crawler (attempt 5/5)
+2025-03-27 17:13:24,772 - ERROR - Crawler failed (attempt 5): None
+2025-03-27 17:13:24,772 - ERROR - Maximum attempts reached. Crawler failed.
+2025-03-27 17:13:24,772 - ERROR - Crawler failed after maximum attempts. Aborting.
+2025-03-27 17:13:24,772 - INFO - Database connection closed
+2025-03-27 17:13:24,772 - ERROR - Update process failed
+2025-03-27 17:13:55,259 - INFO - Starting classroom schedule update process
+2025-03-27 17:13:55,259 - INFO - Running crawler (attempt 1/5)
+2025-03-27 17:13:55,396 - ERROR - Crawler failed (attempt 1): None
+2025-03-27 17:13:55,397 - INFO - Retrying in 10 seconds...
+2025-03-27 17:14:05,397 - INFO - Running crawler (attempt 2/5)
+2025-03-27 17:14:05,525 - ERROR - Crawler failed (attempt 2): None
+2025-03-27 17:14:05,525 - INFO - Retrying in 10 seconds...
+2025-03-27 17:14:11,546 - INFO - Database connection closed
+2025-03-27 17:14:17,457 - INFO - Starting classroom schedule update process
+2025-03-27 17:14:17,457 - INFO - Running crawler (attempt 1/5)
+2025-03-27 17:14:17,595 - ERROR - Crawler failed (attempt 1): None
+2025-03-27 17:14:17,595 - INFO - Retrying in 10 seconds...
+2025-03-27 17:14:27,596 - INFO - Running crawler (attempt 2/5)
+2025-03-27 17:14:27,735 - ERROR - Crawler failed (attempt 2): None
+2025-03-27 17:14:27,735 - INFO - Retrying in 10 seconds...
+2025-03-27 17:14:37,737 - INFO - Running crawler (attempt 3/5)
+2025-03-27 17:14:37,876 - ERROR - Crawler failed (attempt 3): None
+2025-03-27 17:14:37,876 - INFO - Retrying in 10 seconds...
+2025-03-27 17:14:47,877 - INFO - Running crawler (attempt 4/5)
+2025-03-27 17:14:48,012 - ERROR - Crawler failed (attempt 4): None
+2025-03-27 17:14:48,013 - INFO - Retrying in 10 seconds...
+2025-03-27 17:14:53,058 - INFO - Database connection closed
+2025-03-27 17:41:13,432 - INFO - Starting classroom schedule update process
+2025-03-27 17:41:13,433 - INFO - Running crawler (attempt 1/5)
+2025-03-27 17:41:13,567 - ERROR - Crawler failed (attempt 1): None
+2025-03-27 17:41:13,567 - INFO - Retrying in 10 seconds...
+2025-03-27 17:41:23,568 - INFO - Running crawler (attempt 2/5)
+2025-03-27 17:41:23,713 - ERROR - Crawler failed (attempt 2): None
+2025-03-27 17:41:23,713 - INFO - Retrying in 10 seconds...
+2025-03-27 17:41:33,714 - INFO - Running crawler (attempt 3/5)
+2025-03-27 17:41:33,837 - ERROR - Crawler failed (attempt 3): None
+2025-03-27 17:41:33,837 - INFO - Retrying in 10 seconds...
+2025-03-27 17:41:43,837 - INFO - Running crawler (attempt 4/5)
+2025-03-27 17:41:43,968 - ERROR - Crawler failed (attempt 4): None
+2025-03-27 17:41:43,969 - INFO - Retrying in 10 seconds...
+2025-03-27 17:41:53,969 - INFO - Running crawler (attempt 5/5)
+2025-03-27 17:41:54,093 - ERROR - Crawler failed (attempt 5): None
+2025-03-27 17:41:54,093 - ERROR - Maximum attempts reached. Crawler failed.
+2025-03-27 17:41:54,094 - ERROR - Crawler failed after maximum attempts. Aborting.
+2025-03-27 17:41:54,094 - INFO - Database connection closed
+2025-03-27 17:41:54,094 - ERROR - Update process failed
+2025-03-27 19:24:02,209 - INFO - Starting classroom schedule update process
+2025-03-27 19:24:02,210 - INFO - Running crawler (attempt 1/5)
+2025-03-27 19:24:02,340 - ERROR - Crawler failed (attempt 1): None
+2025-03-27 19:24:02,341 - INFO - Retrying in 10 seconds...
+2025-03-27 19:24:12,341 - INFO - Running crawler (attempt 2/5)
+2025-03-27 19:24:12,463 - ERROR - Crawler failed (attempt 2): None
+2025-03-27 19:24:12,463 - INFO - Retrying in 10 seconds...
+2025-03-27 19:24:22,464 - INFO - Running crawler (attempt 3/5)
+2025-03-27 19:24:22,593 - ERROR - Crawler failed (attempt 3): None
+2025-03-27 19:24:22,593 - INFO - Retrying in 10 seconds...
+2025-03-27 19:24:32,593 - INFO - Running crawler (attempt 4/5)
+2025-03-27 19:24:32,722 - ERROR - Crawler failed (attempt 4): None
+2025-03-27 19:24:32,723 - INFO - Retrying in 10 seconds...
+2025-03-27 19:24:35,662 - INFO - Database connection closed
+2025-03-27 21:05:07,473 - INFO - Starting classroom schedule update process
+2025-03-27 21:05:07,474 - INFO - Running crawler (attempt 1/5)
+2025-03-27 21:05:07,625 - ERROR - Crawler failed (attempt 1): None
+2025-03-27 21:05:07,626 - INFO - Retrying in 10 seconds...
+2025-03-27 21:05:17,627 - INFO - Running crawler (attempt 2/5)
+2025-03-27 21:05:17,771 - ERROR - Crawler failed (attempt 2): None
+2025-03-27 21:05:17,772 - INFO - Retrying in 10 seconds...
+2025-03-27 21:05:23,963 - INFO - Starting classroom schedule update process
+2025-03-27 21:05:23,963 - INFO - Running crawler (attempt 1/5)
+2025-03-27 21:05:24,129 - ERROR - Crawler failed (attempt 1): None
+2025-03-27 21:05:24,130 - INFO - Retrying in 10 seconds...
+2025-03-27 21:05:27,773 - INFO - Running crawler (attempt 3/5)
+2025-03-27 21:05:27,930 - ERROR - Crawler failed (attempt 3): None
+2025-03-27 21:05:27,930 - INFO - Retrying in 10 seconds...
+2025-03-27 21:05:34,131 - INFO - Running crawler (attempt 2/5)
+2025-03-27 21:05:34,277 - ERROR - Crawler failed (attempt 2): None
+2025-03-27 21:05:34,277 - INFO - Retrying in 10 seconds...
+2025-03-27 21:05:37,930 - INFO - Running crawler (attempt 4/5)
+2025-03-27 21:05:38,062 - ERROR - Crawler failed (attempt 4): None
+2025-03-27 21:05:38,062 - INFO - Retrying in 10 seconds...
+2025-03-27 21:05:44,278 - INFO - Running crawler (attempt 3/5)
+2025-03-27 21:05:44,455 - ERROR - Crawler failed (attempt 3): None
+2025-03-27 21:05:44,455 - INFO - Retrying in 10 seconds...
+2025-03-27 21:05:48,064 - INFO - Running crawler (attempt 5/5)
+2025-03-27 21:05:48,210 - ERROR - Crawler failed (attempt 5): None
+2025-03-27 21:05:48,210 - ERROR - Maximum attempts reached. Crawler failed.
+2025-03-27 21:05:48,210 - ERROR - Crawler failed after maximum attempts. Aborting.
+2025-03-27 21:05:48,210 - INFO - Database connection closed
+2025-03-27 21:05:48,211 - ERROR - Update process failed
+2025-03-27 21:05:54,456 - INFO - Running crawler (attempt 4/5)
+2025-03-27 21:05:54,590 - ERROR - Crawler failed (attempt 4): None
+2025-03-27 21:05:54,590 - INFO - Retrying in 10 seconds...
+2025-03-27 21:06:04,590 - INFO - Running crawler (attempt 5/5)
+2025-03-27 21:06:04,740 - ERROR - Crawler failed (attempt 5): None
+2025-03-27 21:06:04,741 - ERROR - Maximum attempts reached. Crawler failed.
+2025-03-27 21:06:04,741 - ERROR - Crawler failed after maximum attempts. Aborting.
+2025-03-27 21:06:04,741 - INFO - Database connection closed
+2025-03-27 21:06:04,741 - ERROR - Update process failed

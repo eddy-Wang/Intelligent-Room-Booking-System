@@ -18,8 +18,7 @@ def create_app():
 
     mail.init_app(app)
     CORS(app,
-         origins=["http://localhost:5173","http://127.0.0.1:5173",
-              "http://192.168.110.175:5173"],
+         origins=["http://localhost:5173","http://127.0.0.1:5173","http://192.168.110.139:5173"],
          supports_credentials=True)
 
     from .routes import bp as routes_bp
