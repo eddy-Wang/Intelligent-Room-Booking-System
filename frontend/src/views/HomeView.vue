@@ -34,15 +34,14 @@
 </template>
 
 <script setup>
-import {getCurrentInstance, onMounted, provide, ref} from "vue";
+import {getCurrentInstance, nextTick, onMounted, provide, ref} from "vue";
 import RoomSearch from "@/components/RoomSearch.vue";
 import TimeTable from '@/components/TimeTable.vue';
 import RoomDisplay from '@/components/RoomDisplay.vue';
 
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
-
-const roomIds = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
+const roomIds = ref([])
 const bookDate = ref(null)
 const selectedRoom = ref(null)
 const selectedDate = ref(null)
@@ -65,11 +64,15 @@ const fetchData = async () => {
     const instance = getCurrentInstance();
     const user = instance.appContext.config.globalProperties.$me()
     const url = backendAddress + `/allRoom`;
-    const response = await fetch(url,{
+    const response = await fetch(url, {
       credentials: 'include'
     });
     const data = await response.json();
     roomsData.value = data.data;
+    roomIds.value = roomsData.value
+        .filter(room => Number.isInteger(room.id))
+        .map(room => room.id)
+        .sort((a, b) => a - b);
     console.log('Fetched data:', roomsData.value);
   } catch (err) {
     console.error('Failed to fetch data:', err);

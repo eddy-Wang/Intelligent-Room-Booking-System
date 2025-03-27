@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-import {ref, computed, watch} from 'vue'
+import {ref, computed, watch, inject} from 'vue'
 
 const props = defineProps({
   roomIds: {
@@ -174,7 +174,6 @@ const updateScroll = () => {
     requestAnimationFrame(updateScroll)
   }
 }
-
 const resetSelection = () => {
   selectedRoom.value = null
   scrollPosition.value = 0
@@ -244,7 +243,7 @@ watch(filteredRooms, (newValue, oldValue) => {
 }
 
 .detail-item {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   display: flex;
   flex-wrap: wrap;
 }
@@ -270,14 +269,14 @@ watch(filteredRooms, (newValue, oldValue) => {
 .equipment-item {
   display: flex;
   background-color: #f8f9fa;
-  padding: 8px 10px;
+  padding: 6px 7px;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .equipment-icon {
-  margin-right: 8px;
-  font-size: 1.2rem;
+  margin-right: 7px;
+  font-size: 1rem;
 }
 
 .equipment-name {
@@ -291,7 +290,7 @@ watch(filteredRooms, (newValue, oldValue) => {
   padding-left: 16px;
   border-radius: 8px;
   width: 90%;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .warning-item {
