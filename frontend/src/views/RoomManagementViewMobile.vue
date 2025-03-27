@@ -94,7 +94,7 @@
           <input type="text" id="modify-room-name" v-model="modifiedRoom.name" required/>
 
           <label for="modify-room-capacity">Capacity:</label>
-          <input type="number" id="modify-room-capacity" v-model="modifiedRoom.capacity" required/>
+          <input type="number" id="modify-room-capacity" v-model="modifiedRoom.capacity" required min="0"/>
 
           <label for="modify-room-location">Location:</label>
           <input type="text" id="modify-room-location" v-model="modifiedRoom.location" required/>
@@ -144,6 +144,7 @@
 
 <script>
 import {getCurrentInstance} from "vue";
+import {ElMessage} from "element-plus";
 
 export default {
   name: 'MobileRoomManagement',
@@ -316,9 +317,11 @@ export default {
           }
           this.showModifyRoomModal = false;
           this.resetNewRoom();
+          ElMessage.success("Room modified successfully");
         }
       } catch (error) {
         console.error('Failed to modify room:', error);
+        ElMessage.error("Failed to modify room:", error)
       }
     },
 
@@ -339,22 +342,23 @@ export default {
             if (roomIndex !== -1) {
               this.rooms.splice(roomIndex, 1);
             }
-            alert("Room deleted successfully")
+            ElMessage.success("Room deleted successfully")
           }
         } catch (error) {
           console.error('Failed to delete room:', error);
+          ElMessage.error("Failed to delete room:", error)
         }
       }
     },
     async handleImageUpload(event) {
       const file = event.target.files[0];
       if (!file) {
-        alert("Please select an image to upload");
+        ElMessage.info("Please select an image to upload");
         return;
       }
       const maxFileSize = 5 * 1024 * 1024;
       if (file.size > maxFileSize) {
-        alert("The max size is 5MB");
+        ElMessage.info("The max size is 5MB");
         return;
       }
 
@@ -379,15 +383,13 @@ export default {
           } else {
             this.newRoom.image_url = image_url;
           }
-          alert("upload successfully");
           this.newRoom.image_url = image_url;
           console.log(this.newRoom.image_url)
-          alert("upload successfully");
         } else {
-          alert(`error：${result.message || "unknown error"}`);
+          ElMessage.error(`Error：${result.message || "Unknown error"}`);
         }
       } catch (error) {
-        alert("Upload failed, please check network connection");
+        ElMessage.error("Upload failed, please check network connection");
       }
     },
 

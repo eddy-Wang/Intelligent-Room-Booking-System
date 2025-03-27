@@ -7,73 +7,56 @@
       <div class="filter-container">
         <el-select v-model="roomFilter" placeholder="Filter by Room" clearable>
           <el-option
-              v-for="room in uniqueRooms"
-              :key="room"
-              :label="room"
-              :value="room"
+            v-for="room in uniqueRooms"
+            :key="room"
+            :label="room"
+            :value="room"
           />
         </el-select>
 
         <el-select v-model="dateFilter" placeholder="Filter by Date" clearable>
           <el-option
-              v-for="date in uniqueDates"
-              :key="date"
-              :label="date"
-              :value="date"
+            v-for="date in uniqueDates"
+            :key="date"
+            :label="date"
+            :value="date"
           />
         </el-select>
 
         <el-select v-model="statusFilter" placeholder="Filter by Status" clearable>
           <el-option
-              v-for="status in uniqueStatuses"
-              :key="status"
-              :label="status"
-              :value="status"
+            v-for="status in uniqueStatuses"
+            :key="status"
+            :label="status"
+            :value="status"
           />
         </el-select>
       </div>
 
-            <div class="content-wrapper">
-                <div class="reservation-list">
-                    <div
-                            v-for="(reservation, index) in paginatedReservations"
-                            :key="index"
-                            class="reservation-item"
-                    >
-                        <div class="reservation-info">
-                            <div class="reservation-name">{{ reservation.name }}</div>
-                            <div class="reservation-time">
-                                {{ reservation.date.split('00:00:00')[0] + convertTimeStrToTimeSlots(reservation.time) }}
-                            </div>
-                            <div class="reservation-capacity">Capacity: {{ reservation.capacity }}</div>
-                            <div class="reservation-purpose">{{ reservation.purpose }}</div>
-                        </div>
-                        <div class="status-and-actions">
-                            <div class="reservation-status">{{ reservation.status }}</div>
-                            <div class="reservation-actions" v-if="reservation.status.toString() === 'Confirmed'">
-                                <button @click="checkIn(index)" class="action-button">Check In</button>
-                                <button @click="cancelReservation(index)" class="action-button">Cancel</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="pagination">
-                        <button @click="prevPage" :disabled="currentPage === 1" class="pagination-button">Previous</button>
-                        <button @click="nextPage" :disabled="currentPage === totalPages" class="pagination-button">Next</button>
-                    </div>
-                </div>
-
-                <div class="user-info">
-                    <div class="user-avatar">
-                        <img :src="userAvatar" alt="User Avatar"/>
-                    </div>
-                    <div class="user-email">{{ user.name }}</div>
-                    <div class="user-email">{{ user.email }}</div>
-                    <div class="user-role">{{ user.permission }}</div>
-                    <button @click="downloadCalendar" class="download-button">Subscribe to Calendar</button>
-                </div>
-
+      <div class="content-wrapper">
+        <div class="reservation-list">
+          <div
+            v-for="(reservation, index) in paginatedReservations"
+            :key="reservation.booking_id"
+            class="reservation-item"
+          >
+            <div class="reservation-info">
+              <div class="reservation-name">{{ reservation.name }}</div>
+              <div class="reservation-time">
+                {{ reservation.date.split('00:00:00')[0] + convertTimeStrToTimeSlots(reservation.time) }}
+              </div>
+              <div class="reservation-capacity">Capacity: {{ reservation.capacity }}</div>
+              <div class="reservation-purpose">{{ reservation.purpose }}</div>
+            </div>
+            <div class="status-and-actions">
+              <div class="reservation-status">{{ reservation.status }}</div>
+              <div v-if="reservation.status === 'Confirmed'" class="reservation-actions">
+                <button @click="checkIn(index)" class="action-button">Check In</button>
+                <button @click="cancelReservation(index)" class="action-button">Cancel</button>
+              </div>
             </div>
           </div>
+
           <div class="pagination">
             <button @click="prevPage" :disabled="currentPage === 1" class="pagination-button">Previous</button>
             <button @click="nextPage" :disabled="currentPage === totalPages" class="pagination-button">Next</button>
@@ -82,7 +65,7 @@
 
         <div class="user-info">
           <div class="user-avatar">
-            <img :src="userAvatar" alt="User Avatar"/>
+            <img :src="userAvatar" alt="User Avatar" />
           </div>
           <div class="user-email">{{ user.name }}</div>
           <div class="user-email">{{ user.email }}</div>
@@ -90,26 +73,25 @@
           <button @click="subscribeCalendar" class="download-button">Subscribe to Calendar</button>
           <button @click="downloadCalendar" class="download-button">Download the Calendar</button>
         </div>
-        <!-- Import Calendar Instructions Dialog -->
-        <el-dialog
-            v-model="instructionsDialogVisible"
-            title="Import Calendar Instructions"
-            width="50%"
-        >
-          <el-form label-width="120px">
-              <el-input
-                  v-model="instructionsText"
-                  type="textarea"
-                  :rows="7"
-                  readonly
-              />
-          </el-form>
+      </div>
 
-          <template #footer>
-            <el-button @click="instructionsDialogVisible = false">Close</el-button>
-          </template>
-        </el-dialog>
+      <!-- Import Calendar Instructions Dialog -->
+      <el-dialog
+        v-model="instructionsDialogVisible"
+        title="Import Calendar Instructions"
+        width="50%"
+      >
+        <el-form label-width="120px">
+          <el-input v-model="instructionsText" type="textarea" :rows="7" readonly />
+        </el-form>
+        <template #footer>
+          <el-button @click="instructionsDialogVisible = false">Close</el-button>
+        </template>
+      </el-dialog>
+    </div>
+  </div>
 </template>
+
 <script>
 import {getCurrentInstance} from "vue";
 import {ElMessage} from "element-plus";
@@ -184,9 +166,10 @@ export default {
       return this.filteredReservations.slice(start, end);
     },
     userAvatar() {
-      return this.user.permission === 'student'
-          ? "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-          : "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+      return this.user.permission === 'Student'
+
+          ? "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D":
+          "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
     },
   },
   methods: {
@@ -225,11 +208,11 @@ export default {
             })
             .catch(error => {
               console.error('Error downloading calendar:', error);
-              alert('Error downloading calendar. Please try again later.');
+              ElMessage.error('Error downloading calendar. Please try again later.');
             });
       } catch (error) {
         console.error('Error downloading calendar:', error);
-        alert('Error downloading calendar. Please try again later.');
+        ElMessage.error('Error downloading calendar, please try again later.');
       }
     },
     async fetchReservations() {
@@ -261,10 +244,10 @@ export default {
         });
         const data = await response.json();
         if (data.code === '000') {
-          alert('Check-in successfully!');
+          ElMessage.success('Check-in successfully!');
           await this.fetchReservations();
         } else {
-          alert(data.message);
+          ElMessage.error(data.message);
         }
       } catch (error) {
         console.error('Error:', error);
@@ -284,7 +267,7 @@ export default {
         });
         const data = await response.json();
         if (data.code === '000') {
-          alert('Reservation cancelled successfully!');
+          ElMessage.success('Reservation cancelled successfully!');
           await this.fetchReservations();
         } else {
           ElMessage.error(data.message);
@@ -545,7 +528,7 @@ h1 {
   color: #333;
   transition: background-color 0.2s ease;
   margin-top: 20px;
-  width: 52%;
+  width: 60%;
 }
 
 .download-button:disabled {

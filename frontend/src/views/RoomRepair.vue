@@ -29,6 +29,7 @@
 
 <script setup>
 import {getCurrentInstance, onMounted, ref} from "vue";
+import {ElMessage} from "element-plus";
 
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
@@ -79,17 +80,17 @@ const submitRepair = async () => {
         if (response.ok) {
           const data = await response.json();
           if (data.code === "000") {
-            alert("Repair request submitted successfully!");
+            ElMessage.success("Repair request submitted successfully!");
             showDialog.value = false;
           } else {
-            alert("There is a problem with the network, please try again.");
+            ElMessage.error("Failed to submit repair request: " , data.message);
           }
         } else {
-          alert("Failed to submit repair request.");
+          ElMessage.error("There is a problem with the network, please try again.");
         }
       } catch (error) {
         console.error("Error submitting repair:", error);
-        alert("An error occurred.");
+        ElMessage.error("Error submitting repair:", error);
       }
     }
 ;

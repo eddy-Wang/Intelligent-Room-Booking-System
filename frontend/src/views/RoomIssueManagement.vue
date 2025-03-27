@@ -163,6 +163,7 @@ const timestampToTime = (timestamp) => {
     return chinaTime.toISOString().replace('T', ' ').slice(0, 19);
 };
 const exportToExcel = () => {
+    // Original export data
     const dataForExport = filteredReports.value.map(report => {
         return {
             'Room Name': getRoomName(report.room_id),
@@ -173,10 +174,35 @@ const exportToExcel = () => {
         };
     });
 
+    // Create worksheet for main reports
     const ws = XLSX.utils.json_to_sheet(dataForExport);
 
+    // Calculate frequently reported rooms
+    const roomIssueCounts = {};
+    reports.value.forEach(report => {
+        if (report.reviewed === 'Completed' || report.reviewed === 'Approved') {
+            if (!roomIssueCounts[report.room_id]) {
+                roomIssueCounts[report.room_id] = 0;
+            }
+            roomIssueCounts[report.room_id]++;
+        }
+    });
+
+    // Filter rooms with 5+ issues and prepare data
+    const frequentIssuesData = Object.entries(roomIssueCounts)
+        .filter(([_, count]) => count >= 5)
+        .map(([room_id, count]) => ({
+            'Room Name': getRoomName(room_id),
+            'Issue Count': count
+        }));
+
+    // Create worksheet for frequent issues
+    const frequentIssuesWs = XLSX.utils.json_to_sheet(frequentIssuesData);
+
+    // Create workbook with both sheets
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Repair Reports");
+    XLSX.utils.book_append_sheet(wb, frequentIssuesWs, "Frequent Issues Rooms");
 
     const dateStr = new Date().toISOString().slice(0, 10);
     const fileName = `Repair_Reports_${dateStr}.xlsx`;
@@ -361,7 +387,9 @@ const submitNewReport = async () => {
     console.error('Error submitting report:', error);
     ElMessage.error('Failed to submit report');
   }
-};// Fetch data on component mount
+};
+
+// Fetch data on component mount
 onMounted(() => {
   fetchRooms();
   fetchUsers();
@@ -374,7 +402,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 1%;
+  width: 100%;
 }
 
 .page-title {
@@ -385,7 +414,7 @@ onMounted(() => {
 }
 .button-group {
     display: flex;
-    gap: 10px;
+    gap: 30px;
 }
 
 .export-button {
@@ -399,7 +428,6 @@ onMounted(() => {
 }
 
 .new-button {
-    width: 300%;
     min-width: 10%;
     height: 50%;
     padding: 10px;
@@ -407,12 +435,24 @@ onMounted(() => {
 }
 
 .export-button {
-    width: 150%;
     min-width: 10%;
     height: 50%;
     padding: 10px;
     margin: 0;
 }
+
+.el-button.el-button--success.export-button{
+  width: 100%;
+  margin-top: 10%;
+  height: 43px;
+}
+
+.el-button.el-button--primary.new-button{
+  width: 120%;
+  margin-top: 10%;
+  height: 43px;
+}
+
 .el-table {
   height: 700px;
   width: 100%;
@@ -422,9 +462,9 @@ onMounted(() => {
 .room-repair-handling {
   font-family: 'Cambria', serif;
   width: 100%;
+  height: 100%;
   padding: 20px;
   background-color: #f8f9fa;
-  overflow: auto;
 }
 
 .custom-card {

@@ -4,6 +4,7 @@
       <h1><strong>DRBS</strong></h1>
       <h2><strong>Reservation Management</strong></h2>
     </div>
+
     <div class="filter-controls">
       <el-autocomplete
           v-model="filters.userInput"
@@ -99,8 +100,7 @@
           v-for="booking in filteredBookings"
           :key="booking.booking_id"
           class="booking-card"
-          :class="statusClass(booking.status)"
-      >
+          :class="statusClass(booking.status)">
         <div class="card-header">
           <div class="room-info">
             <div class="room-name">{{ getRoomName(booking.room_id) }}</div>
@@ -110,8 +110,7 @@
                 :type="statusTagType(booking.status)"
                 size="mini"
                 class="booking-status-tag"
-                :data-status="booking.status"
-            >
+                :data-status="booking.status">
               {{ booking.status }}
             </el-tag>
           </div>
@@ -190,6 +189,7 @@
     </div>
 
     <div v-if="modifyDialogVisible" class="modal" @click.self="modifyDialogVisible = false">
+
       <div class="modal-content">
         <h2>Modify Booking</h2>
         <form @submit.prevent="saveModifiedBooking">
