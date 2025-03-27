@@ -412,8 +412,8 @@ export default {
           // response handling
           const result = await response.json();
 
-          console.log(result)
-          console.log(result.code)
+          console.log(result);
+          console.log(result.code);
 
           if (result.code === 200) {
             const image_url = result.data.url;
@@ -422,9 +422,9 @@ export default {
             } else {
               this.newRoom.image_url = image_url;
             }
-            alert("Upload successful!");
+            ElMessage.success("Upload successful!");
             console.log("Image URL:", image_url);
-            return; //stop once it succeeds
+            return; // stop once it succeeds
           }
 
           // If daily limit hit, try next credentials
@@ -432,18 +432,14 @@ export default {
             console.log(`Account ${i + 1} limit reached — switching credentials`);
             continue;
           }
-          this.newRoom.image_url = image_url;
-          console.log(this.newRoom.image_url)
-          ElMessage.success("Upload successfully");
-           } else {
           ElMessage.error(`Error uploading image: ${result.msg || "Unknown error"}`);
           return;
-          }
         } catch (error) {
-        ElMessage.error("Upload failed, please check network connection");
-        return;
+          ElMessage.error("Upload failed, please check network connection");
+          return;
+        }
       }
-      alert("All accounts have reached today's upload limit.");
+      ElMessage.info("All accounts have reached today's upload limit.");
     },
 
     prevPage() {
@@ -517,10 +513,10 @@ h1 {
 }
 
 .admin-actions {
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: flex-end;
-    padding-right: 20px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 20px;
 }
 
 .room-list-container {
