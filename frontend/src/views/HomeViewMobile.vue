@@ -202,7 +202,7 @@ const bookingPurpose = ref('');
 
 onMounted(async () => {
   try {
-    const response = await axios.get(backendAddress+'/allRoom', {
+    const response = await axios.get(backendAddress + '/allRoom', {
       params: {permission: instance.appContext.config.globalProperties.$user.permission}
     });
     if (response.data.code === '001') {
@@ -616,7 +616,7 @@ async function handleBook() {
     user_email: instance.appContext.config.globalProperties.$user.email
   };
   try {
-    const response = await axios.post(backendAddress+'/bookRoom', bookingData, {
+    const response = await axios.post(backendAddress + '/bookRoom', bookingData, {
       headers: {'Content-Type': 'application/json'}
     });
     if (response.data.code === '000') {
@@ -626,6 +626,8 @@ async function handleBook() {
       bookDate.value = null;
       selectedSlots.value = [];
       bookingPurpose.value = '';
+    } else if (response.data.code === '007') {
+      ElMessage.info('You are currently on the blacklist and cannot make bookings.');
     } else {
       ElMessage.error('Booking failed: ' + response.data.message);
     }
