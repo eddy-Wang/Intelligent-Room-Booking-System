@@ -1,7 +1,7 @@
 import os
 import time
 
-from flask import Blueprint, request, jsonify, Response, url_for, redirect, session
+from flask import Blueprint, request, jsonify, session
 from .services import generate_verification_code, send_verification_email, verification_codes, remove_verification_code, \
     get_user_reservations, cancel_reservation, fetch_users, fetch_rooms_id_and_name, fetch_bookings, \
     update_booking_status, \
@@ -97,7 +97,8 @@ def allRoom():
     if request.method == 'OPTIONS':
         return '', 200
 
-    permission = request.args.get('permission')
+    permission = session.get('user_data').get('permission')
+    print(permission)
     if not permission:
         return create_response('003', 'Permission parameter is required!')
 

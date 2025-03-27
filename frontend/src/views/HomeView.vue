@@ -66,9 +66,11 @@ const fetchData = async () => {
   try {
     const instance = getCurrentInstance();
     const user = instance.appContext.config.globalProperties.$me()
-    const userPermission = instance.appContext.config.globalProperties.$user.permission;
-    const url = backendAddress + `/allRoom?permission=` + userPermission;
-    const response = await fetch(url);
+    // const userPermission = instance.appContext.config.globalProperties.$user.permission;
+    const url = backendAddress + `/allRoom`;
+    const response = await fetch(url,{
+      credentials: 'include'
+    });
     const data = await response.json();
     roomsData.value = data.data;
     console.log('Fetched data:', roomsData.value);
