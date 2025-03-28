@@ -358,7 +358,9 @@ export default {
         if (response.data.code === '000') {
           ElMessage.success('Booking successful!');
           this.bookingPurpose = ""
-          window.location.reload()
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
         } else if (response.data.code === '007') {
           ElMessage.error('You are currently on the blacklist and cannot make bookings.');
         } else {
