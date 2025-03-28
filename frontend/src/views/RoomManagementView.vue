@@ -296,7 +296,7 @@ export default {
           const room_id = data.message.room_id
           this.rooms.push(room);
           this.showAddRoomModal = false;
-          this.resetNewRoom(room_id);
+          this.fetchRoomData();
         }
       } catch (error) {
         console.error('Failed to add room:', error);

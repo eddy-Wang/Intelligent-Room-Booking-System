@@ -255,7 +255,7 @@ export default {
         if (data.code === '000') {
           this.rooms.push(room);
           this.showAddRoomModal = false;
-          this.resetNewRoom();
+          this.fetchRoomData();
         }
       } catch (error) {
         console.error('Failed to add room:', error);
