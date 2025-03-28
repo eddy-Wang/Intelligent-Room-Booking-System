@@ -1,9 +1,24 @@
+<!--
+BlacklistViewMobile.vue - Vue component for displaying and managing user blacklist.
+
+This component provides:
+- A table view of blacklisted users with filtering capabilities
+- Ability to release users from blacklist
+- Sorting and searching functionality
+
+Props: None
+Events: None
+Dependencies: Element Plus UI components
+-->
 <template>
   <div class="blacklist-management-mobile-container">
+    <!-- Page title section -->
     <div class="title-container">
       <h1><strong>DRBS</strong></h1>
       <h2><strong>User Blacklist</strong></h2>
     </div>
+
+    <!-- Filter controls section -->
     <div class="filter-controls">
       <el-autocomplete
           v-model="filters.user_email"
@@ -20,17 +35,23 @@
           class="mobile-filter"
       />
     </div>
+
+    <!-- User list display -->
     <div class="user-list">
+      <!-- User card for each blacklisted user -->
       <div
           v-for="(user, index) in filteredUsers"
           :key="index"
           class="user-card">
+        <!-- Card header with user info -->
         <div class="card-header">
           <div class="user-info">
             <div class="user-name">{{ user.user_name }}</div>
             <div class="user-email">{{ user.user_email }}</div>
           </div>
         </div>
+
+        <!-- Card content with ban details -->
         <div class="card-content">
           <div class="card-body">
             <div class="info-row">
@@ -46,6 +67,8 @@
               <span> {{ user.ban_end }}</span>
             </div>
           </div>
+
+          <!-- Action buttons -->
           <div class="card-actions">
             <el-button size="small" type="primary" @click="handleRelease(user)">
               Release
@@ -62,6 +85,7 @@ import {getCurrentInstance} from 'vue'
 
 export default {
   name: 'BlacklistViewMobile',
+  // Initialize backend address from global properties
   setup() {
     const instance = getCurrentInstance()
     const backendAddress = instance.appContext.config.globalProperties.$backendAddress
@@ -69,16 +93,20 @@ export default {
   },
   data() {
     return {
-      users: [],
-      filters: {
-        user_email: '',
-        user_name: '',
+      users: [], // Stores complete list of blacklisted users
+      filters: { // Current filter values
+        user_email: '', // Filter by email
+        user_name: '', // Filter by name
       },
-      loading: false,
-      error: null
+      loading: false,// Loading state flag
+      error: null  // Error message storage
     }
   },
   computed: {
+    /**
+     * Computed property that filters users based on current filter values
+     * @returns {Array} Filtered list of users
+     */
     filteredUsers() {
       return this.users.filter(user => {
         const emailMatch = user.user_email.toLowerCase().includes(this.filters.user_email.toLowerCase())
@@ -88,6 +116,12 @@ export default {
     }
   },
   methods: {
+    /**
+     * Converts GMT time string to local time string with optional day offset
+     * @param {string} gmtTimeString - GMT time string to convert
+     * @param {number} [addDays=0] - Number of days to add to the date
+     * @returns {string} Formatted local time string
+     */
     convertTime(gmtTimeString, addDays = 0) {
       if (!gmtTimeString) return ''
       const gmtDate = new Date(gmtTimeString)
@@ -95,6 +129,8 @@ export default {
         console.error('invalid date :', gmtTimeString)
         return 'invalid date'
       }
+
+      // Add days if specified
       if (addDays > 0) {
         gmtDate.setDate(gmtDate.getDate() + addDays)
       }
@@ -109,6 +145,11 @@ export default {
         hour12: false,
       }).format(gmtDate)
     },
+
+    /**
+     * Fetches the list of blacklisted users from backend
+     * @async
+     */
     async fetchBadUsers() {
       this.loading = true
       try {
@@ -132,20 +173,39 @@ export default {
         this.loading = false
       }
     },
+
+    /**
+     * Provides autocomplete suggestions for user email filter
+     * @param {string} queryString - Current search query
+     * @param {function} cb - Callback to return results
+     */
     queryUsers(queryString, cb) {
       const results = this.users
           .filter(u => u.user_email.toLowerCase().includes(queryString.toLowerCase()))
           .map(u => ({value: u.user_email}))
       cb(results)
     },
+
+    /**
+     * Provides autocomplete suggestions for user name filter
+     * @param {string} queryString - Current search query
+     * @param {function} cb - Callback to return results
+     */
     queryUserNames(queryString, cb) {
       const results = this.users
           .filter(u => u.user_name.toLowerCase().includes(queryString.toLowerCase()))
           .map(u => ({value: u.user_name}))
       cb(results)
     },
+
+    /**
+     * Handles releasing a user from the blacklist
+     * @async
+     * @param {Object} user - The user to release
+     */
     async handleRelease(user) {
       try {
+        // Confirm with user before proceeding
         const confirmResult = await this.$confirm(
             `Are you sure you want to release ${user.user_email} from the blacklist?`,
             'Confirm Release',
@@ -159,12 +219,14 @@ export default {
         })
         if (!confirmResult) return
 
+        // Show loading indicator
         const loadingInstance = this.$loading({
           lock: true,
           text: 'Releasing user...',
           background: 'rgba(0, 0, 0, 0.7)'
         })
 
+        // Call API to release user
         const response = await fetch(
             `${this.backendAddress}/reset_missed_times/${encodeURIComponent(user.user_email)}`,
             {
@@ -180,6 +242,7 @@ export default {
             message: 'User released successfully!',
             type: 'success'
           })
+          // Refresh the user list
           await this.fetchBadUsers()
         } else {
           throw new Error(result.message || 'Failed to release user')
@@ -195,6 +258,7 @@ export default {
       }
     }
   },
+  // Fetch data when component mounts
   mounted() {
     this.fetchBadUsers()
   }
@@ -202,6 +266,7 @@ export default {
 </script>
 
 <style scoped>
+/* Main container styling */
 .blacklist-management-mobile-container {
   font-family: 'Cambria', serif;
   display: flex;
@@ -213,6 +278,7 @@ export default {
   overflow: auto;
 }
 
+/* Title section styling */
 .title-container {
   margin-bottom: 0;
 }
@@ -229,6 +295,7 @@ export default {
   color: #555;
 }
 
+/* Filter controls styling */
 .filter-controls {
   display: flex;
   flex-direction: column;
@@ -244,18 +311,19 @@ export default {
   width: 100%;
 }
 
+/* User list container */
 .user-list {
   display: grid;
   gap: 1rem;
 }
-
+/* Individual user card styling */
 .user-card {
   background: white;
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-
+/* Card header styling */
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -278,7 +346,7 @@ export default {
   font-size: 1rem;
   color: #566c94;
 }
-
+/* Card content layout */
 .card-content {
   display: flex;
 }
@@ -286,7 +354,7 @@ export default {
 .card-body {
   flex: 0 0 70%;
 }
-
+/* Action buttons styling */
 .card-actions {
   margin-bottom: 30px;
   margin-right: 20px;
@@ -305,6 +373,7 @@ export default {
   border-radius: 10px;
 }
 
+/* Info row styling */
 .card-body .info-row {
   justify-content: space-between;
   font-size: 1rem;

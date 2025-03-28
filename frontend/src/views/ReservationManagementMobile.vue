@@ -1,3 +1,20 @@
+<!--
+ReservationManagementMobile.vue - Mobile-optimized component for managing room reservations.
+
+This component provides:
+- Responsive interface for managing reservations on mobile devices
+- Filtering capabilities for reservations by various criteria
+- CRUD operations for reservations (create, read, update, delete)
+- Approval/rejection workflow for pending reservations
+- Time slot management interface
+
+Props: None
+Events: None
+Dependencies:
+- Element Plus UI components
+- Vue 3 Composition API
+- Element Plus icons
+-->
 <template>
   <div class="reservation-management-mobile-container">
     <div class="title-container">
@@ -349,9 +366,10 @@ const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 const userEmail = ref("")
 
-const bookings = ref([])
-const rooms = ref([])
-const users = ref([])
+// Core data
+const bookings = ref([])    // All booking records
+const rooms = ref([])       // Available rooms
+const users = ref([])       // System users
 
 const modifyDialogVisible = ref(false)
 const currentBooking = ref({})
@@ -387,6 +405,10 @@ const rejectForm = ref({
   booking_id: null,
   reason: ''
 });
+
+/**
+ * Confirms booking rejection
+ */
 const confirmRejectBooking = async () => {
   try {
     const response = await fetch(backendAddress + `/bookings/${rejectForm.value.booking_id}`, {
@@ -414,6 +436,9 @@ const cancelForm = ref({
   booking_id: null,
   reason: ''
 });
+/**
+ * Confirms booking cancellation
+ */
 const confirmCancelBooking = async () => {
   try {
     const response = await fetch(backendAddress + `/bookings/${cancelForm.value.booking_id}`, {
@@ -444,17 +469,29 @@ const limitUsageForm = ref({
       purpose: ''
     })
 ;
+/**
+ * Opens time limit dialog
+ */
 const openLimitUsageDialog = () => {
   limitUsageDialogVisible.value = true;
 };
-
+/**
+ * Handles closing the Limit Usage Time dialog
+ */
 const handleCloseLimitUsageDialog = () => {
   limitUsageDialogVisible.value = false;
 };
-
+/**
+ * Disables dates before today in date picker
+ * @param {Date} time - Date to check
+ * @returns {boolean} True if date should be disabled
+ */
 const disabledDate = (time) => {
   return time.getTime() < Date.now() - 8.64e7;
 }
+/**
+ * Submits time limit restrictions
+ */
 const submitLimitUsage = async () => {
   try {
     limitUsageForm.value.user_email = userEmail.value
@@ -484,21 +521,34 @@ const submitLimitUsage = async () => {
     ElMessage.error('Failed to limit usage time');
   }
 };
+/**
+ * Gets unique dates from bookings for filtering
+ * @returns {Array} Array of unique date strings
+ */
 const uniqueDates = computed(() => {
   return [...new Set(bookings.value.map(b => b.date))]
 })
+/**
+ * Sorts dates chronologically
+ * @returns {Array} Sorted array of date strings
+ */
 const sortedDates = computed(() => {
   return uniqueDates.value.sort((a, b) => new Date(a) - new Date(b))
 })
-
+/**
+ * Filters and sorts bookings based on current filter state
+ * @returns {Array} Filtered and sorted booking records
+ */
 const filteredBookings = computed(() => {
   if (!Array.isArray(bookings.value)) return []
   const result = bookings.value.filter(booking => {
     return Object.keys(filters.value).every(key => {
       const filterValue = filters.value[key]
+      // Skip if no filter value
       if (!filterValue || (Array.isArray(filterValue) && filterValue.length === 0) || (typeof filterValue === 'string' && filterValue.trim() === '')) {
         return true
       }
+      // Handle user input search
       if (key === 'userInput') {
         const user = users.value.find(u => u.email === booking.user_email)
         if (!user) return false
@@ -508,6 +558,7 @@ const filteredBookings = computed(() => {
             user.permission.toLowerCase().includes(filterValue.toLowerCase())
         )
       }
+      // Handle time slot filtering
       if (key === 'time') {
         const selectedTimeSlots = filterValue.map(time =>
             Object.keys(reverseTimeSlotMap).find(i => reverseTimeSlotMap[i] === time)
@@ -527,6 +578,7 @@ const filteredBookings = computed(() => {
       return filterValue.includes(booking[key])
     })
   })
+  // Sort by date (newest first) and then by latest time slot
   return result.sort((a, b) => {
     const dateCompare = new Date(b.date) - new Date(a.date)
     if (dateCompare !== 0) return dateCompare
@@ -535,7 +587,11 @@ const filteredBookings = computed(() => {
     return bMaxTime - aMaxTime
   })
 })
-
+/**
+ * Searches users for autocomplete
+ * @param {string} queryString - Search query
+ * @param {function} cb - Callback with results
+ */
 const queryUsers = (queryString, cb) => {
   const trimmedQuery = queryString.trim().toLowerCase()
   if (!trimmedQuery) {
@@ -558,14 +614,26 @@ const queryUsers = (queryString, cb) => {
   }))
   cb(results)
 }
+/**
+ * Handles user selection from autocomplete
+ * @param {Object} selected - Selected user
+ */
 const handleUserSelect = (selected) => {
   filters.value.userInput = selected.value.split(' (')[0]
 }
-
+/**
+ * Gets room name by ID
+ * @param {number} roomId - Room ID
+ * @returns {string} Room name
+ */
 const getRoomName = (roomId) => {
   return rooms.value.find(r => r.room_id === roomId)?.name || 'Unknown Room'
 }
-
+/**
+ * Maps status to processing state
+ * @param {string} status - Booking status
+ * @returns {string} Processing state
+ */
 const getProcessingState = (status) => {
   const stateMap = {
     'Pending': 'unprocessed',
@@ -576,19 +644,31 @@ const getProcessingState = (status) => {
   }
   return stateMap[status] || 'unknown'
 }
-
+/**
+ * Formats date string to localized format
+ * @param {string} dateString - Date string to format
+ * @returns {string} Formatted date
+ */
 const formatDate = (dateString) => {
   const date = new Date(dateString)
   return date.toLocaleDateString('en-CA')
 }
-
+/**
+ * Converts time string to human-readable slots
+ * @param {string} timeStr - Comma-separated time indexes
+ * @returns {string} Formatted time slots
+ */
 const convertTimeStrToTimeSlots = (timeStr) => {
   return timeStr.split(',')
       .map(Number)
       .map(index => reverseTimeSlotMap[index])
       .join('  ')
 }
-
+/**
+ * Gets CSS class for booking status
+ * @param {string} status - Booking status
+ * @returns {string} CSS class name
+ */
 const statusClass = (status) => {
   const classMap = {
     'Pending': 'status-pending',
@@ -600,6 +680,11 @@ const statusClass = (status) => {
   }
   return classMap[status] || 'status-default'
 }
+/**
+ * Gets Element Plus tag type for status
+ * @param {string} status - Booking status
+ * @returns {string} Tag type
+ */
 const statusTagType = (status) => {
   const typeMap = {
     'Pending': 'warning',
@@ -610,11 +695,18 @@ const statusTagType = (status) => {
   }
   return typeMap[status] || 'info'
 }
+/**
+ * Gets user display name with permission
+ * @param {string} email - User email
+ * @returns {string} Formatted user display
+ */
 const getUserDisplay = (email) => {
   const user = users.value.find(u => u.email === email)
   return user ? `${user.name} (${user.permission})` : 'Unknown User'
 }
-
+/**
+ * Fetches all bookings from backend
+ */
 const fetchBookings = async () => {
   try {
     const response = await fetch(backendAddress + '/bookings')
@@ -625,6 +717,9 @@ const fetchBookings = async () => {
     ElMessage.error('Failed to load bookings')
   }
 }
+/**
+ * Fetches room data from backend
+ */
 const fetchRooms = async () => {
   try {
     const response = await fetch(backendAddress + '/rooms_id_and_name')
@@ -635,6 +730,9 @@ const fetchRooms = async () => {
     ElMessage.error('Failed to load rooms')
   }
 }
+/**
+ * Fetches user data from backend
+ */
 const fetchUsers = async () => {
   try {
     const response = await fetch(backendAddress + '/users')
@@ -645,7 +743,11 @@ const fetchUsers = async () => {
     ElMessage.error('Failed to load users')
   }
 }
-
+/**
+ * Opens modify dialog for a booking
+ * @param {number} booking_id - Booking ID
+ * @param {Object} booking - Booking data
+ */
 const modifyBooking = async (booking_id, newbooking) => {
   const booking = newbooking
   if (booking) {
@@ -657,6 +759,10 @@ const modifyBooking = async (booking_id, newbooking) => {
     modifyDialogVisible.value = true
   }
 }
+
+/**
+ * Saves modified booking
+ */
 const saveModifiedBooking = async () => {
   try {
     const payload = {
@@ -676,6 +782,10 @@ const saveModifiedBooking = async () => {
     ElMessage.error('Update failed')
   }
 }
+/**
+ * Initiates booking cancellation
+ * @param {number} booking_id - Booking ID
+ */
 const cancelBooking = async (booking_id) => {
   cancelForm.value = {
     booking_id: booking_id,
@@ -683,6 +793,10 @@ const cancelBooking = async (booking_id) => {
   };
   cancelDialogVisible.value = true;
 };
+/**
+ * Approves a pending booking
+ * @param {number} booking_id - Booking ID
+ */
 const approveBooking = async (booking_id) => {
   try {
     const response = await fetch(backendAddress + `/bookings/${booking_id}`, {
@@ -697,6 +811,10 @@ const approveBooking = async (booking_id) => {
     ElMessage.error('Failed to approve booking')
   }
 }
+/**
+ * Initiates booking rejection
+ * @param {number} booking_id - Booking ID
+ */
 const rejectBooking = async (booking_id) => {
   rejectForm.value = {
     booking_id: booking_id,
@@ -704,6 +822,10 @@ const rejectBooking = async (booking_id) => {
   };
   rejectDialogVisible.value = true;
 };
+/**
+ * Deletes a completed booking
+ * @param {number} booking_id - Booking ID
+ */
 const deleteBooking = async (booking_id) => {
   try {
     const response = await fetch(backendAddress + `/bookings/${booking_id}`, {
@@ -718,6 +840,8 @@ const deleteBooking = async (booking_id) => {
 }
 
 let scrollPosition = 0
+
+// Watch for modify dialog visibility changes to handle scroll position
 watch(modifyDialogVisible, (newVal) => {
   if (newVal) {
     scrollPosition = window.pageYOffset || document.documentElement.scrollTop
@@ -733,14 +857,14 @@ watch(modifyDialogVisible, (newVal) => {
     window.scrollTo(0, scrollPosition)
   }
 })
-
+// Clean up scroll position on unmount
 onBeforeUnmount(() => {
   document.body.style.position = ''
   document.body.style.top = ''
   document.body.style.left = ''
   document.body.style.right = ''
 })
-
+// Initialize component
 onMounted(async () => {
   let me = await instance.appContext.config.globalProperties.$me()
   let user = me.data
@@ -855,7 +979,7 @@ onMounted(async () => {
   font-size: 1rem;
   font-weight: bold;
 }
-
+/* Status-specific tag colors */
 .booking-status-tag[data-status="Confirmed"] {
   background-color: #5ccb6a !important;
   border-color: #5ccb6a !important;

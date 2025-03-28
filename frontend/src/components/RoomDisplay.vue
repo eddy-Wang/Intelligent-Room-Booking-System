@@ -1,6 +1,31 @@
+<!--
+RoomDisplay.vue - Interactive room display component with horizontal scrolling and selection.
+
+Features:
+- Horizontal scrolling room cards with mouse interaction
+- Detailed room information panel
+- Equipment icons and status display
+- Warning notifications for reported issues
+- Responsive design
+- Smooth animations and transitions
+
+Props:
+- roomIds: Array of room IDs to display (required)
+- rooms: Array of all room objects (required)
+
+Events:
+- roomSelected: Emitted when a room is selected
+- room-unselected: Emitted when room selection is cleared
+
+Dependencies:
+- None (pure Vue implementation)
+-->
 <template>
+  <!-- Main container with mouse move tracking -->
   <div class="room-display" @mousemove="handleMouseMove" @mouseleave="stopAutoScroll">
+    <!-- Scrollable rooms container -->
     <div class="rooms-container" :style="{ transform: `translateX(${scrollPosition}%)` }">
+      <!-- Room cards or placeholder -->
       <template v-if="filteredRooms.length > 0">
         <div
             v-for="room in filteredRooms"
@@ -20,17 +45,20 @@
       </div>
     </div>
 
+    <!-- Room details panel (slide transition) -->
     <transition name="slide">
       <div
           v-if="selectedRoom"
           class="room-info"
           @click.stop
       >
+        <!-- Room header with close button -->
         <div class="room-header">
           <h2 class="room-title">{{ selectedRoom.name }}</h2>
           <button class="close-btn" @click="resetSelection">×</button>
         </div>
 
+        <!-- Room details section -->
         <div class="room-details">
           <div class="detail-item">
             <span class="label">Capacity: </span>
@@ -57,6 +85,7 @@
           </div>
         </div>
 
+        <!-- Warning section (if reports exist) -->
         <div
             v-if="selectedRoom.report && selectedRoom.report.length > 0"
             class="warning-container"
@@ -86,6 +115,11 @@ const props = defineProps({
     default: () => []
   }
 })
+/**
+ * Maps equipment names to emoji icons
+ * @param {string} equipment - Equipment name
+ * @returns {string} Emoji icon
+ */
 const getEquipmentIcon = (equipment) => {
   const icons = {
     'Power Outlets': '🔌',
@@ -97,6 +131,11 @@ const getEquipmentIcon = (equipment) => {
   };
   return icons[equipment] || '✨';
 }
+
+/**
+ * Computed property for parsed equipment list
+ * @returns {Array} Parsed equipment array
+ */
 const parsedEquipment = computed(() => {
   if (!selectedRoom.value || !selectedRoom.value.equipment) {
     return [];
@@ -113,20 +152,33 @@ const accessMap = ref({
   1: "Staff Only",
   2: "Selected Staff"
 });
+/**
+ * Computed property for filtered rooms based on roomIds prop
+ * @returns {Array} Filtered rooms array
+ */
 const filteredRooms = computed(() => {
   return props.rooms.filter(room => props.roomIds.includes(room.id))
 })
+
+/**
+ * Computed property to determine if scrolling should be enabled
+ * @returns {boolean} True if there are more than 3 rooms
+ */
 const shouldScroll = computed(() => {
   return filteredRooms.value.length > 3
 })
 
-const scrollPosition = ref(0)
-const isScrolling = ref(false)
-const scrollSpeed = ref(0)
-const selectedRoom = ref(null)
+// Reactive data properties
+const scrollPosition = ref(0) // Current scroll position in percentage
+const isScrolling = ref(false) // Auto-scroll active flag
+const scrollSpeed = ref(0) // Current scroll speed
+const selectedRoom = ref(null) // Currently selected room
 
 const emit = defineEmits(['roomSelected'])
-
+/**
+ * Handles room card click
+ * @param {Object} room - Clicked room object
+ */
 const handleRoomClick = (room) => {
   const index = filteredRooms.value.findIndex(r => r.id === room.id)
 
@@ -137,6 +189,10 @@ const handleRoomClick = (room) => {
   emit('roomSelected', room)
 }
 
+/**
+ * Handles mouse movement for auto-scrolling
+ * @param {MouseEvent} e - Mouse event
+ */
 const handleMouseMove = (e) => {
   if (selectedRoom.value || !shouldScroll.value) return;
 
@@ -159,7 +215,9 @@ const handleMouseMove = (e) => {
     isScrolling.value = false;
   }
 };
-
+/**
+ * Updates scroll position recursively
+ */
 const updateScroll = () => {
   if (!isScrolling.value) return
 
@@ -174,17 +232,23 @@ const updateScroll = () => {
     requestAnimationFrame(updateScroll)
   }
 }
+/**
+ * Resets room selection and scroll position
+ */
 const resetSelection = () => {
   selectedRoom.value = null
   scrollPosition.value = 0
   emit('room-unselected')
 }
-
+/**
+ * Stops auto-scrolling when mouse leaves
+ */
 const stopAutoScroll = () => {
   if (selectedRoom.value) return
   isScrolling.value = false
   scrollPosition.value = 0
 }
+// Watch for changes in filtered rooms and reset selection
 watch(filteredRooms, (newValue, oldValue) => {
   if (newValue !== oldValue) {
     resetSelection()
@@ -193,6 +257,7 @@ watch(filteredRooms, (newValue, oldValue) => {
 </script>
 
 <style scoped>
+/* Main container styling */
 .room-info {
   position: absolute;
   left: 33.5%;
@@ -207,7 +272,7 @@ watch(filteredRooms, (newValue, oldValue) => {
   flex-direction: column;
   overflow: hidden;
 }
-
+/* Scrollable rooms container */
 .room-header {
   display: flex;
   justify-content: space-between;
@@ -370,7 +435,7 @@ watch(filteredRooms, (newValue, oldValue) => {
   font-weight: 500;
   background: #d5ddff;
 }
-
+/* Placeholder for empty state */
 .placeholder {
   width: 100%;
   height: 100%;

@@ -1,6 +1,25 @@
+<!--
+AdminIndexMobile.vue - Mobile admin dashboard with bottom navigation bar.
+
+Features:
+- Bottom navigation for mobile devices
+- Dynamic component loading
+- Back navigation functionality
+- Responsive design optimized for mobile
+
+Props: None
+Events: None
+Dependencies:
+- Vue Router for navigation
+- @mdi/js for Material Design icons
+- Custom SvgIcon component
+- Mobile view components for each section
+-->
 <template>
   <div class="index-container">
+    <!-- Dynamic component area -->
     <component :is="activeComponent"/>
+    <!-- Bottom navigation bar -->
     <div class="nav-container">
       <nav class="bottom-nav">
         <div
@@ -43,11 +62,19 @@ export default {
     };
   },
   computed: {
+    /**
+     * Returns the currently active component based on navigation selection
+     * @returns {Component} The active component
+     */
     activeComponent() {
       return this.navItems[this.activeNav].component;
     }
   },
   methods: {
+    /**
+     * Sets the active navigation item or handles back navigation
+     * @param {number} index - Index of the navigation item
+     */
     setActiveNav(index) {
       if (index === 0) {
         this.$router.back();

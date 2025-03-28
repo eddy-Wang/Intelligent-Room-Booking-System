@@ -1,9 +1,24 @@
+<!--
+MyReservationMobile.vue - Mobile-optimized reservation management component.
+
+This component provides:
+- Mobile-friendly view of user reservations with filtering capabilities
+- Status-based styling for different reservation states
+- Check-in and cancellation functionality
+- Responsive card-based layout optimized for mobile devices
+
+Props: None
+Events: None
+Dependencies: Element Plus UI components
+-->
 <template>
   <div class="reservation-container">
+    <!-- Title section -->
     <div class="title-container">
       <h1><strong>DRBS</strong></h1>
       <h2><strong>My Reservation</strong></h2>
     </div>
+    <!-- Filter controls section -->
     <div class="filter-container">
       <div class="filter-row">
         <el-select v-model="filters.date" multiple clearable placeholder="Date">
@@ -22,14 +37,17 @@
         </el-select>
       </div>
     </div>
+    <!-- Reservation list -->
     <div class="content-wrapper">
       <div class="reservation-list">
+        <!-- Reservation card for each booking -->
         <el-card
             v-for="(reservation, index) in filteredReservations"
             :key="index"
             :class="['reservation-item', statusClass(reservation.status)]"
             shadow="hover"
         >
+          <!-- Card header with room info and status -->
           <div class="card-header">
             <div class="room-info">
               <div class="room-name">{{ reservation.name }}</div>
@@ -45,6 +63,7 @@
               </el-tag>
             </div>
           </div>
+          <!-- Reservation details -->
           <div class="reservation-content">
             <div class="reservation-info">
               <div class="reservation-time">
@@ -61,6 +80,7 @@
               </div>
             </div>
           </div>
+          <!-- Action buttons for confirmed reservations -->
           <div class="reservation-actions" v-if="reservation.status.toString() === 'Confirmed'">
             <button @click="checkIn(index)" class="action-button">Check In</button>
             <button @click="cancelReservation(index)" class="action-button">Cancel</button>
@@ -82,14 +102,15 @@ export default {
     ElTag
   },
   setup() {
+    // Initialize backend address from global properties
     const instance = getCurrentInstance();
     const backendAddress = instance.appContext.config.globalProperties.$backendAddress;
     return {backendAddress};
   },
   data() {
     return {
-      user: [],
-      reservations: [],
+      user: [],// Current user data
+      reservations: [],// List of user reservations
       reverseTimeSlotMap: {
         0: "08:00-08:45",
         1: "08:55-09:45",
@@ -103,7 +124,7 @@ export default {
         9: "16:55-17:40",
         10: "19:00-19:45",
         11: "19:55-20:40"
-      },
+      },// Mapping of time slot indexes to human-readable time ranges
       timeSlots: [
         "08:00-08:45",
         "08:55-09:45",
@@ -117,33 +138,51 @@ export default {
         "16:55-17:40",
         "19:00-19:45",
         "19:55-20:40"
-      ],
+      ],// Array of all possible time slots for filtering
       filters: {
         date: [],
         time: [],
         name: [],
         status: []
-      }
+      }// Current filter values
     };
   },
   computed: {
+    /**
+     * Computed property for unique dates from reservations
+     * @returns {Array} List of unique dates
+     */
     uniqueDates() {
       return [...new Set(this.reservations.map(item => item.date.split("00:00:00")[0]))];
     },
+    /**
+     * Computed property for unique room names from reservations
+     * @returns {Array} List of unique room names
+     */
     uniqueRooms() {
       return [...new Set(this.reservations.map(item => item.name))];
     },
+    /**
+     * Computed property for unique status values from reservations
+     * @returns {Array} List of unique status values
+     */
     uniqueStatusValues() {
       return [...new Set(this.reservations.map(item => item.status))];
     },
+    /**
+     * Computed property for filtered reservations based on current filters
+     * @returns {Array} Filtered list of reservations
+     */
     filteredReservations() {
       return this.reservations.filter(reservation => {
+        // Filter by date if any dates are selected
         if (this.filters.date && this.filters.date.length > 0) {
           const resDate = reservation.date.split("00:00:00")[0];
           if (!this.filters.date.includes(resDate)) {
             return false;
           }
         }
+        // Filter by time if any time slots are selected
         if (this.filters.time && this.filters.time.length > 0) {
           const resTimeArr = reservation.time
               .split(",")
@@ -154,11 +193,13 @@ export default {
             return false;
           }
         }
+        // Filter by room name if any names are selected
         if (this.filters.name && this.filters.name.length > 0) {
           if (!this.filters.name.includes(reservation.name)) {
             return false;
           }
         }
+        // Filter by status if any statuses are selected
         if (this.filters.status && this.filters.status.length > 0) {
           if (!this.filters.status.includes(reservation.status)) {
             return false;
@@ -169,6 +210,11 @@ export default {
     },
   },
   methods: {
+    /**
+     * Returns CSS class based on reservation status
+     * @param {string} status - Reservation status
+     * @returns {string} CSS class name
+     */
     statusClass(status) {
       const classMap = {
         Pending: "status-pending",
@@ -180,6 +226,11 @@ export default {
       };
       return classMap[status] || "status-default";
     },
+    /**
+     * Returns Element Plus tag type based on reservation status
+     * @param {string} status - Reservation status
+     * @returns {string} Tag type
+     */
     statusTagType(status) {
       const typeMap = {
         Pending: "warning",
@@ -191,6 +242,10 @@ export default {
       };
       return typeMap[status] || "info";
     },
+    /**
+     * Fetches user reservations from backend
+     * @async
+     */
     async fetchReservations() {
       try {
         const response = await fetch(this.backendAddress + "/get-reservations", {
@@ -202,6 +257,7 @@ export default {
         });
         const data = await response.json();
         if (data.code === "000") {
+          // Sort reservations by date (newest first)
           this.reservations = data.data.sort((a, b) => new Date(b.date) - new Date(a.date));
         } else {
           ElMessage.error(data.message);
@@ -210,6 +266,11 @@ export default {
         console.error("Error fetching reservations:", error);
       }
     },
+    /**
+     * Cancels a reservation
+     * @async
+     * @param {number} index - Index of reservation in filtered array
+     */
     async cancelReservation(index) {
       const bookingId = this.reservations[index].booking_id;
       try {
@@ -231,6 +292,11 @@ export default {
         console.error("Error cancelling reservation:", error);
       }
     },
+    /**
+     * Handles check-in for a reservation
+     * @async
+     * @param {number} index - Index of reservation in filtered array
+     */
     async checkIn(index) {
       const bookingId = this.reservations[index].booking_id;
       try {
@@ -248,6 +314,11 @@ export default {
         console.error("Error:", error);
       }
     },
+    /**
+     * Converts time slot string to human-readable format
+     * @param {string} timeStr - Comma-separated time slot indexes
+     * @returns {string} Formatted time ranges
+     */
     convertTimeStrToTimeSlots(timeStr) {
       return timeStr
           .split(",")
@@ -256,6 +327,10 @@ export default {
           .join(" ");
     }
   },
+  /**
+ * Vue lifecycle hook - called after the component is mounted to the DOM
+ * @async
+ */
   async mounted() {
     const instance = getCurrentInstance();
     if (instance) {
@@ -268,12 +343,13 @@ export default {
 </script>
 
 <style scoped>
+/* Base styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-
+/* Main container styling */
 .reservation-container {
   font-family: "Cambria", serif;
   display: flex;
@@ -285,6 +361,7 @@ export default {
   padding: 20px;
 }
 
+/* Title section styling */
 .title-container {
   margin-bottom: 0;
 }
@@ -300,7 +377,7 @@ export default {
   font-size: 2.25rem;
   color: #555;
 }
-
+/* Filter controls styling */
 .filter-container {
   margin: 20px 0;
   display: flex;
@@ -316,19 +393,19 @@ export default {
   display: flex;
   gap: 10px;
 }
-
+/* Main content layout */
 .content-wrapper {
   display: flex;
   flex-direction: column;
   margin-bottom: 50px;
 }
-
+/* Reservation list styling */
 .reservation-list {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-
+/* Individual reservation card styling */
 .reservation-item {
   background-color: #ffffff;
   border-radius: 12px;
@@ -336,7 +413,7 @@ export default {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   position: relative;
 }
-
+/* Status-based border colors */
 .status-pending {
   border-left: 4px solid #b58d54;
 }
@@ -360,7 +437,7 @@ export default {
 .status-banned {
   border-left: 4px solid #737373;
 }
-
+/* Card header styling */
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -383,6 +460,7 @@ export default {
   word-break: break-word;
 }
 
+/* Status tag styling */
 .booking-status {
   margin-top: 0;
   display: flex;
@@ -395,7 +473,7 @@ export default {
   font-size: 1rem;
   font-weight: bold;
 }
-
+/* Status-specific tag colors */
 .booking-status-tag[data-status="Confirmed"] {
   background-color: #5ccb6a !important;
   border-color: #5ccb6a !important;
@@ -431,7 +509,7 @@ export default {
   border-color: #737373 !important;
   color: #fff !important;
 }
-
+/* Reservation details styling */
 .reservation-content {
   color: #545454;
   display: flex;
@@ -448,7 +526,7 @@ export default {
 .reservation-purpose {
   margin-top: 0.1rem;
 }
-
+/* Action buttons styling */
 .reservation-actions {
   margin: 8px 10px auto 10px;
   display: flex;
@@ -465,6 +543,7 @@ export default {
   border-radius: 10px;
 }
 
+/* Override Element Plus card padding */
 :deep(.el-card__body) {
   padding: 0 !important;
 }

@@ -1,5 +1,20 @@
+<!--
+RoomIssueManagement.vue - Component for managing room repair reports.
+
+This component provides:
+- Interface for viewing and managing room repair reports
+- Filtering capabilities for reports by room, user, and status
+- Functionality to approve, reject, complete, and delete reports
+- Export to Excel with additional analysis of frequent issues
+- Form for submitting new repair reports
+
+Props: None
+Events: None
+Dependencies: Element Plus UI components, xlsx library for Excel export
+-->
 <template>
   <div class="room-repair-handling">
+    <!-- Header section with title and action buttons -->
       <div class="header">
           <h2 class="page-title">Room Repair Handling</h2>
           <div class="button-group">
@@ -7,6 +22,7 @@
               <el-button class="export-button" type="success" @click="exportToExcel">Export to Excel</el-button>
           </div>
       </div>
+    <!-- Dialog for reporting new issues -->
     <el-dialog v-model="dialogVisible" title="Report New Issue" width="30%">
       <el-form :model="newReportForm" label-width="120px">
         <el-form-item label="Room Name">
@@ -35,9 +51,10 @@
         <el-button type="primary" @click="submitNewReport">Submit</el-button>
       </template>
     </el-dialog>
+    <!-- Main card containing reports table -->
     <el-card class="custom-card">
       <el-table :data="filteredReports" border stripe style="width: 100%" class="el-table">
-        <!-- Room Name Column -->
+        <!-- Room Name Column with filter -->
         <el-table-column class="el-table-column" label="Room Name">
           <template #header>
             <div class="filter-header">
@@ -153,6 +170,11 @@ import {ref, computed, onMounted, getCurrentInstance} from 'vue';
 import {ElTable, ElTableColumn, ElSelect, ElOption, ElCard, ElButton, ElMessage, ElAutocomplete} from 'element-plus';
 import 'element-plus/dist/index.css';
 import * as XLSX from 'xlsx';
+/**
+ * Converts timestamp to formatted time string (China timezone)
+ * @param {number} timestamp - Unix timestamp in milliseconds
+ * @returns {string} Formatted time string
+ */
 const timestampToTime = (timestamp) => {
     const timestampInSeconds = timestamp / 1000;
     const time = new Date(timestampInSeconds * 1000);
@@ -162,8 +184,11 @@ const timestampToTime = (timestamp) => {
 
     return chinaTime.toISOString().replace('T', ' ').slice(0, 19);
 };
+/**
+ * Exports reports data to Excel with additional analysis
+ */
 const exportToExcel = () => {
-    // Original export data
+    // Prepare main reports data for export
   const roomNameMap = {};
     rooms.value.forEach(room => {
         roomNameMap[room.room_id] = room.name;
@@ -206,34 +231,39 @@ const exportToExcel = () => {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Repair Reports");
     XLSX.utils.book_append_sheet(wb, frequentIssuesWs, "Frequent Issues Rooms");
-
+    // Generate filename with current date
     const dateStr = new Date().toISOString().slice(0, 10);
     const fileName = `Repair_Reports_${dateStr}.xlsx`;
-
+    // Trigger download
     XLSX.writeFile(wb, fileName);
 };
+// Initialize backend address
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 
-// Define reactive data
-const reports = ref([]);
-const rooms = ref([]);
-const users = ref([]);
-const filters = ref({
-  room_id: [],
-  user_email: '',
-  status: [],
+// Reactive data
+const reports = ref([]);          // List of all repair reports
+const rooms = ref([]);            // List of all rooms
+const users = ref([]);            // List of all users
+const filters = ref({             // Current filter values
+  room_id: [],                    // Selected room IDs
+  user_email: '',                 // Filter by user email
+  status: [],                     // Selected statuses
 });
-const dialogVisible = ref(false);
-const newReportForm = ref({
-  room_id: '',
-  user_email: '',
-  reportInfo: '',
+const dialogVisible = ref(false); // Controls new report dialog visibility
+const newReportForm = ref({       // Form data for new reports
+  room_id: '',                    // Selected room ID
+  user_email: '',                 // Reporter email
+  reportInfo: '',                 // Report description
 });
+
 // Status options
 const statusOptions = ['Unreviewed', 'Approved', 'Rejected', 'Completed'];
 
-// Fetch rooms from backend API
+/**
+ * Fetches room list from backend
+ * @async
+ */
 const fetchRooms = async () => {
   try {
     const response = await fetch(backendAddress+'/rooms_id_and_name');
@@ -245,7 +275,10 @@ const fetchRooms = async () => {
   }
 };
 
-// Fetch users from backend API
+/**
+ * Fetches user list from backend
+ * @async
+ */
 const fetchUsers = async () => {
   try {
     const response = await fetch(backendAddress+'/users');
@@ -257,7 +290,10 @@ const fetchUsers = async () => {
   }
 };
 
-// Fetch reports from backend API
+/**
+ * Fetches repair reports from backend
+ * @async
+ */
 const fetchReports = async () => {
   try {
     const response = await fetch(backendAddress+'/room_issue_reports');
@@ -271,19 +307,29 @@ const fetchReports = async () => {
   }
 };
 
-
-// Get room name by room_id
+/**
+ * Gets room name by room ID
+ * @param {string} room_id - Room ID to look up
+ * @returns {string} Room name or 'Unknown Room'
+ */
 const getRoomName = (room_id) => {
   const room = rooms.value.find((r) => r.room_id === room_id);
   return room ? room.name : 'Unknown Room';
 };
 
-// Handle user selection in autocomplete
+/**
+ * Handles user selection in autocomplete
+ * @param {Object} selected - Selected user object
+ */
 const handleUserSelect = (selected) => {
   filters.value.user_email = selected.value.split(' ')[0];
 };
 
-// Query users for autocomplete
+/**
+ * Provides autocomplete suggestions for user email filter
+ * @param {string} queryString - Current search query
+ * @param {function} cb - Callback to return results
+ */
 const queryUsers = (queryString, cb) => {
   const results = users.value
       .filter((user) => user.email.toLowerCase().includes(queryString.toLowerCase()))
@@ -291,7 +337,10 @@ const queryUsers = (queryString, cb) => {
   cb(results);
 };
 
-// Filtered reports based on filters
+/**
+ * Computed property for filtered reports based on current filters
+ * @returns {Array} Filtered list of reports
+ */
 const filteredReports = computed(() => {
   return reports.value.filter((report) => {
     return (
@@ -302,7 +351,11 @@ const filteredReports = computed(() => {
   });
 });
 
-// Approve report
+/**
+ * Approves a repair report
+ * @async
+ * @param {Object} report - Report to approve
+ */
 const approveReport = async (report) => {
   try {
     const response = await fetch(backendAddress+`/room_issue_reports/${report.timestamp}`, {
@@ -319,7 +372,11 @@ const approveReport = async (report) => {
   }
 };
 
-// Reject report
+/**
+ * Rejects a repair report
+ * @async
+ * @param {Object} report - Report to reject
+ */
 const rejectReport = async (report) => {
   try {
     const response = await fetch(backendAddress+`/room_issue_reports/${report.timestamp}`, {
@@ -336,7 +393,12 @@ const rejectReport = async (report) => {
   }
 };
 
-// Complete report
+
+/**
+ * Marks a report as completed
+ * @async
+ * @param {Object} report - Report to complete
+ */
 const completeReport = async (report) => {
   try {
     const response = await fetch(backendAddress+`/room_issue_reports/${report.timestamp}`, {
@@ -353,7 +415,11 @@ const completeReport = async (report) => {
   }
 };
 
-// Delete report
+/**
+ * Deletes a report
+ * @async
+ * @param {Object} report - Report to delete
+ */
 const deleteReport = async (report) => {
   try {
     const response = await fetch(backendAddress+`/room_issue_reports/${report.timestamp}`, {
@@ -368,7 +434,10 @@ const deleteReport = async (report) => {
   }
 };
 
-// Submit new report
+/**
+ * Submits a new repair report
+ * @async
+ */
 const submitNewReport = async () => {
   try {
     const response = await fetch(backendAddress+'/room_issue_reports', {
@@ -415,11 +484,12 @@ onMounted(() => {
   margin-bottom: 20px;
   padding: 10px;
 }
+/* Button group styling */
 .button-group {
     display: flex;
     gap: 30px;
 }
-
+/* Export button styling */
 .export-button {
     width: 100%;
     background-color: #28a745;
@@ -429,7 +499,7 @@ onMounted(() => {
 .export-button:hover {
     background-color: #218838;
 }
-
+/* New report button styling */
 .new-button {
     min-width: 10%;
     height: 50%;
@@ -443,7 +513,7 @@ onMounted(() => {
     padding: 10px;
     margin: 0;
 }
-
+/* Specific button overrides */
 .el-button.el-button--success.export-button{
   width: 100%;
   margin-top: 10%;
@@ -455,13 +525,14 @@ onMounted(() => {
   margin-top: 10%;
   height: 43px;
 }
-
+/* Table styling */
 .el-table {
   height: 700px;
   width: 100%;
   overflow: auto;
 }
 
+/* Main container styling */
 .room-repair-handling {
   font-family: 'Cambria', serif;
   width: 100%;
@@ -470,6 +541,7 @@ onMounted(() => {
   background-color: #f8f9fa;
 }
 
+/* Card styling */
 .custom-card {
   width: 100%;
   padding: 20px;
@@ -478,6 +550,7 @@ onMounted(() => {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Filter header styling */
 .filter-header {
   height: 100%;
   width: 100%;
@@ -485,11 +558,11 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
 }
-
+/* Action buttons styling */
 .action-buttons {
   align-items: flex-start;
 }
-
+/* Button styling */
 .el-button {
   width: 40%;
   padding: 8px 16px;

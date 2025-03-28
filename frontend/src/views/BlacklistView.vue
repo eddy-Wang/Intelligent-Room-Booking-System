@@ -1,11 +1,27 @@
+<!--
+BlacklistView.vue - Vue component for displaying and managing user blacklist.
+
+This component provides:
+- A table view of blacklisted users with filtering capabilities
+- Ability to release users from blacklist
+- Sorting and searching functionality
+
+Props: None
+Events: None
+Dependencies: Element Plus UI components
+-->
 <template>
   <div class="room-repair-handling">
+    <!-- Page header section -->
     <div class="header">
       <h2 class="page-title">User Blacklist</h2>
     </div>
 
+    <!-- Main card containing the user table -->
     <el-card class="custom-card">
+      <!-- User table with filtering and sorting -->
       <el-table :data="filteredUsers" border stripe style="width: 100%" class="el-table">
+        <!-- Email column with autocomplete filter -->
         <el-table-column class="el-table-column" label="User Email">
           <template #header>
             <div class="filter-header">
@@ -22,6 +38,8 @@
             {{ row.user_email }}
           </template>
         </el-table-column>
+
+        <!-- Name column with autocomplete filter -->
         <el-table-column class="el-table-column" label="User Name">
           <template #header>
             <div class="filter-header">
@@ -38,10 +56,13 @@
             {{ row.user_name }}
           </template>
         </el-table-column>
+
+        <!-- Read-only columns for missed time and ban dates -->
         <el-table-column class="el-table-column" label="Missed Time" prop="missed_time" sortable>
         </el-table-column>
         <el-table-column class="el-table-column" label="Ban Start Date" prop="ban_start" sortable/>
         <el-table-column class="el-table-column" label="Ban End Date" prop="ban_end" sortable/>
+        <!-- Action column with release button -->
         <el-table-column class="el-table-column" label="Actions" width="180">
           <template #default="{ row }">
             <div class="action-buttons">
@@ -64,6 +85,7 @@ import {getCurrentInstance} from 'vue'
 
 export default {
   name: 'BlacklistView',
+  // Initialize backend address from global properties
   setup() {
     const instance = getCurrentInstance()
     const backendAddress = instance.appContext.config.globalProperties.$backendAddress
@@ -71,16 +93,20 @@ export default {
   },
   data() {
     return {
-      users: [],
-      filters: {
-        user_email: '',
-        user_name: '',
+      users: [],// Stores the complete list of blacklisted users
+      filters: {// Current filter values
+        user_email: '',// Filter by email
+        user_name: '',// Filter by name
       },
-      loading: false,
-      error: null
+      loading: false, // Loading state flag
+      error: null // Error message storage
     }
   },
   computed: {
+    /**
+     * Computed property that filters users based on current filter values
+     * @returns {Array} Filtered list of users
+     */
     filteredUsers() {
       return this.users.filter(user => {
         const emailMatch = user.user_email.toLowerCase().includes(this.filters.user_email.toLowerCase())
@@ -90,6 +116,12 @@ export default {
     }
   },
   methods: {
+    /**
+     * Converts GMT time string to local time string with optional day offset
+     * @param {string} gmtTimeString - GMT time string to convert
+     * @param {number} [addDays=0] - Number of days to add to the date
+     * @returns {string} Formatted local time string
+     */
     convertTime(gmtTimeString, addDays = 0) {
       if (!gmtTimeString) return '';
 
@@ -117,6 +149,10 @@ export default {
     },
 
 
+    /**
+     * Fetches the list of blacklisted users from backend
+     * @async
+     */
     async fetchBadUsers() {
       this.loading = true
       try {
@@ -140,18 +176,36 @@ export default {
         this.loading = false
       }
     },
+
+    /**
+     * Provides autocomplete suggestions for user email filter
+     * @param {string} queryString - Current search query
+     * @param {function} cb - Callback to return results
+     */
     queryUsers(queryString, cb) {
       const results = this.users
           .filter(u => u.user_email.toLowerCase().includes(queryString.toLowerCase()))
           .map(u => ({value: u.user_email}))
       cb(results)
     },
+
+    /**
+     * Provides autocomplete suggestions for user name filter
+     * @param {string} queryString - Current search query
+     * @param {function} cb - Callback to return results
+     */
     queryUserNames(queryString, cb) {
       const results = this.users
           .filter(u => u.user_name.toLowerCase().includes(queryString.toLowerCase()))
           .map(u => ({value: u.user_name}))
       cb(results)
     },
+
+    /**
+     * Handles releasing a user from the blacklist
+     * @async
+     * @param {Object} row - The user row to release
+     */
     async handleRelease(row) {
       try {
         // Confirm with the user before releasing
@@ -177,7 +231,7 @@ export default {
           background: 'rgba(0, 0, 0, 0.7)'
         });
 
-        // Call the API
+        // Call the API to release user
         const response = await fetch(
             `${this.backendAddress}/reset_missed_times/${encodeURIComponent(row.user_email)}`,
             {
@@ -212,6 +266,8 @@ export default {
       }
     }
   },
+
+  // Fetch data when component mounts
   mounted() {
     this.fetchBadUsers()
   }
@@ -220,6 +276,7 @@ export default {
 
 
 <style scoped>
+/* Main page styling */
 .header {
   display: flex;
   justify-content: space-between;
@@ -234,12 +291,14 @@ export default {
   padding: 10px;
 }
 
+/* Table styling */
 .el-table {
   height: 700px;
   width: 100%;
   overflow: auto;
 }
 
+/* Main container styling */
 .room-repair-handling {
   font-family: 'Cambria', serif;
   width: 100%;
@@ -247,6 +306,7 @@ export default {
   background-color: #f8f9fa;
 }
 
+/* Card styling */
 .custom-card {
   width: 100%;
   padding: 20px;
@@ -255,6 +315,7 @@ export default {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Filter header styling */
 .filter-header {
   display: flex;
   align-items: center;
@@ -265,6 +326,7 @@ export default {
   white-space: nowrap;
 }
 
+/* Action buttons styling */
 .action-buttons {
   display: flex;
   gap: 8px;
@@ -277,7 +339,7 @@ export default {
   gap: 8px;
 }
 
-
+/* Table sorting caret styling */
 .el-table .caret-wrapper {
   display: inline-flex;
   align-items: center;

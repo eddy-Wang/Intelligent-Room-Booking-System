@@ -1,10 +1,31 @@
+<!--
+RoomManagementViewMobile.vue - Mobile-optimized component for managing room information.
+
+Features:
+- Responsive design for mobile devices
+- CRUD operations for room management
+- Image upload functionality with multiple fallback accounts
+- Equipment checklist and access level configuration
+- Modal forms for add/edit operations
+- Form validation and error handling
+
+Props: None
+Events: None
+Dependencies:
+- Element Plus for notifications
+- Vue 3 Composition API
+-->
 <template>
+  <!-- Main container with mobile-optimized layout -->
   <div class="room-management-mobile-container">
+    <!-- Title section -->
     <div class="title-container">
       <h1><strong>DRBS</strong></h1>
       <h2><strong>Room Management</strong></h2>
     </div>
+    <!-- Add Room button -->
     <button @click="showAddRoomModal = true" class="add-button-container">Add Room</button>
+    <!-- Room list container -->
     <div class="room-list-container">
       <div
           v-for="(room, index) in rooms"
@@ -32,6 +53,8 @@
         </div>
       </div>
     </div>
+
+    <!-- Add Room Modal -->
     <div v-if="showAddRoomModal" class="modal" @click.self="showAddRoomModal = false">
       <div class="modal-content">
         <h2>Add Room</h2>
@@ -44,7 +67,7 @@
 
           <label for="room-location">Location:</label>
           <input type="text" id="room-location" v-model="newRoom.location" required/>
-
+          <!-- Equipment checkboxes -->
           <label>Equipment:</label>
           <div class="equipment-checkboxes">
             <label><input type="checkbox" v-model="newRoom.equipment.Projector"> Projector</label>
@@ -54,14 +77,14 @@
             <label><input type="checkbox" v-model="newRoom.equipment.PowerOutlets"> Power Outlets</label>
             <label><input type="checkbox" v-model="newRoom.equipment.WiFi"> Wi-Fi</label>
           </div>
-
+          <!-- Access level dropdown -->
           <label for="room-access">Access:</label>
           <select id="room-access" v-model="newRoom.access" required>
             <option value="All">All</option>
             <option value="Staff Only">Staff Only</option>
             <option value="Selected Staff Only">Selected Staff Only</option>
           </select>
-
+          <!-- Image upload -->
           <label for="room-image">Image:</label>
           <input
               type="file"
@@ -86,10 +109,12 @@
         </form>
       </div>
     </div>
+    <!-- Modify Room Modal -->
     <div v-if="showModifyRoomModal" class="modal" @click.self="showModifyRoomModal = false">
       <div class="modal-content">
         <h2>Modify Room</h2>
         <form @submit.prevent="saveModifiedRoom">
+          <!-- Form fields for room modification -->
           <label for="modify-room-name">Room Name:</label>
           <input type="text" id="modify-room-name" v-model="modifiedRoom.name" required/>
 
@@ -99,6 +124,7 @@
           <label for="modify-room-location">Location:</label>
           <input type="text" id="modify-room-location" v-model="modifiedRoom.location" required/>
 
+          <!-- Equipment checkboxes -->
           <label>Equipment:</label>
           <div class="equipment-checkboxes">
             <label><input type="checkbox" v-model="modifiedRoom.equipment.Projector"> Projector</label>
@@ -108,14 +134,14 @@
             <label><input type="checkbox" v-model="modifiedRoom.equipment.PowerOutlets"> Power Outlets</label>
             <label><input type="checkbox" v-model="modifiedRoom.equipment.WiFi"> Wi-Fi</label>
           </div>
-
+          <!-- Access level dropdown -->
           <label for="modify-room-access">Access:</label>
           <select id="modify-room-access" v-model="modifiedRoom.access" required>
             <option value="0">All</option>
             <option value="1">Staff Only</option>
             <option value="2">Selected Staff Only</option>
           </select>
-
+          <!-- Image upload -->
           <label for="modify-room-image">Image:</label>
           <input
               type="file"
@@ -129,8 +155,10 @@
             <img :src="modifiedRoom.image_url" alt="Current Image" class="preview-img">
           </div>
 
+          <!-- Additional information -->
           <label for="modify-room-information">Information (optional):</label>
           <textarea id="modify-room-information" v-model="modifiedRoom.information"></textarea>
+          <!-- Form action buttons -->
           <div class="room-actions">
             <button type="submit" class="action-button">Save</button>
             <button @click="showModifyRoomModal = false" class="action-button">Cancel</button>
@@ -149,6 +177,9 @@ import {ElMessage} from "element-plus";
 export default {
   name: 'MobileRoomManagement',
   setup() {
+    /**
+     * Initialize component with backend address from global properties
+     */
     const instance = getCurrentInstance()
     const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 
@@ -156,10 +187,11 @@ export default {
   },
   data() {
     return {
-      rooms: [],
-      isModifying: false,
-      showAddRoomModal: false,
-      showModifyRoomModal: false,
+      rooms: [], // Array to store room data
+      isModifying: false, // Flag for modify mode
+      showAddRoomModal: false, // Controls add modal visibility
+      showModifyRoomModal: false, // Controls modify modal visibility
+      // Access level mapping
       accessMap: {
         0: "All",
         1: "Staff Only",
@@ -201,6 +233,11 @@ export default {
     };
   },
   methods: {
+    /**
+     * Formats equipment data for display
+     * @param {string|Array} equipment - Equipment data to format
+     * @returns {string} Formatted equipment string
+     */
     formatEquipment(equipment) {
       if (typeof equipment === 'string') {
         const cleanedString = equipment.replace(/[{}]/g, '').replace(/'/g, '"');
@@ -216,6 +253,10 @@ export default {
         return 'No equipment';
       }
     },
+    /**
+     * Fetches room data from backend API
+     * @async
+     */
     async fetchRoomData() {
       try {
         const response = await fetch(this.backendAddress + '/getRooms');
@@ -225,7 +266,12 @@ export default {
         console.error('Error fetching room data:', error);
       }
     },
+    /**
+     * Adds a new room to the system
+     * @async
+     */
     async addRoom() {
+      // Format equipment data
       const equipment = Object.keys(this.newRoom.equipment)
           .filter(key => this.newRoom.equipment[key])
           .map(key => key.replace(/([A-Z])/g, ' $1').trim());
@@ -233,6 +279,7 @@ export default {
 
       const information = this.newRoom.information ? this.newRoom.information : null;
       const image_url = this.newRoom.image_url ? this.newRoom.image_url : null;
+      // Prepare room object
       const room = {
         name: this.newRoom.name,
         capacity: this.newRoom.capacity,
@@ -263,7 +310,10 @@ export default {
       this.isModifying = false;
     },
 
-
+    /**
+     * Prepares room data for modification
+     * @param {number} index - Index of room to modify
+     */
     async modifyRoom(index) {
       const room = this.rooms[index];
       console.log(room)
@@ -287,6 +337,10 @@ export default {
       this.isModifying = true;
       this.showModifyRoomModal = true;
     },
+    /**
+     * Saves modified room data
+     * @async
+     */
     async saveModifiedRoom() {
       const equipment = Object.keys(this.modifiedRoom.equipment)
           .filter(key => this.modifiedRoom.equipment[key])
@@ -311,6 +365,7 @@ export default {
 
         const data = await response.json();
         if (data.code === '000') {
+          // Update local room data
           const index = this.rooms.findIndex(r => r.id === this.modifiedRoom.id);
           if (index !== -1) {
             this.rooms.splice(index, 1, {...this.rooms[index], ...room});
@@ -325,7 +380,11 @@ export default {
       }
     },
 
-
+    /**
+     * Deletes a room from the system
+     * @async
+     * @param {number} index - Index of room to delete
+     */
     async deleteRoom(index) {
       const room = this.rooms[index];
 
@@ -350,6 +409,11 @@ export default {
         }
       }
     },
+    /**
+     * Handles image upload with multiple fallback accounts
+     * @async
+     * @param {Event} event - File input change event
+     */
     async handleImageUpload(event) {
       const file = event.target.files[0];
       if (!file) {
@@ -399,7 +463,8 @@ export default {
             return; // stop once it succeeds
           }
 
-          // If daily limit hit, try next credentials
+          // '今日上传数量上限！' means that an account has reached its maximum number of uploads
+          // As the API is from a Chinese website, so the return message must be used in Chinese in the code.
           if (result.code === -1000 && result.msg === '今日上传数量上限！') {
             console.log(`Account ${i + 1} limit reached — switching credentials`);
             continue;
@@ -413,6 +478,9 @@ export default {
       }
       ElMessage.info("All accounts have reached today's upload limit.");
     },
+    /**
+     * Resets the new room form
+     */
     resetNewRoom() {
       this.newRoom = {
         name: "",
@@ -433,6 +501,9 @@ export default {
     },
   },
   mounted() {
+    /**
+     * Fetch room data when component is mounted
+     */
     this.fetchRoomData();
   }
 };
@@ -441,6 +512,7 @@ export default {
 </script>
 
 <style scoped>
+/* Mobile-optimized styling */
 .room-management-mobile-container {
   font-family: 'Cambria', serif;
   display: flex;

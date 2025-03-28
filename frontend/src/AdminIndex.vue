@@ -1,3 +1,21 @@
+<!--
+AdminIndex.vue - Main admin dashboard layout with navigation sidebar.
+
+Features:
+- Responsive sidebar navigation
+- Dynamic component loading
+- Tooltips on hover
+- Accessible navigation elements
+- Logout functionality
+
+Props: None
+Events: None
+Dependencies:
+- Vue Router for navigation
+- Element Plus for notifications
+- @mdi/js for Material Design icons
+- Custom SvgIcon component
+-->
 <template>
   <div class="index-container">
     <aside
@@ -126,14 +144,25 @@ export default {
     };
   },
   computed: {
+    /**
+     * Returns the currently active component based on navigation selection
+     * @returns {Component} The active component
+     */
     activeComponent() {
       return this.navItems[this.activeNav].component
     }
   },
   methods: {
+    /**
+     * Sets the active navigation item
+     * @param {number} index - Index of the navigation item to activate
+     */
     setActiveNav(index) {
       this.activeNav = index;
     },
+    /**
+     * Handles logout with confirmation
+     */
     handleLogout() {
       if (confirm('Are you sure you want to logout?')) {
         router.push({name: 'LoginView'});

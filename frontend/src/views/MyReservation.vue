@@ -1,9 +1,22 @@
+<!--
+MyReservation.vue - Component for managing user's room reservations.
+
+This component provides:
+- View of all user reservations with filtering capabilities
+- Check-in and cancellation functionality
+- Calendar subscription/download options
+- Responsive layout with user info sidebar
+
+Props: None
+Events: None
+Dependencies: Element Plus UI components
+-->
 <template>
   <div class="panel">
     <div class="container">
       <h1>My Reservation</h1>
 
-      <!-- Filter Dropdowns -->
+      <!-- Filter controls section -->
       <div class="filter-container">
         <el-select v-model="roomFilter" placeholder="Filter by Room" clearable>
           <el-option
@@ -32,15 +45,16 @@
           />
         </el-select>
       </div>
-
+      <!-- Main content area -->
       <div class="content-wrapper">
+        <!-- Reservation card for each booking -->
         <div class="reservation-list">
           <div
               v-for="(reservation, index) in paginatedReservations"
               :key="reservation.booking_id"
               class="reservation-item"
           >
-
+            <!-- Reservation details -->
             <div class="reservation-info">
               <div class="reservation-name">{{ reservation.name }}</div>
               <div class="reservation-time">
@@ -49,6 +63,7 @@
               <div class="reservation-capacity">Capacity: {{ reservation.capacity }}</div>
               <div class="reservation-purpose">{{ reservation.purpose }}</div>
             </div>
+            <!-- Status and actions section -->
             <div class="status-and-actions">
               <div class="reservation-status">{{ reservation.status }}</div>
               <div class="check-in-hint" v-if="reservation.status === 'Confirmed'">
@@ -61,12 +76,14 @@
             </div>
           </div>
 
+          <!-- Pagination controls -->
           <div class="pagination">
             <button @click="prevPage" :disabled="currentPage === 1" class="pagination-button">Previous</button>
             <button @click="nextPage" :disabled="currentPage === totalPages" class="pagination-button">Next</button>
           </div>
         </div>
 
+        <!-- User info sidebar -->
         <div class="user-info">
           <div class="user-avatar">
             <img :src="userAvatar" alt="User Avatar"/>
@@ -99,7 +116,7 @@
 <script>
 import {getCurrentInstance} from "vue";
 import {ElMessage} from "element-plus";
-
+// Mapping of time slot indexes to human-readable time ranges
 const reverseTimeSlotMap = {
   0: '08:00-08:45',
   1: '08:55-09:45',
@@ -124,15 +141,15 @@ export default {
   },
   data() {
     return {
-      user: [],
-      reservations: [],
-      currentPage: 1,
-      reverseTimeSlotMap,
-      itemsPerPage: 3,
-      roomFilter: '',
-      dateFilter: '',
-      statusFilter: '',
-      instructionsDialogVisible: false,
+      user: [],               // Current user data
+      reservations: [],       // List of user reservations
+      currentPage: 1,         // Current pagination page
+      reverseTimeSlotMap,     // Time slot mapping
+      itemsPerPage: 3,        // Number of items per page
+      roomFilter: '',         // Current room filter value
+      dateFilter: '',         // Current date filter value
+      statusFilter: '',       // Current status filter value
+      instructionsDialogVisible: false,  // Controls instructions dialog visibility
       instructionsText: `
         1. Download the calendar file by clicking the "Download Calendar" button.
         2. Open Outlook.
@@ -143,15 +160,31 @@ export default {
     };
   },
   computed: {
+    /**
+     * Computed property for unique room names from reservations
+     * @returns {Array} List of unique room names
+     */
     uniqueRooms() {
       return [...new Set(this.reservations.map(reservation => reservation.name))];
     },
+    /**
+     * Computed property for unique dates from reservations
+     * @returns {Array} List of unique dates
+     */
     uniqueDates() {
       return [...new Set(this.reservations.map(reservation => reservation.date.split('00:00:00')[0]))];
     },
+    /**
+     * Computed property for unique statuses from reservations
+     * @returns {Array} List of unique statuses
+     */
     uniqueStatuses() {
       return [...new Set(this.reservations.map(reservation => reservation.status))];
     },
+    /**
+     * Computed property for filtered reservations based on current filters
+     * @returns {Array} Filtered list of reservations
+     */
     filteredReservations() {
       return this.reservations.filter(reservation => {
         return (
@@ -161,14 +194,26 @@ export default {
         );
       });
     },
+    /**
+     * Computed property for total number of pages
+     * @returns {number} Total pages based on filtered reservations
+     */
     totalPages() {
       return Math.ceil(this.filteredReservations.length / this.itemsPerPage);
     },
+    /**
+     * Computed property for paginated reservations
+     * @returns {Array} Reservations for current page
+     */
     paginatedReservations() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
       return this.filteredReservations.slice(start, end);
     },
+    /**
+     * Computed property for user avatar image based on permission
+     * @returns {string} Path to appropriate avatar image
+     */
     userAvatar() {
       return this.user.permission === 'Student'
           ? '/src/assets/student.png'
@@ -176,15 +221,24 @@ export default {
     },
   },
   methods: {
+    /**
+     * Shows calendar import instructions dialog
+     */
     showInstructions() {
       this.instructionsDialogVisible = true;
     },
+    /**
+     * Opens Outlook to subscribe to calendar feed
+     */
     subscribeCalendar() {
       const email = this.user.email;
       const calendarUrl = `https://legal-certainly-gobbler.ngrok-free.app/subscribe_calendar/${email}`;
       const outlookOfficeUrl = `https://outlook.office.com/owa/?path=/calendar/action/compose&rru=addsubscription&name=My+DIICSU+Calendar&url=${encodeURIComponent(calendarUrl)}`;
       window.open(outlookOfficeUrl, "_blank");
     },
+    /**
+     * Downloads calendar file and shows instructions
+     */
     downloadCalendar() {
       try {
         const email = this.user.email;
@@ -218,6 +272,10 @@ export default {
         ElMessage.error('Error downloading calendar, please try again later.');
       }
     },
+    /**
+     * Fetches user reservations from backend
+     * @async
+     */
     async fetchReservations() {
       try {
         const response = await fetch(this.backendAddress + '/get-reservations', {
@@ -229,6 +287,7 @@ export default {
         });
         const data = await response.json();
         if (data.code === '000') {
+          // Sort reservations by date (newest first)
           this.reservations = data.data.sort((a, b) => {
             return new Date(b.date) - new Date(a.date);
           });
@@ -239,6 +298,11 @@ export default {
         console.error('Error fetching reservations:', error);
       }
     },
+    /**
+     * Handles check-in for a reservation
+     * @async
+     * @param {number} index - Index of reservation in current page
+     */
     async checkIn(index) {
       const bookingId = this.reservations[(this.currentPage - 1) * this.itemsPerPage + index].booking_id
       try {
@@ -256,6 +320,11 @@ export default {
         console.error('Error:', error);
       }
     },
+    /**
+     * Cancels a reservation
+     * @async
+     * @param {number} index - Index of reservation in current page
+     */
     async cancelReservation(index) {
       const bookingId = this.reservations[(this.currentPage - 1) * this.itemsPerPage + index].booking_id;
       try {
@@ -279,16 +348,27 @@ export default {
         console.error('Error cancelling reservation:', error);
       }
     },
+    /**
+     * Navigates to previous page
+     */
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
       }
     },
+    /**
+     * Navigates to next page
+     */
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
       }
     },
+    /**
+     * Converts time slot string to human-readable format
+     * @param {string} timeStr - Comma-separated time slot indexes
+     * @returns {string} Formatted time ranges
+     */
     convertTimeStrToTimeSlots(timeStr) {
       return timeStr.split(',')
           .map(Number)
@@ -296,7 +376,12 @@ export default {
           .join('  ');
     },
   },
+  /**
+ * Vue lifecycle hook - called after the component is mounted to the DOM
+ * @async
+ */
   async mounted() {
+    // Fetch user data and reservations when component mounts
     const instance = getCurrentInstance();
     if (instance) {
       let me = await instance.appContext.config.globalProperties.$me()
@@ -308,12 +393,13 @@ export default {
 </script>
 
 <style scoped>
+/* Base styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-
+/* Main panel layout */
 .panel {
   background: #eceef8;
   display: flex;
@@ -327,7 +413,7 @@ body {
   color: #333;
   line-height: 1.6;
 }
-
+/* Container styling */
 .container {
   font-family: 'Cambria', serif;
   width: 100%;
@@ -338,32 +424,32 @@ body {
   background-color: #eceef8;
   border-radius: 12px;
 }
-
+/* Header styling */
 h1 {
   text-align: center;
   color: #2c3e50;
   margin-bottom: 20px;
   font-size: 3.5rem;
 }
-
+/* Filter controls styling */
 .filter-container {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
-
+/* Main content layout */
 .content-wrapper {
   display: flex;
   gap: 20px;
 }
-
+/* Reservation list styling */
 .reservation-list {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-
+/* Individual reservation card styling */
 .reservation-item {
   height: 50%;
   width: 100%;
@@ -381,7 +467,7 @@ h1 {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
-
+/* Reservation info styling */
 .reservation-info {
   flex: 1;
 }
@@ -438,7 +524,7 @@ h1 {
   margin-bottom: 5px;
   margin-right: 20px;
 }
-
+/* Action button styling */
 .action-button {
   height: 20%;
   width: 30%;
@@ -462,7 +548,7 @@ h1 {
   background-color: #3155ef;
   color: #fff;
 }
-
+/* User info sidebar styling */
 .user-info {
   width: 30%;
   height: 20%;
@@ -529,7 +615,7 @@ h1 {
   background-color: #3155ef;
   color: #fff;
 }
-
+/* Download button styling */
 .download-button {
   padding: 12px 16px;
   border: none;
@@ -555,6 +641,7 @@ h1 {
   color: #fff;
 }
 
+/* Element UI select override */
 .el-select {
   border-radius: 10px;
   width: 22.5%;

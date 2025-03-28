@@ -1,6 +1,20 @@
+<!--
+LoginView.vue - User identification verification component.
+
+This component provides:
+- Email input with domain selection (@dundee.ac.uk or @csu.edu.cn)
+- Email validation and error handling
+- API integration for sending verification codes
+- Responsive layout with background image
+
+Props: None
+Events: None
+Dependencies: Vue Router, Element Plus
+-->
 <template>
   <div class="app-container">
     <div class="main-content">
+      <!-- Left content section containing form elements -->
       <div class="left-content">
         <div class="header">
           <img src="../assets/header-logo.png" alt="DIICSU Header Logo" class="header-logo">
@@ -8,6 +22,7 @@
         <div class="input-button-container" :class="{ 'has-error': showError }">
           <h1 class="title">Verify Your Identification</h1>
           <p class="subtitle">Please enter your Dundee or CSU email address to continue</p>
+          <!-- Email input group with domain selector -->
           <div class="input-group">
             <input
                 type="email"
@@ -22,9 +37,11 @@
               <option value="@csu.edu.cn">@csu.edu.cn</option>
             </select>
           </div>
+          <!-- Error message display -->
           <p class="error-message" v-if="showError">
             Please enter a valid email address
           </p>
+          <!-- Submit button -->
           <div class="button-container">
             <button
                 @click="handleNext"
@@ -39,6 +56,7 @@
 
       </div>
 
+      <!-- Right content section with background image -->
       <div class="right-content">
         <img src="../assets/DIICSUPicture.png" alt="DIICSU Building" class="diicsu-picture">
       </div>
@@ -52,28 +70,37 @@ import {useRouter} from 'vue-router'
 import {ElMessage} from "element-plus";
 
 const router = useRouter()
-const email = ref('')
-const showError = ref(false)
-const selectedSuffix = ref('@dundee.ac.uk');
-
+const email = ref('')// Stores user email input (without domain)
+const showError = ref(false) // Controls error message visibility
+const selectedSuffix = ref('@dundee.ac.uk');// Selected email domain suffix
+// Get backend address from global properties
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
-
+/**
+ * Computed property that checks if email is valid
+ * @returns {boolean} True if email is valid
+ */
 const isValidEmail = computed(() => {
   return email.value.length > 0 && !showError.value
 })
-
+/**
+ * Validates email format based on selected domain
+ */
 const validateEmail = () => {
   const emailPattern = selectedSuffix.value === '@dundee.ac.uk'
       ? /^[a-zA-Z0-9._%+-]+@dundee\.ac\.uk$/
       : /^[a-zA-Z0-9._%+-]+@csu\.edu\.cn$/;
   showError.value = !emailPattern.test(email.value + selectedSuffix.value);
 };
-
+/**
+ * Handles form submission and verification code request
+ * @async
+ */
 const handleNext = async () => {
   if (isValidEmail.value) {
     try {
       const fullEmail = email.value + selectedSuffix.value;
+      // Send email to backend for verification
       const response = await fetch(backendAddress + '/login', {
         method: 'POST',
         headers: {
@@ -87,6 +114,7 @@ const handleNext = async () => {
       if (response.ok) {
         const data = await response.json();
         if (data.code === "000") {
+          // Navigate to verification page on success
           await router.push({
             name: 'VerifyView',
             params: {
@@ -94,6 +122,7 @@ const handleNext = async () => {
             }
           })
         } else {
+          // Show error message from backend
           ElMessage.error(data.message)
         }
       }
@@ -105,6 +134,7 @@ const handleNext = async () => {
 </script>
 
 <style scoped>
+/* Base styles */
 * {
   margin: 0;
   padding: 0;
@@ -115,7 +145,7 @@ body {
   font-family: 'Segoe UI', Arial, sans-serif;
 }
 
-
+/* Main container styles */
 .app-container {
   font-family: 'Cambria', serif;
   min-height: 100vh;
@@ -130,7 +160,7 @@ body {
   align-items: center;
 }
 
-
+/* Left content (form) styles */
 .left-content {
   flex: 0 0 50%;
   position: relative;
@@ -152,6 +182,7 @@ body {
     width: auto;
   }
 
+  /* Form title styles */
   .title {
     font-size: 2.8rem;
     font-weight: 700;
@@ -162,6 +193,7 @@ body {
     text-align: center;
   }
 
+  /* Form subtitle styles */
   .subtitle {
     font-size: 1.2rem;
     opacity: 0.95;
@@ -171,6 +203,7 @@ body {
     text-align: center;
   }
 
+  /* Input group styling */
   .input-group {
     display: flex;
     align-items: center;
@@ -189,6 +222,7 @@ body {
     }
   }
 
+  /* Email input field styling */
   .email-input {
     flex: 1;
     border: none;
@@ -204,6 +238,7 @@ body {
     }
   }
 
+  /* Email domain selector styling */
   .email-suffix {
     color: #666;
     font-size: 0.9rem;
@@ -237,6 +272,7 @@ body {
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23333333'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
   }
 
+  /* Error message styling */
   .error-message {
     color: #FFE5E5;
     font-size: 1.1rem;
@@ -253,6 +289,7 @@ body {
     text-align: center;
   }
 
+  /* Button container styling */
   .button-container {
     width: 100%;
     max-width: 400px;
@@ -261,6 +298,7 @@ body {
     padding: 0;
   }
 
+  /* Submit button styling */
   .next-button {
     background: #319efd;
     color: #FFFFFF;
@@ -292,6 +330,7 @@ body {
   }
 }
 
+/* Right content (image) styling */
 .right-content {
   flex: 1;
   width: 40%;
@@ -309,6 +348,7 @@ body {
   border-radius: 20px;
 }
 
+/* Mobile responsive styles */
 @media (max-width: 768px) {
   .app-container {
     padding: 0;
@@ -323,6 +363,7 @@ body {
     position: relative;
   }
 
+  /* Adjusted styles for mobile view */
   .left-content {
     position: relative;
     z-index: 2;
@@ -436,6 +477,7 @@ body {
     }
   }
 
+  /* Mobile adjustments for right content */
   .right-content {
     position: absolute;
     top: 0;
@@ -467,7 +509,7 @@ body {
   }
 }
 
-
+/* Animation for input container */
 .input-button-container {
   transition: transform 0.5s ease-in-out;
 }

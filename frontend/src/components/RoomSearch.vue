@@ -1,3 +1,27 @@
+<!--
+RoomSearch.vue - Component for searching and booking rooms with filters.
+
+Features:
+- Capacity, equipment, and date/time filters
+- Interactive time slot selection
+- Booking information display
+- Form validation and submission
+- Responsive panel layout
+
+Props:
+- selectedRoom: Currently selected room object
+- bookDate: Selected booking date
+- selectedSlots: Array of selected time slots
+
+Events:
+- filters-updated: Emitted when filters change
+- date-selected: Emitted when date is selected
+
+Dependencies:
+- vue3-datepicker for date selection
+- axios for HTTP requests
+- Element Plus for notifications
+-->
 <template>
   <div class="room-search-container">
     <div class="panel1">
@@ -145,16 +169,19 @@ export default {
   },
 
   async mounted() {
+    // Initialize backend address and user email
     let instance = getCurrentInstance()
     this.backendAddress = instance.appContext.config.globalProperties.$backendAddress
     let me = await instance.appContext.config.globalProperties.$me()
     this.user_email = me.data.email
 
+    // Add click outside listener for time picker
     document.addEventListener('click', this.handleClickOutside);
 
 
   },
   watch: {
+    // Emit events when filters change
     combinedFilters(newFilters) {
       this.$emit('filters-updated', newFilters);
     },
@@ -162,6 +189,7 @@ export default {
       this.$emit('date-selected', newDate);
     },
 
+    // Debug logging for booking state
     bookDate(newVal, oldVal) {
       console.log("bookDate old:", oldVal);
       console.log("bookDate new:", newVal);
@@ -244,6 +272,10 @@ export default {
   },
 
   computed: {
+    /**
+     * Combines all active filters into a single array
+     * @returns {Array} Combined filters array
+     */
     combinedFilters() {
       const filters = [];
 
@@ -272,11 +304,16 @@ export default {
 
       return filters;
     },
-
-
+    /**
+     * Formats selected time slots for display
+     * @returns {string} Formatted time slots
+     */
     selectedTimeDisplay() {
       return this.selectedTimeSlots.join(', ') || 'Select time slots';
     },
+    /**
+     * Updates the display of the selected date and emits a custom event with the selected date.
+     */
     updateDateDisplay() {
       this.selectedDateDisplay = this.selectedDate ? this.selectedDate.toLocaleDateString() : '';
       this.$emit('date-selected', this.selectedDate);
@@ -285,15 +322,27 @@ export default {
   },
 
   methods: {
+    /**
+     * Handles access filter selection
+     * @param {string} filterValue - Selected filter value
+     */
     handleAccessFilter(filterValue) {
       this.activeAccessFilter = filterValue;
     }
     ,
+    /**
+     * Handles capacity filter selection (toggles)
+     * @param {string} filterValue - Selected filter value
+     */
     handleCapacityFilter(filterValue) {
       this.activeCapacityFilter =
           this.activeCapacityFilter === filterValue ? '' : filterValue;
     }
     ,
+    /**
+     * Handles equipment filter selection (multi-select)
+     * @param {string} filterValue - Selected filter value
+     */
     handleEquipmentFilter(filterValue) {
       if (this.activeEquipmentFilters.includes(filterValue)) {
         this.activeEquipmentFilters = this.activeEquipmentFilters.filter(
@@ -303,21 +352,38 @@ export default {
         this.activeEquipmentFilters.push(filterValue);
       }
     },
+    /**
+     * Formats date for display
+     * @param {Date} date - Date to format
+     * @returns {string} Formatted date string
+     */
     formatDate(date) {
       if (!date) return '';
       const d = new Date(date);
       return d.toISOString().split('T')[0];
     },
+    /**
+     * Formats time string (removes seconds)
+     * @param {string} timeStr - Time string to format
+     * @returns {string} Formatted time string
+     */
     formatTime(timeStr) {
       return timeStr.slice(0, 5)
     },
 
+    /**
+     * Toggles time picker visibility
+     */
     toggleTimePicker() {
       this.selectedTimeSlots = [];
       this.selectedTimeSlotMaps = [];
 
       this.isTimePickerOpen = !this.isTimePickerOpen;
     },
+    /**
+     * Toggles time slot selection
+     * @param {number} index - Index of time slot to toggle
+     */
     toggleSlot(index) {
       const slotKey = this.timeSlots[index]; //  '08:00-08:45'
       const slotValue = this.timeSlotMap[slotKey]; // 0
@@ -331,13 +397,20 @@ export default {
       }
     },
 
-
+    /**
+     * Handles clicks outside component to close time picker
+     * @param {Event} event - Click event
+     */
     handleClickOutside(event) {
       if (!this.$el.contains(event.target)) {
         this.isTimePickerOpen = false;
       }
     },
 
+    /**
+     * Handles booking submission
+     * @async
+     */
     async handleBook() {
       if (!this.selectedRoom || !this.bookDate || this.bookTimeSlots.length === 0) {
         ElMessage.error('Please select a room, date, and time slots.');
@@ -373,6 +446,7 @@ export default {
     }
   },
   beforeDestroy() {
+    // Clean up event listener
     document.removeEventListener('click', this.handleClickOutside);
   },
 

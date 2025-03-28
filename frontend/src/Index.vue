@@ -1,10 +1,31 @@
+<!--
+Index.vue - Desktop admin dashboard with left navigation sidebar.
+
+Features:
+- Fixed left navigation sidebar with icons
+- Dynamic component loading
+- Hover tooltips for navigation items
+- Smooth transitions and animations
+- Responsive design optimized for desktop
+- Logout functionality
+
+Props: None
+Events: None
+Dependencies:
+- Vue Router for navigation
+- @mdi/js for Material Design icons
+- Custom SvgIcon component
+- View components for each section
+-->
 <template>
   <div class="index-container">
+    <!-- Left navigation sidebar -->
     <aside
         class="left-column"
         role="navigation"
         aria-label="Main navigation"
     >
+      <!-- Home/Logo button at top -->
       <router-link
           to="/index"
           class="top-icon"
@@ -18,6 +39,7 @@
         >
       </router-link>
 
+      <!-- Navigation items container -->
       <nav class="nav-items-container">
         <button
             v-for="(item, index) in navItems"
@@ -48,7 +70,7 @@
           </span>
         </button>
       </nav>
-
+      <!-- Logout button at bottom -->
       <button
           class="bottom-icon"
           @click="handleLogout"
@@ -61,6 +83,7 @@
         ></svg-icon>
       </button>
     </aside>
+    <!-- Main content area -->
     <main class="main-content">
       <component :is="activeComponent"/>
     </main>
@@ -82,8 +105,8 @@ export default {
   },
   data() {
     return {
-      activeNav: 0,
-      hoverIndex: null,
+      activeNav: 0, // Currently active navigation index
+      hoverIndex: null, // Index of hovered navigation item
       navItems: [
         {
           icon: 'mdiHomeOutline',
@@ -104,14 +127,25 @@ export default {
     };
   },
   computed: {
+    /**
+     * Returns the currently active component based on navigation selection
+     * @returns {Component} The active component
+     */
     activeComponent() {
       return this.navItems[this.activeNav].component
     }
   },
   methods: {
+    /**
+     * Sets the active navigation item
+     * @param {number} index - Index of the navigation item
+     */
     setActiveNav(index) {
       this.activeNav = index;
     },
+    /**
+     * Handles logout confirmation and redirects to login page
+     */
     handleLogout() {
       if (confirm('Are you sure you want to logout?')) {
         router.push({name: 'LoginView'});

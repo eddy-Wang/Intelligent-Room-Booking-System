@@ -1,3 +1,18 @@
+<!--
+AdminEnterPageMobile.vue - Mobile admin dashboard with user information and system navigation.
+
+Features:
+- Displays current user information
+- Provides navigation to user/admin systems
+- Logout functionality
+- Responsive mobile design
+
+Props: None
+Events: None
+Dependencies:
+- Vue Router for navigation
+- Element Plus for notifications
+-->
 <template>
   <div class="admin-home-mobile-container">
     <div class="title-container">
@@ -48,7 +63,10 @@ const currentUser = ref({
   permission: "Admin"
 })
 const users = ref([])
-
+/**
+ * Fetches user data from backend
+ * @async
+ */
 const fetchUsers = async () => {
   try {
     const response = await fetch(backendAddress + '/users')
@@ -61,20 +79,28 @@ const fetchUsers = async () => {
   }
 }
 
+// Component lifecycle hook
 onMounted(async () => {
   let me = await instance.appContext.config.globalProperties.$me()
   currentUser.value = me.data
   await fetchUsers()
 })
-
+/**
+ * Navigates to user system
+ */
 const goToUserSystem = () => {
   router.push({name: 'IndexMobile'})
 }
 
+/**
+ * Navigates to admin system
+ */
 const goToAdminSystem = () => {
   router.push({name: 'AdminIndexMobile'})
 }
-
+/**
+ * Handles logout process with confirmation
+ */
 const handleLogout = () => {
   if (confirm('Are you sure you want to logout?')) {
     instance.appContext.config.globalProperties.$user = null

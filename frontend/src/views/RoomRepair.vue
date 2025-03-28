@@ -1,4 +1,21 @@
+<!--
+RoomRepair.vue - Component for reporting equipment issues in rooms.
+
+Features:
+- Displays list of rooms with images
+- Allows users to report equipment issues
+- Modal form for submitting repair requests
+- Responsive grid layout
+- User authentication integration
+
+Props: None
+Events: None
+Dependencies:
+- Element Plus for notifications
+- Vue 3 Composition API
+-->
 <template>
+  <!-- Main container -->
   <div class="container">
     <h1 class="title">Room Equipment Repair</h1>
 
@@ -12,6 +29,7 @@
 
       </div>
     </div>
+    <!-- Repair report modal dialog -->
     <div v-if="showDialog" class="modal-overlay">
       <div class="modal">
         <h2 class="modal-title">Report Issue for {{ selectedRoom?.name }}</h2>
@@ -30,17 +48,24 @@
 <script setup>
 import {getCurrentInstance, onMounted, ref} from "vue";
 import {ElMessage} from "element-plus";
-
+/**
+ * Component initialization
+ */
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 
-const rooms = ref([]);
-const showDialog = ref(false);
-const selectedRoom = ref(null);
-const reportInfo = ref("");
-const userEmail = ref("")
-const userPermission = ref("")
+// Reactive data properties
+const rooms = ref([]); // Array to store room data
+const showDialog = ref(false); // Controls modal visibility
+const selectedRoom = ref(null); // Currently selected room for reporting
+const reportInfo = ref(""); // User's issue description
+const userEmail = ref(""); // Logged-in user's email
+const userPermission = ref(""); // User's permission level
 
+/**
+ * Fetches room data from backend API
+ * @async
+ */
 const fetchRoomData = async () => {
   try {
     const response = await fetch(backendAddress+"/getRooms");
@@ -50,13 +75,19 @@ const fetchRoomData = async () => {
     console.error("Error fetching room data:", error);
   }
 };
-
+/**
+ * Opens the repair dialog for a specific room
+ * @param {Object} room - The room to report issues for
+ */
 const openRepairDialog = (room) => {
   selectedRoom.value = room;
   showDialog.value = true;
   reportInfo.value = "";
 };
-
+/**
+ * Submits a repair request to the backend
+ * @async
+ */
 const submitRepair = async () => {
       if (!reportInfo.value) {
         alert("Please fill in report information!");
@@ -94,7 +125,10 @@ const submitRepair = async () => {
       }
     }
 ;
-
+/**
+ * Component mounted lifecycle hook
+ * Fetches initial data and user information
+ */
 onMounted(async () => {
   let me = await instance.appContext.config.globalProperties.$me()
   let user = me.data
@@ -105,13 +139,14 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Main container styling */
 .container {
   font-family: 'Cambria', serif;
   padding: 20px;
   background-color: #F5F6FA;
   height: 100vh;
 }
-
+/* Page title styling */
 .title {
   font-size: 58px;
   font-weight: bold;
@@ -120,6 +155,7 @@ onMounted(async () => {
   height: 12%;
 }
 
+/* Responsive room grid container */
 .room-list-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -129,7 +165,7 @@ onMounted(async () => {
   padding-right: 20px;
   margin: 30px;
 }
-
+/* Individual room card styling */
 .room-card {
   background-color: #ECEEF8;
   border-radius: 30px;

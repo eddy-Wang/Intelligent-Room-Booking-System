@@ -1,7 +1,25 @@
+<!--
+TimeTable.vue - Interactive calendar for room booking with time slot selection.
+
+Features:
+- Monthly calendar view with navigation
+- Time slot selection grid
+- Disabled dates/slots for past times
+- Visual indication of booked/selected slots
+- Responsive layout
+
+Props: None
+Events:
+- time-selected: Emitted when time slots are selected (date, slots)
+
+Dependencies:
+- None (pure Vue implementation)
+-->
 <template>
   <div class="container">
     <div class="card">
       <div class="card-content">
+        <!-- Calendar section -->
         <div class="calendar-container">
           <div class="calendar-header">
             <button @click="prevMonth" class="nav-button">‹</button>
@@ -25,6 +43,7 @@
           </div>
         </div>
 
+        <!-- Time slots section -->
         <div class="time-slots-container">
           <div class="time-slots-grid">
             <button
@@ -41,6 +60,7 @@
           </div>
         </div>
       </div>
+      <!-- Footer label -->
       <div class="room-status-label">
         Room Status
       </div>
@@ -54,15 +74,19 @@ import {inject} from "vue";
 export default {
   emits: ['time-selected'],
   setup() {
-    const childData = inject('childData');
-    const lessonData = inject('lessonData');
-    const roomSelected = inject('roomSelected')
+    // Inject shared state from parent
+    const childData = inject('childData'); // Existing bookings
+    const lessonData = inject('lessonData'); // Scheduled lessons
+    const roomSelected = inject('roomSelected'); // Currently selected room
 
     return {
       childData, lessonData, roomSelected
     };
   },
   watch: {
+    /**
+     * Watches for changes in booking data and updates calendar
+     */
     childData(newVal, oldVal) {
       console.log("old:", oldVal);
       console.log("new:", newVal);
@@ -74,6 +98,9 @@ export default {
       this.handleDateSelection();
 
     },
+    /**
+     * Watches for room selection changes
+     */
     roomSelected(newVal, oldVal) {
       console.log("newVal:", newVal)
       if (newVal === 0) {
@@ -98,12 +125,24 @@ export default {
   },
 
   computed: {
+    /**
+     * Returns current month name
+     * @returns {string} Current month
+     */
     currentMonth() {
       return this.currentDate.toLocaleString('en-US', {month: 'long'});
     },
+    /**
+     * Returns current year
+     * @returns {number} Current year
+     */
     currentYear() {
       return this.currentDate.getFullYear();
     },
+    /**
+     * Generates array of days for current month view
+     * @returns {Array} Days for calendar display
+     */
     daysInMonth() {
       const year = this.currentDate.getFullYear();
       const month = this.currentDate.getMonth();
@@ -144,12 +183,22 @@ export default {
   },
 
   methods: {
+    /**
+     * Navigates to previous month
+     */
     prevMonth() {
       this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() - 1, 1);
     },
+    /**
+     * Navigates to next month
+     */
     nextMonth() {
       this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 1);
     },
+    /**
+     * Selects a date and updates time slots
+     * @param {string} date - Date string in YYYY-MM-DD format
+     */
     selectDate(date) {
       const selectedDate = new Date(date);
       const today = new Date();
@@ -162,9 +211,17 @@ export default {
       this.selectedDate = selectedDate;
       this.handleDateSelection();
     },
+    /**
+     * Checks if a date is currently selected
+     * @param {string} date - Date string to check
+     * @returns {boolean} True if date is selected
+     */
     isSelected(date) {
       return this.selectedDate && this.formatDate(this.selectedDate) === date;
     },
+    /**
+     * Updates time slots based on selected date
+     */
     handleDateSelection() {
       if (!this.selectedDate) {
         this.timeSlots = this.timeSlots.map(slot => ({...slot, status: 1}));
@@ -201,6 +258,10 @@ export default {
 
       this.emitSelection();
     },
+    /**
+     * Toggles a time slot's selection state
+     * @param {number} index - Index of time slot to toggle
+     */
     toggleSlot(index) {
       if (!this.selectedDate) return;
 
@@ -218,22 +279,39 @@ export default {
 
       this.emitSelection();
     },
+    /**
+     * Emits selected time slots to parent
+     */
     emitSelection() {
       const selectedSlots = this.timeSlots
           .map((slot, idx) => ({...slot, index: idx}))
           .filter(slot => slot.status === 2);
       this.$emit('time-selected', this.selectedDate, selectedSlots);
     },
+    /**
+     * Formats time string (HH:MM)
+     * @param {string} time - Time string to format
+     * @returns {string} Formatted time
+     */
     formatTime(time) {
       const [hours, minutes] = time.split(':');
       return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
     },
+    /**
+     * Formats date as YYYY-MM-DD
+     * @param {Date} date - Date to format
+     * @returns {string} Formatted date string
+     */
     formatDate(date) {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     },
+    /**
+     * Updates bookings data structure
+     * @param {Array} bookingsArray - Array of booking objects
+     */
     updateBookings(bookingsArray) {
       this.bookings = {};
 
@@ -254,7 +332,12 @@ export default {
         });
       });
     },
-
+     /**
+     * Checks if a time slot should be disabled
+     * @param {Object} slot - Time slot object
+     * @param {number} index - Slot index
+     * @returns {boolean} True if slot should be disabled
+     */
     isSlotDisabled(slot, index) {
       if (!this.selectedDate) return true;
 

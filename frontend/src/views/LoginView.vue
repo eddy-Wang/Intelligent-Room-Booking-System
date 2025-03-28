@@ -1,17 +1,34 @@
+<!--
+LoginPage.vue - Landing page for DIICSU Room Booking System.
+
+This component provides:
+- Welcome screen with system branding
+- Sign in button to begin authentication flow
+- Responsive layout with background image
+- Mobile-optimized design
+
+Props: None
+Events: None
+Dependencies: Vue Router
+-->
 <template>
   <div class="app-container">
     <div class="main-content">
+       <!-- Left content section with welcome message and sign in button -->
       <div class="left-content">
         <div class="header">
           <img src="../assets/header-logo.png" alt="DIICSU Header Logo" class="header-logo">
         </div>
+        <!-- Welcome message section -->
         <h1 class="welcome-text">Welcome to</h1>
         <h2 class="system-name">DIICSU Room Booking System</h2>
         <p class="slogan">"Book Smarter: Real-Time Room Reservations for DIICSU."</p>
+         <!-- Sign in button -->
         <button @click="handleSignIn" class="sign-in-button">
           Sign In
         </button>
       </div>
+      <!-- Right content section with background image -->
       <div class="right-content">
         <img src="../assets/DIICSUPicture.png" alt="DIICSU Building" class="diicsu-picture">
       </div>
@@ -23,13 +40,17 @@
 import {useRouter} from 'vue-router'
 
 const router = useRouter()
-
+/**
+ * Handles sign in button click
+ * Navigates to email authentication page
+ */
 const handleSignIn = () => {
   router.push('./email')
 }
 </script>
 
 <style scoped>
+/* Base reset styles */
 * {
   margin: 0;
   padding: 0;
@@ -39,7 +60,7 @@ const handleSignIn = () => {
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
 }
-
+/* Main container styles */
 .app-container {
   font-family: 'Cambria', serif;
   min-height: 100vh;
@@ -53,7 +74,7 @@ body {
   display: flex;
   align-items: center;
 }
-
+/* Left content (welcome message) styling */
 .left-content {
   flex: 0 0 50%;
   position: relative;
@@ -74,7 +95,7 @@ body {
     height: 45px;
     width: auto;
   }
-
+  /* Welcome text styling */
   .welcome-text {
     width: 100%;
     color: white;
@@ -83,7 +104,7 @@ body {
     margin-bottom: 0.5rem;
     margin-left: 20%;
   }
-
+  /* System name styling */
   .system-name {
     width: 100%;
     color: white;
@@ -92,7 +113,7 @@ body {
     margin-bottom: 1rem;
     margin-left: 20%;
   }
-
+  /* Slogan text styling */
   .slogan {
     width: 100%;
     color: white;
@@ -102,7 +123,7 @@ body {
     opacity: 0.9;
     margin-left: 20%;
   }
-
+  /* Sign in button styling */
   .sign-in-button {
     background: #5fb2fa;
     box-shadow: 0 4px 15px 0 rgba(41, 44, 225, 0.75);
@@ -121,18 +142,20 @@ body {
     margin-left: 20%;
   }
 
+  /* Hover state */
   .sign-in-button:hover {
     background-image: linear-gradient(to right, #319efd, #7db3ff);
     transform: translateY(-2px);
     box-shadow: 0 6px 25px rgba(79, 172, 254, 0.9);
   }
 
+  /* Active/pressed state */
   .sign-in-button:active {
     transform: translateY(1px);
     box-shadow: 0 2px 10px rgba(79, 172, 254, 0.6);
   }
 }
-
+/* Right content (image) styling */
 .right-content {
   flex: 1;
   width: 40%;
@@ -149,7 +172,7 @@ body {
   object-fit: cover;
   border-radius: 20px;
 }
-
+/* Mobile responsive styles */
 @media (max-width: 768px) {
   .app-container {
     padding: 0;
@@ -164,6 +187,7 @@ body {
     position: relative;
   }
 
+  /* Mobile header adjustments */
   .header {
     max-width: 400px;
     left: 60px;
@@ -176,6 +200,7 @@ body {
     width: auto;
   }
 
+  /* Mobile left content adjustments */
   .left-content {
     position: relative;
     z-index: 2;
@@ -189,6 +214,7 @@ body {
     top: 50%;
     transform: translateY(-50%);
 
+    /* Text size adjustments for mobile */
     .welcome-text {
       font-size: 2.2rem;
       margin-bottom: 1rem;
@@ -207,6 +233,7 @@ body {
       margin-left: 0 ;
     }
 
+    /* Button adjustments for mobile */
     .sign-in-button {
       width: 100%;
       max-width: 300px;
@@ -216,6 +243,7 @@ body {
     }
   }
 
+  /* Mobile right content (background image) adjustments */
   .right-content {
     position: absolute;
     top: 0;
@@ -227,6 +255,7 @@ body {
     margin: 0;
   }
 
+  /* Dark overlay for better text readability on mobile */
   .right-content::before {
     content: '';
     position: absolute;
@@ -239,6 +268,7 @@ body {
   }
 
 
+  /* Image adjustments for mobile */
   .diicsu-picture {
     width: 100%;
     height: 100%;

@@ -1,21 +1,40 @@
+<!--
+RoomManagementView.vue - Component for managing room information and configurations.
+
+This component provides:
+- CRUD operations for room management (Create, Read, Update, Delete)
+- Paginated display of room information
+- Image upload functionality for room pictures
+- Equipment checklist and access level configuration
+- Responsive layout with modal forms for add/edit operations
+
+Props: None
+Events: None
+Dependencies: Element Plus UI components
+-->
 <template>
   <div class="panel">
     <div class="container">
       <h1>Room Management</h1>
       <div class="content-wrapper">
+        <!-- Admin action buttons -->
         <div class="admin-actions">
           <button @click="showAddRoomModal = true" class="add-button-container">Add Room</button>
         </div>
+        <!-- Room list container -->
         <div class="room-list-container">
           <div class="room-items-container">
+            <!-- Room item for each room -->
             <div
                 v-for="(room, index) in paginatedRooms"
                 :key="index"
                 class="room-item"
             >
+              <!-- Room image -->
               <div class="room-image">
                 <img :src="room.image_url" alt="Room Image" class="room-img"/>
               </div>
+              <!-- Room information -->
               <div class="room-info">
                 <div class="room-name">{{ room.name }}</div>
                 <div class="room-capacity">Capacity: {{ room.capacity }}</div>
@@ -24,13 +43,14 @@
                 <div class="room-access">Access: {{ accessMap[room.access] }}</div>
                 <div class="room-information">Information: {{ room.information || 'N/A' }}</div>
               </div>
-
+              <!-- Room action buttons -->
               <div class="room-actions">
                 <button @click="modifyRoom(index)" class="action-button">Modify</button>
                 <button @click="deleteRoom(index)" class="action-button">Delete</button>
               </div>
             </div>
           </div>
+          <!-- Pagination controls -->
           <div class="pagination">
             <button
                 @click="prevPage"
@@ -72,14 +92,14 @@
                 <label><input type="checkbox" v-model="newRoom.equipment.PowerOutlets"> Power Outlets</label>
                 <label><input type="checkbox" v-model="newRoom.equipment.WiFi"> Wi-Fi</label>
               </div>
-
+              <!-- Access level dropdown -->
               <label for="room-access">Access:</label>
               <select id="room-access" v-model="newRoom.access" required>
                 <option value=0>All</option>
                 <option value=1>Staff Only</option>
                 <option value=2>Selected Staff Only</option>
               </select>
-
+              <!-- Image upload -->
               <label for="room-image">Image:</label>
               <input
                   type="file"
@@ -93,9 +113,10 @@
               <div v-if="newRoom.image_url" class="image-preview">
                 <img :src="newRoom.image_url" alt="Current Image" class="preview-img">
               </div>
-
+              <!-- Additional information textarea -->
               <label for="room-information">Information (optional):</label>
               <textarea id="room-information" v-model="newRoom.information"></textarea>
+              <!-- Form action buttons -->
               <button type="submit" class="action-button">Add</button>
               <button @click="showAddRoomModal = false" class="action-button">Cancel</button>
             </form>
@@ -125,14 +146,14 @@
                 <label><input type="checkbox" v-model="modifiedRoom.equipment.PowerOutlets"> Power Outlets</label>
                 <label><input type="checkbox" v-model="modifiedRoom.equipment.WiFi"> Wi-Fi</label>
               </div>
-
+              <!-- Access level dropdown -->
               <label for="modify-room-access">Access:</label>
               <select id="modify-room-access" v-model="modifiedRoom.access" required>
                 <option value="0">All</option>
                 <option value="1">Staff Only</option>
                 <option value="2">Selected Staff Only</option>
               </select>
-
+              <!-- Image upload -->
               <label for="modify-room-image">Image:</label>
               <input
                   type="file"
@@ -145,10 +166,10 @@
               <div v-if="modifiedRoom.image_url" class="image-preview">
                 <img :src="modifiedRoom.image_url" alt="Current Image" class="preview-img">
               </div>
-
+              <!-- Additional information textarea -->
               <label for="modify-room-information">Information (optional):</label>
               <textarea id="modify-room-information" v-model="modifiedRoom.information"></textarea>
-
+              <!-- Form action buttons -->
               <button type="submit" class="action-button">Save</button>
               <button @click="showModifyRoomModal = false" class="action-button">Cancel</button>
             </form>
@@ -165,6 +186,7 @@ import {ElMessage} from "element-plus";
 export default {
   name: 'RoomManagement',
   setup() {
+    // Initialize backend address from global properties
     const instance = getCurrentInstance()
     const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 
@@ -172,17 +194,19 @@ export default {
   },
   data() {
     return {
-      isModifying: false,
+      isModifying: false, // Flag for modify mode
+      // Access level mapping
       accessMap: {
         0: "All",
         1: "Staff Only",
         2: "Selected Staff"
       },
-      rooms: [],
-      currentPage: 1,
-      itemsPerPage: 3,
-      showAddRoomModal: false,
-      showModifyRoomModal: false,
+      rooms: [], // List of rooms
+      currentPage: 1, // Current pagination page
+      itemsPerPage: 3, // Items per page
+      showAddRoomModal: false, // Controls add modal visibility
+      showModifyRoomModal: false, // Controls modify modal visibility
+      // New room form data
       newRoom: {
         name: "",
         capacity: 0,
@@ -222,9 +246,17 @@ export default {
     };
   },
   computed: {
+    /**
+     * Calculates total number of pages
+     * @returns {number} Total pages
+     */
     totalPages() {
       return Math.ceil(this.rooms.length / this.itemsPerPage);
     },
+    /**
+     * Returns rooms for current page
+     * @returns {Array} Paginated rooms
+     */
     paginatedRooms() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
@@ -232,6 +264,11 @@ export default {
     }
   },
   methods: {
+    /**
+     * Formats equipment data for display
+     * @param {string|Array} equipment - Equipment data
+     * @returns {string} Formatted equipment string
+     */
     formatEquipment(equipment) {
       if (typeof equipment === 'string') {
         const cleanedString = equipment.replace(/[{}]/g, '').replace(/'/g, '"');
@@ -247,6 +284,10 @@ export default {
         return 'No equipment';
       }
     },
+    /**
+     * Fetches room data from backend
+     * @async
+     */
     async fetchRoomData() {
       try {
         const response = await fetch(this.backendAddress + '/getRooms');
@@ -265,12 +306,17 @@ export default {
         console.error('Error fetching room data:', error);
       }
     },
+    /**
+     * Adds a new room
+     * @async
+     */
     async addRoom() {
+      // Format equipment data
       const equipment = Object.keys(this.newRoom.equipment)
           .filter(key => this.newRoom.equipment[key])
           .map(key => key.replace(/([A-Z])/g, ' $1').trim());
 
-
+      // Prepare room data
       const information = this.newRoom.information ? this.newRoom.information : null;
       const image_url = this.newRoom.image_url ? this.newRoom.image_url : null;
       const room = {
@@ -304,7 +350,10 @@ export default {
       this.isModifying = false;
     },
 
-
+    /**
+     * Prepares room data for modification
+     * @param {number} index - Index of room to modify
+     */
     async modifyRoom(index) {
       const room = this.paginatedRooms[index];
       this.modifiedRoom = {
@@ -327,11 +376,16 @@ export default {
       this.isModifying = true;
       this.showModifyRoomModal = true;
     },
+    /**
+     * Saves modified room data
+     * @async
+     */
     async saveModifiedRoom() {
+      // Format equipment data
       const equipment = Object.keys(this.modifiedRoom.equipment)
           .filter(key => this.modifiedRoom.equipment[key])
           .map(key => key.replace(/([A-Z])/g, ' $1').trim());
-
+      // Prepare room data
       const room = {
         name: this.modifiedRoom.name,
         capacity: this.modifiedRoom.capacity,
@@ -363,7 +417,11 @@ export default {
       }
     },
 
-
+    /**
+     * Deletes a room
+     * @async
+     * @param {number} index - Index of room to delete
+     */
     async deleteRoom(index) {
       const room = this.paginatedRooms[index];
 
@@ -389,6 +447,11 @@ export default {
         }
       }
     },
+    /**
+     * Handles image upload
+     * @async
+     * @param {Event} event - File input change event
+     */
     async handleImageUpload(event) {
       const file = event.target.files[0];
       if (!file) {
@@ -400,6 +463,7 @@ export default {
         ElMessage.info("The max size is 5MB");
         return;
       }
+      // Multiple credentials for image upload service
       const creds = [
         {uid: "af7c509daf8264c6f539e62ad1a63fbd", token: "0ee94f5bd8b1a55cddf0e1a5d5436785"},
         {uid: "88ebf0e92847f83dc9689aea7dfe9d1c", token: "805d0aaaed73724e435a7a727743090e"},
@@ -407,6 +471,7 @@ export default {
         {uid: "7a55ae3d265f33da6ec8efbf90759e71", token: "02a6e7d8831ace26ec97bb66a2df5968"},
         {uid: "4fd9e5610b0e525238740a52d529a0ab", token: "8672bd62f6f14e80dd95e536b7ccea04"}
       ];
+      // Try each credential until successful
       for (let i = 0; i < creds.length; i++) {
         const formData = new FormData();
         formData.append("uid", creds[i].uid);
@@ -453,17 +518,26 @@ export default {
       }
       ElMessage.info("All accounts have reached today's upload limit.");
     },
-
+    /**
+     * Navigates to previous page
+     */
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
       }
     },
+    /**
+     * Navigates to next page
+     */
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
       }
     },
+    /**
+     * Resets the new room object with default values and sets the specified room ID.
+     * @param {number} room_id - The ID of the room to be reset.
+     */
     resetNewRoom(room_id) {
       this.newRoom = {
         id: room_id,
@@ -488,20 +562,22 @@ export default {
     this.fetchRoomData();
   },
 };
-
 </script>
+
 <style scoped>
+/* Base styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* Main panel layout */
 .panel {
   height: 100vh;
   display: flex;
 }
-
+/* Container styling */
 .container {
   font-family: 'Cambria', serif;
   flex: 1;
@@ -511,20 +587,20 @@ export default {
   margin: 20px auto;
   padding: 20px;
 }
-
+/* Header styling */
 h1 {
   text-align: center;
   color: #2c3e50;
   font-size: 3.5rem;
   margin-bottom: 10px;
 }
-
+/* Content wrapper layout */
 .content-wrapper {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 180px);
 }
-
+/* Admin actions styling */
 .admin-actions {
   margin-bottom: 10px;
   display: flex;
@@ -547,7 +623,7 @@ h1 {
   background: #eceef8;
   box-shadow: none;
 }
-
+/* Individual room item */
 .room-item {
   display: flex;
   height: 200px;
@@ -557,7 +633,7 @@ h1 {
   margin-bottom: 20px;
   overflow: hidden;
 }
-
+/* Room image styling */
 .room-image {
   height: 100%;
   width: 300px;
@@ -572,6 +648,7 @@ h1 {
   border-radius: inherit;
 }
 
+/* Room information styling */
 .room-info {
   flex: 1;
   padding: 15px 25px;
@@ -602,7 +679,7 @@ h1 {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
-
+/* Room actions styling */
 .room-actions {
   display: flex;
   flex-direction: column;
@@ -612,7 +689,7 @@ h1 {
   flex-shrink: 0;
 }
 
-
+/* Button styling */
 .add-button-container {
   padding: 10px 20px;
   border: none;
@@ -637,7 +714,7 @@ h1 {
   color: #333;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
-
+/* Button hover effects */
 .add-button-container:hover:not(:disabled),
 .action-button:hover:not(:disabled),
 .pagination-button:hover:not(:disabled) {
@@ -646,13 +723,13 @@ h1 {
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(49, 85, 239, 0.3);
 }
-
+/* Button active effects */
 .add-button-container:active:not(:disabled),
 .action-button:active:not(:disabled),
 .pagination-button:active:not(:disabled) {
   transform: translateY(0);
 }
-
+/* Pagination styling */
 .pagination {
   position: sticky;
   bottom: 0;
@@ -667,7 +744,7 @@ h1 {
 .pagination-button {
   min-width: 100px;
 }
-
+/* Modal dialog styling */
 .modal {
   position: fixed;
   top: 0;
@@ -689,7 +766,7 @@ h1 {
   max-height: 90vh;
   overflow-y: auto;
 }
-
+/* Form styling */
 .modal-content form {
   display: flex;
   flex-direction: column;
@@ -723,7 +800,7 @@ button:disabled {
   cursor: not-allowed;
   box-shadow: none !important;
 }
-
+/* Image preview styling */
 .image-preview {
   margin: 10px 0;
 }
@@ -734,14 +811,14 @@ button:disabled {
   border-radius: 8px;
   border: 1px solid #ddd;
 }
-
+/* File input styling */
 input[type="file"] {
   padding: 5px;
   border: 1px solid #ddd;
   border-radius: 4px;
   background: #f8f9fa;
 }
-
+/* Equipment checkboxes styling */
 .equipment-checkboxes {
   display: flex;
   flex-direction: column;

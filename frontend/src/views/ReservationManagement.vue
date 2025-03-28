@@ -1,3 +1,20 @@
+<!--
+ReservationManagement.vue - Vue component for managing room reservations.
+
+This component provides:
+- Comprehensive reservation listing with filtering capabilities
+- CRUD operations for reservations (create, read, update, delete)
+- Approval/rejection workflow for pending reservations
+- Excel export functionality
+- Time slot management interface
+
+Props: None
+Events: None
+Dependencies:
+- Element Plus UI components
+- XLSX library for Excel export
+- Vue 3 Composition API
+-->
 <template>
   <div class="booking-management">
     <div class="header">
@@ -351,7 +368,9 @@ import 'element-plus/dist/index.css';
 import * as XLSX from 'xlsx';
 import {ElMessage} from "element-plus";
 
-
+/**
+ * Exports filtered bookings to Excel
+ */
 const exportToExcel = () => {
     // Prepare the data for export
     const dataForExport = filteredBookings.value.map(booking => {
@@ -391,9 +410,10 @@ const rejectForm = ref({
   reason: ''
 });
 // Define reactive data
-const bookings = ref([]);
-const rooms = ref([]);
-const users = ref([]);
+const bookings = ref([]);  // All booking records
+const rooms = ref([]);     // Available rooms
+const users = ref([]);     // System users
+// Filter state
 const filters = ref({
   user_email: [],
   room_id: [],
@@ -426,7 +446,9 @@ const reverseTimeSlotMap = {
 const timeSlots = Object.values(reverseTimeSlotMap);
 const processingStateOptions = ['unprocessed', 'processed', 'completed'];
 
-// Fetch rooms from backend API
+/**
+ * Fetches room data from backend
+ */
 const fetchRooms = async () => {
   try {
     const response = await fetch(backendAddress + '/rooms_id_and_name');
@@ -438,6 +460,9 @@ const fetchRooms = async () => {
     console.error('Error fetching rooms:', error);
   }
 };
+/**
+ * Fetches user data from backend
+ */
 const fetchUsers = async () => {
   try {
     const response = await fetch(backendAddress + '/users');
@@ -448,16 +473,29 @@ const fetchUsers = async () => {
     console.error('Error fetching users:', error);
   }
 };
-
+/**
+ * Gets user display name with permission
+ * @param {string} email - User email
+ * @returns {string} Formatted user display
+ */
 const getUserDisplay = (email) => {
   const user = users.value.find(u => u.email === email);
   return user ? `${user.name} (${user.permission})` : 'Unknown User';
 };
-
+/**
+ * Sorts date strings chronologically
+ * @param {Array} dates - Array of date strings
+ * @returns {Array} Sorted dates
+ */
 const sortDates = (dates) => {
 
   return dates.sort((a, b) => new Date(a) - new Date(b));
 };
+/**
+ * Searches users for autocomplete
+ * @param {string} queryString - Search query
+ * @param {function} cb - Callback with results
+ */
 const queryUsers = (queryString, cb) => {
   const trimmedQuery = queryString.trim().toLowerCase().trim();
 
@@ -491,12 +529,17 @@ const queryUsers = (queryString, cb) => {
 };
 const modifyDialogVisible = ref(false);
 const currentBooking = ref({});
-
+/**
+ * Closes the modify booking dialog
+ */
 const handleCloseModifyDialog = () => {
   modifyDialogVisible.value = false;
 };
 
 
+/**
+ * Saves modified booking
+ */
 const saveModifiedBooking = async () => {
   try {
     console.log(currentBooking.value);
@@ -525,11 +568,18 @@ const saveModifiedBooking = async () => {
     ElMessage.error(error.message || 'Failed to update booking');
   }
 };
-
+/**
+ * Handles user selection from autocomplete
+ * @param {Object} selected - Selected user
+ */
 const handleUserSelect = (selected) => {
   filters.value.userInput = selected.value.split(' (')[0];
 };
-// Function to modify a booking
+/**
+ * Opens modify dialog for a booking
+ * @param {number} booking_id - Booking ID
+ * @param {Object} newbooking - Booking data
+ */
 const modifyBooking = async (booking_id, newbooking) => {
   const booking = newbooking;
   if (booking) {
@@ -543,11 +593,17 @@ const modifyBooking = async (booking_id, newbooking) => {
     modifyDialogVisible.value = true;
   }
 };
+/**
+ * Handles date selection changes in the booking modification form
+ */
 const handleDateChange = (date) => {
   console.log('Selected Date:', date);
   console.log('Current Booking Date:', currentBooking.value.date);
 };
-// Function to show cancel dialog
+/**
+ * Initiates booking cancellation
+ * @param {number} booking_id - Booking ID
+ */
 const cancelBooking = async (booking_id) => {
   cancelForm.value = {
     booking_id: booking_id,
@@ -555,7 +611,9 @@ const cancelBooking = async (booking_id) => {
   };
   cancelDialogVisible.value = true;
 };
-// Function to confirm cancellation with reason
+/**
+ * Confirms booking cancellation
+ */
 const confirmCancelBooking = async () => {
   try {
     const response = await fetch(backendAddress + `/bookings/${cancelForm.value.booking_id}`, {
@@ -577,7 +635,10 @@ const confirmCancelBooking = async () => {
     ElMessage.error(error.message || 'Failed to cancel booking');
   }
 };
-// Function to approve a booking
+/**
+ * Approves a pending booking
+ * @param {number} booking_id - Booking ID
+ */
 const approveBooking = async (booking_id) => {
   try {
     const response = await fetch(backendAddress + `/bookings/${booking_id}`, {
@@ -594,8 +655,10 @@ const approveBooking = async (booking_id) => {
   }
 };
 
-
-// Function to show reject dialog
+/**
+ * Initiates booking rejection
+ * @param {number} booking_id - Booking ID
+ */
 const rejectBooking = async (booking_id) => {
   rejectForm.value = {
     booking_id: booking_id,
@@ -603,7 +666,9 @@ const rejectBooking = async (booking_id) => {
   };
   rejectDialogVisible.value = true;
 };
-// Function to confirm rejection with reason
+/**
+ * Confirms booking rejection
+ */
 const confirmRejectBooking = async () => {
   try {
     const response = await fetch(backendAddress + `/bookings/${rejectForm.value.booking_id}`, {
@@ -625,7 +690,11 @@ const confirmRejectBooking = async () => {
     ElMessage.error(error.message || 'Failed to reject booking');
   }
 };
-// Function to delete a booking
+
+/**
+ * Deletes a completed booking
+ * @param {number} booking_id - Booking ID
+ */
 const deleteBooking = async (booking_id) => {
   try {
     const response = await fetch(backendAddress + `/bookings/${booking_id}`, {
@@ -641,7 +710,12 @@ const deleteBooking = async (booking_id) => {
 };
 
 
-// Fetch data on component mount
+/**
+ * Component mounted lifecycle hook
+ * - Fetches current user information
+ * - Initializes booking, room, and user data
+ * - Sets the current user's email for form submissions
+ */
 onMounted(async () => {
   let me = await instance.appContext.config.globalProperties.$me()
   let user = me.data
@@ -652,7 +726,11 @@ onMounted(async () => {
   await fetchUsers();
 });
 
-// Function to convert timestamp to a readable time format
+/**
+ * Converts timestamp to readable time format
+ * @param {number} timestamp - Unix timestamp
+ * @returns {string} Formatted time string
+ */
 const timestampToTime = (timestamp) => {
   const timestampInSeconds = timestamp / 1000;
   const time = new Date(timestampInSeconds * 1000);
@@ -663,13 +741,21 @@ const timestampToTime = (timestamp) => {
   return chinaTime.toISOString().replace('T', ' ').slice(0, 19);
 };
 
-// Function to get room name by room_id
+/**
+ * Gets room name by ID
+ * @param {number} room_id - Room ID
+ * @returns {string} Room name
+ */
 const getRoomName = (room_id) => {
   const room = rooms.value.find(r => r.room_id === room_id);
   return room ? room.name : 'Unknown Room';
 };
 
-// Function to map status to processing state
+/**
+ * Maps status to processing state
+ * @param {string} status - Booking status
+ * @returns {string} Processing state
+ */
 const getProcessingState = (status) => {
   const processingStateMap = {
     'Pending': 'unprocessed',
@@ -682,16 +768,27 @@ const getProcessingState = (status) => {
   return processingStateMap[status] || 'unknown';
 };
 
-// Function to get unique values for filters
+/**
+ * Gets unique values for a given booking property
+ * @param {string} key - Property name
+ * @returns {Array} Unique values
+ */
 const uniqueValues = (key) => [...new Set(bookings.value.map((item) => item[key]))];
 
-// Function to convert time index to time slots
+/**
+ * Converts time string to human-readable slots
+ * @param {string} timeStr - Comma-separated time indexes
+ * @returns {string} Formatted time slots
+ */
 const convertTimeStrToTimeSlots = (timeStr) => {
   return timeStr.split(',')
       .map(Number)
       .map(index => reverseTimeSlotMap[index])
       .join('  ');
 };
+/**
+ * Fetches all bookings from backend
+ */
 const fetchBookings = async () => {
   try {
     const response = await fetch(backendAddress + '/bookings');
@@ -708,11 +805,19 @@ const fetchBookings = async () => {
     console.error('Error fetching bookings:', error);
   }
 };
+/**
+ * Formats date string to localized format
+ * @param {string} dateString - Date string to format
+ * @returns {string} Formatted date
+ */
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-CA');
 };
-
+/**
+ * Computes filtered bookings based on current filters
+ * @returns {Array} Filtered booking records
+ */
 const filteredBookings = computed(() => {
   if (!Array.isArray(bookings.value)) {
     console.error('bookings.value is not an array:', bookings.value);
@@ -767,6 +872,9 @@ const limitUsageForm = ref({
       purpose: ''
     })
 ;
+/**
+ * Opens time limit dialog
+ */
 const openLimitUsageDialog = () => {
   limitUsageDialogVisible.value = true;
 };
@@ -775,9 +883,17 @@ const handleCloseLimitUsageDialog = () => {
   limitUsageDialogVisible.value = false;
 };
 
+/**
+ * Disables dates before today in date picker
+ * @param {Date} time - Date to check
+ * @returns {boolean} True if date should be disabled
+ */
 const disabledDate = (time) => {
   return time.getTime() < Date.now() - 8.64e7;
 }
+/**
+ * Submits time limit restrictions
+ */
 const submitLimitUsage = async () => {
   try {
     limitUsageForm.value.user_email = userEmail.value

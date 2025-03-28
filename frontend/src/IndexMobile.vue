@@ -1,16 +1,41 @@
+<!--
+IndexMobile.vue - Mobile application with bottom navigation bar and role-based UI.
+
+Features:
+- Bottom navigation optimized for mobile devices
+- Dynamic component loading based on navigation selection
+- Role-based navigation items (Admin vs Student)
+- Back navigation functionality for Admin users
+- Logout functionality for Student users
+- Responsive design for mobile screens
+
+Props: None
+Events: None
+Dependencies:
+- Vue Router for navigation
+- @mdi/js for Material Design icons
+- Custom SvgIcon component
+- Mobile view components for each section
+- User permission system ($user)
+-->
 <template>
   <div class="index-container">
+    <!-- Dynamic component area - shows current view -->
     <component :is="activeComponent"/>
+    <!-- Bottom navigation bar -->
     <div class="nav-container">
       <nav class="bottom-nav">
+        <!-- Navigation items loop -->
         <div
             v-for="(item, index) in navItems"
             :key="index"
             class="nav-item"
             :class="{ active: activeNav === index }"
             @click="setActiveNav(index)">
+          <!-- Navigation icon -->
           <svg-icon type="mdi" :path="$mdi[item.icon]"></svg-icon>
         </div>
+        <!-- Logout button (only shown for Student users) -->
         <div
             v-if="permission === 'Student'"
             class="nav-item logout-item"
@@ -51,17 +76,33 @@ export default {
     };
   },
   computed: {
+    /**
+     * Returns current user permission level
+     * @returns {string} User permission ('Admin' or 'Student')
+     */
     permission() {
       return this.$user ? this.$user.permission : 'Student';
     },
+    /**
+     * Returns navigation items based on user role
+     * @returns {Array} Appropriate navigation items array
+     */
     navItems() {
       return this.permission === 'Admin' ? this.adminNavItems : this.userNavItems;
     },
+    /**
+     * Returns the currently active component
+     * @returns {Component} The active component based on navigation
+     */
     activeComponent() {
       return this.navItems[this.activeNav].component;
     }
   },
   methods: {
+    /**
+     * Sets active navigation or handles back navigation for Admin
+     * @param {number} index - Index of the navigation item
+     */
     setActiveNav(index) {
       if (this.permission === 'Admin' && index === 0) {
         this.$router.back();
@@ -69,6 +110,9 @@ export default {
         this.activeNav = index;
       }
     },
+    /**
+     * Handles logout confirmation and redirects to login page
+     */
     handleLogout() {
       if (confirm('Are you sure you want to logout?')) {
         this.$user = null;

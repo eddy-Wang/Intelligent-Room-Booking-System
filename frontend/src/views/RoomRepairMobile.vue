@@ -1,14 +1,33 @@
+<!--
+RoomRepairMobile.vue - Component for reporting equipment issues in rooms with search functionality.
+
+Features:
+- Searchable list of rooms with images
+- Modal dialog for submitting repair requests
+- Responsive grid layout for room cards
+- Form validation and error handling
+- User authentication integration
+
+Props: None
+Events: None
+Dependencies:
+- Element Plus for notifications
+- Vue 3 Composition API
+- Axios for HTTP requests
+-->
 <template>
+  <!-- Main container -->
   <div class="home-container">
     <div class="title-container">
       <h1><strong>DRBS</strong></h1>
       <h2><strong>Room Equipment Repair</strong></h2>
     </div>
 
+    <!-- Search input -->
     <div class="search-container">
       <input type="text" v-model="searchQuery" placeholder="Search a room..."/>
     </div>
-
+    <!-- Room cards grid -->
     <div class="rooms-container">
       <div
           v-for="room in filteredRooms"
@@ -25,7 +44,7 @@
         <button class="repair-button" @click.stop="openRepairDialog(room)">Report</button>
       </div>
     </div>
-
+    <!-- Repair dialog modal -->
     <div v-if="showRepairDialog" class="modal-overlay" @click="closeRepairDialog">
       <div class="modal-container" @click.stop>
         <h3>Repair: {{ selectedRoom ? selectedRoom.name : '' }}</h3>
@@ -51,18 +70,25 @@
 import {ref, onMounted, computed, getCurrentInstance} from 'vue';
 import axios from 'axios';
 import {ElMessage} from "element-plus";
-
+/**
+ * Component initialization
+ */
 const instance = getCurrentInstance()
 const backendAddress = instance.appContext.config.globalProperties.$backendAddress
 
-const selectedRoom = ref(null);
-const roomsData = ref([]);
-const searchQuery = ref('');
-const showRepairDialog = ref(false);
-const repairDescription = ref('');
-const userEmail = ref("")
-const userPermission = ref("")
+// Reactive data properties
+const selectedRoom = ref(null); // Currently selected room for repair
+const roomsData = ref([]); // Array to store room data
+const searchQuery = ref(''); // Search query string
+const showRepairDialog = ref(false); // Controls modal visibility
+const repairDescription = ref(''); // Repair issue description
+const userEmail = ref(""); // Logged-in user's email
+const userPermission = ref(""); // User's permission level
 
+/**
+ * Computed property for filtered rooms based on search query
+ * @returns {Array} Filtered rooms array
+ */
 const filteredRooms = computed(() => {
   const query = searchQuery.value.toLowerCase().replace(/\s+/g, '');
   return roomsData.value.filter(room => {
@@ -70,7 +96,9 @@ const filteredRooms = computed(() => {
     return roomName.includes(query);
   });
 });
-
+/**
+ * Lifecycle hook - fetches initial data when component mounts
+ */
 onMounted(async () => {
   let me = await instance.appContext.config.globalProperties.$me()
   let user = me.data
@@ -92,7 +120,11 @@ onMounted(async () => {
     console.error('Error fetching rooms:', error);
   }
 });
-
+/**
+ * Returns the appropriate image URL for a given room
+ * @param {Object} room - The room object
+ * @returns {string} Image URL
+ */
 function getRoomImage(room) {
   switch (room.id) {
     case 1:
@@ -109,17 +141,25 @@ function getRoomImage(room) {
       return new URL('@/assets/english-room.png', import.meta.url).href;
   }
 }
-
+/**
+ * Opens the repair dialog for a specific room
+ * @param {Object} room - The room to report issues for
+ */
 function openRepairDialog(room) {
   selectedRoom.value = room;
   repairDescription.value = ''; // 每次打开时重置输入内容
   showRepairDialog.value = true;
 }
-
+/**
+ * Closes the repair dialog
+ */
 function closeRepairDialog() {
   showRepairDialog.value = false;
 }
-
+/**
+ * Submits a repair request to the backend
+ * @async
+ */
 async function submitRepair() {
   if (repairDescription.value.trim().length === 0) {
     ElMessage.info("Please enter repair description.");
@@ -152,6 +192,7 @@ async function submitRepair() {
 </script>
 
 <style scoped>
+/* Main container styling */
 .home-container {
   font-family: 'Cambria', serif;
   display: flex;
@@ -162,7 +203,7 @@ async function submitRepair() {
   height: 100%;
   padding: 20px;
 }
-
+/* Title section styling */
 .title-container {
   margin-bottom: 0;
 }
@@ -178,7 +219,7 @@ async function submitRepair() {
   font-size: 2.25rem;
   color: #555;
 }
-
+/* Search container styling */
 .search-container {
   width: 100%;
   background-color: #fff;
@@ -196,7 +237,7 @@ async function submitRepair() {
   width: 100%;
   font-size: 14px;
 }
-
+/* Rooms grid container */
 .rooms-container {
   background: #eceef8;
   width: 100%;
@@ -205,7 +246,7 @@ async function submitRepair() {
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
-
+/* Individual room card styling */
 .room-card {
   position: relative;
   height: 240px;
@@ -218,6 +259,7 @@ async function submitRepair() {
   flex-direction: column;
 }
 
+/* Room image container */
 .room-image {
   height: 60%;
   background-color: #eceef8;
@@ -230,7 +272,7 @@ async function submitRepair() {
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
 }
-
+/* Room name/details styling */
 .room-details {
   min-height: 2.4em;
   display: flex;
@@ -242,7 +284,7 @@ async function submitRepair() {
   margin: 10px 5px 8px 5px;
   text-align: center;
 }
-
+/* Report button styling */
 .repair-button {
   position: absolute;
   bottom: 10px;
@@ -257,7 +299,7 @@ async function submitRepair() {
   font-size: 0.9rem;
   width: 50%;
 }
-
+/* Modal overlay styling */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -270,7 +312,7 @@ async function submitRepair() {
   justify-content: center;
   z-index: 1000;
 }
-
+/* Modal container styling */
 .modal-container {
   background: #fff;
   padding: 20px;
@@ -281,6 +323,7 @@ async function submitRepair() {
   gap: 10px;
 }
 
+/* Repair input field styling */
 .repair-input {
   background-color: #fdf8f6;
   border: 1px solid #ccc;
@@ -289,7 +332,7 @@ async function submitRepair() {
   width: 100%;
   font-size: 0.9rem;
 }
-
+/* Submit button styling (inactive state) */
 .submit-repair-button {
   border: none;
   border-radius: 5px;
@@ -300,7 +343,7 @@ async function submitRepair() {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
+/* Submit button styling (active state) */
 .submit-repair-button.active {
   background-color: #3155ef;
 }

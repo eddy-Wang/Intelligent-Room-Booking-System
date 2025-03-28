@@ -1,4 +1,26 @@
+<!--
+HomeViewMobile.vue - Main view component for DIICSU Room Booking System.
+
+This component provides:
+- Interactive room display with filtering capabilities
+- Calendar and time slot selection interface
+- Booking management functionality
+- Real-time availability checking
+
+Props: None
+Events:
+- @room-selected: Emitted when a room is selected
+- @room-unselected: Emitted when a room is unselected
+- @time-selected: Emitted when time slots are selected
+- @filters-updated: Emitted when search filters are changed
+
+Dependencies:
+- Vue3Datepicker - For date selection
+- Element Plus - For UI components and messaging
+- Axios - For HTTP requests
+-->
 <template>
+  <!-- Main Container -->
   <div class="home-container">
     <!-- Title Section -->
     <div class="title-container">
@@ -347,13 +369,21 @@ const filterTimeSlotMap = {
 };
 
 /* ===== Helper Functions ===== */
-// Format time string to ensure two digits for hours/minutes
+/**
+ * Formats time string to ensure two digits for hours/minutes
+ * @param {string} time - Time string to format (HH:MM)
+ * @returns {string} Formatted time string
+ */
 function formatTime(time) {
   const parts = time.split(':');
   return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
 }
 
-// Format date object to 'yyyy-MM-dd'
+/**
+ * Formats date object to 'yyyy-MM-dd' string
+ * @param {Date} date - Date to format
+ * @returns {string} Formatted date string
+ */
 function formatDate(date) {
   const d = new Date(date);
   const year = d.getFullYear();
@@ -362,7 +392,10 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
-//
+/**
+ * Watches for changes in selectedRoom and resets date/time selections
+ * when a new room with bookings is selected
+ */
 watch(selectedRoom, (newRoom) => {
   if (newRoom && newRoom.booking) {
     console.log("999")
@@ -371,7 +404,10 @@ watch(selectedRoom, (newRoom) => {
   }
 });
 
-// 更新预订数据的方法
+/**
+ * Updates bookings data structure
+ * @param {Array} bookingsArray - Array of booking objects
+ */
 const updateBookings = (bookingsArray) => {
   let tmp = {}
   console.log(4)
@@ -398,6 +434,10 @@ const updateBookings = (bookingsArray) => {
   console.log(bookings)
 }
 
+/**
+ * Handles room selection and fetches room details
+ * @param {Object} room - Selected room object
+ */
 const handleRoomSelected = async (room) => {
   console.log("start handleRoomSelected")
   selectedRoom.value = room;
@@ -430,13 +470,19 @@ const handleRoomSelected = async (room) => {
   }
 };
 
-// Parse equipment string to an array
+/**
+ * Parses equipment string to array
+ * @param {string} equipStr - Equipment string to parse
+ * @returns {Array} Array of equipment items
+ */
 function parseEquipment(equipStr) {
   return equipStr.replace(/{|}|'/g, '').split(',').map(item => item.trim());
 }
 
 /* ===== Date and Calendar Functions ===== */
-// Navigate to previous month
+/**
+ * Navigates to previous month in calendar
+ */
 function prevMonth() {
   currentDate.value = new Date(
       currentDate.value.getFullYear(),
@@ -445,7 +491,9 @@ function prevMonth() {
   );
 }
 
-// Navigate to next month
+/**
+ * Navigates to next month in calendar
+ */
 function nextMonth() {
   currentDate.value = new Date(
       currentDate.value.getFullYear(),
@@ -454,7 +502,10 @@ function nextMonth() {
   );
 }
 
-// Handle date selection from calendar
+/**
+ * Handles date selection from calendar
+ * @param {string} date - Selected date string
+ */
 function selectDate(date) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -464,12 +515,19 @@ function selectDate(date) {
   handleDateSelection();
 }
 
-// Check if a date is selected
+
+/**
+ * Checks if a date is selected
+ * @param {string} date - Date to check
+ * @returns {boolean} True if date is selected
+ */
 function isSelected(date) {
   return selectedDate.value && formatDate(selectedDate.value) === date;
 }
 
-// Update time slots status based on selected date and room bookings
+/**
+ * Updates time slots based on selected date
+ */
 const handleDateSelection = () => {
   if (!selectedRoom.value || !selectedDate.value) {
     timeSlots.value = timeSlots.value.map(slot => ({...slot, status: 0}));
@@ -494,6 +552,10 @@ const handleDateSelection = () => {
 
 
 /* ===== Time Slot Functions ===== */
+/**
+ * Toggles time slot selection
+ * @param {number} index - Index of time slot to toggle
+ */
 const timeSlots = ref(
     Array(12)
         .fill()
@@ -511,6 +573,10 @@ const timeSlots = ref(
 );
 
 // Toggle a time slot (select/unselect)
+/**
+ * Toggles time slot selection
+ * @param {number} index - Index of time slot to toggle
+ */
 function toggleSlot(index) {
   if (!selectedDate.value) return;
   if (timeSlots.value[index].status === 0) return;
@@ -518,7 +584,10 @@ function toggleSlot(index) {
   emitSelection();
 }
 
-// Emit current selected time slots
+
+/**
+ * Emits current selected time slots
+ */
 function emitSelection() {
   const selectedSlotsArr = timeSlots.value
       .map((slot, idx) => ({...slot, index: idx}))
@@ -527,14 +596,22 @@ function emitSelection() {
   handleTimeSelection(selectedDate.value, selectedSlotsArr);
 }
 
-// Update booking date and selected slots
+
+/**
+ * Handles time slot selection
+ * @param {Date} date - Selected date
+ * @param {Array} slots - Array of selected slots
+ */
 function handleTimeSelection(date, slots) {
   bookDate.value = date;
   selectedSlots.value = slots;
 }
 
 /* ===== Filter Functions ===== */
-// Combine filters based on capacity, equipment and date-time
+/**
+ * Computes combined filters from capacity, equipment and date-time selections
+ * @returns {Array} Array of filter objects to apply
+ */
 const combinedFilters = computed(() => {
   const filters = [];
   if (activeCapacityFilter.value) {
@@ -555,7 +632,10 @@ const combinedFilters = computed(() => {
   return filters;
 });
 
-// Apply filters to room data
+/**
+ * Applies filters to room data
+ * @param {Array} filters - Array of filter objects
+ */
 function handleFilters(filters) {
   const filteredRooms = roomsData.value.filter(room => {
     return filters.every(filter => {
@@ -612,17 +692,26 @@ function handleFilters(filters) {
   roomIds.value = filteredRooms.map(room => room.id);
 }
 
+/**
+ * Watches for changes in combined filters and applies them
+ */
 watch(combinedFilters, (newFilters) => {
   handleFilters(newFilters);
 });
 
 /* ===== Filter UI Handlers ===== */
-// Toggle capacity filter button
+/**
+ * Toggles capacity filter
+ * @param {string} filterValue - Capacity filter value
+ */
 function handleCapacityFilter(filterValue) {
   activeCapacityFilter.value = activeCapacityFilter.value === filterValue ? '' : filterValue;
 }
 
-// Toggle equipment filter button
+/**
+ * Toggles equipment filter
+ * @param {string} filterValue - Equipment filter value
+ */
 function handleEquipmentFilter(filterValue) {
   if (activeEquipmentFilters.value.includes(filterValue)) {
     activeEquipmentFilters.value = activeEquipmentFilters.value.filter(v => v !== filterValue);
@@ -632,14 +721,19 @@ function handleEquipmentFilter(filterValue) {
 }
 
 /* ===== Time Picker Handlers ===== */
-// Toggle the time picker dropdown
+/**
+ * Toggles time picker dropdown
+ */
 function toggleTimePicker() {
   selectedTimeSlots.value = [];
   selectedTimeSlotMaps.value = [];
   isTimePickerOpen.value = !isTimePickerOpen.value;
 }
 
-// Toggle individual time slot in filter
+/**
+ * Toggles time slot in filter
+ * @param {number} index - Index of time slot to toggle
+ */
 function toggleFilterSlot(index) {
   const slot = filterTimeSlots.value[index];
   const slotValue = filterTimeSlotMap[slot];
@@ -653,7 +747,11 @@ function toggleFilterSlot(index) {
 }
 
 /* ===== Date Picker Helper ===== */
-// Disable dates before today
+/**
+ * Disables dates before today in date picker
+ * @param {Date} date - Date to check
+ * @returns {boolean} True if date should be disabled
+ */
 function disabledDate(date) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -663,12 +761,18 @@ function disabledDate(date) {
 }
 
 /* ===== Room Selection and Booking ===== */
-// Computed list of rooms after filtering
+/**
+ * Computes filtered rooms based on current roomIds filter
+ * @returns {Array} Filtered list of rooms
+ */
 const filteredRooms = computed(() => {
   return roomsData.value.filter(room => roomIds.value.includes(room.id));
 });
 
-// Select or deselect a room
+/**
+ * Selects or deselects a room
+ * @param {Object} room - Room object to select/deselect
+ */
 function selectRoom(room) {
   if (selectedRoom.value && selectedRoom.value.id === room.id) {
     // Deselect room and reset booking data
@@ -696,7 +800,10 @@ function selectRoom(room) {
   }
 }
 
-// Determine if booking is allowed (room, date, time slots, and purpose selected)
+/**
+ * Determines if booking can be submitted
+ * @returns {boolean} True if all required booking fields are filled
+ */
 const isBookable = computed(() => {
   return (
       selectedRoom.value &&
@@ -706,7 +813,9 @@ const isBookable = computed(() => {
   );
 });
 
-// Handle booking submission
+/**
+ * Handles booking submission
+ */
 async function handleBook() {
   if (!isBookable.value) {
     alert('Please select a room, date, time slots, and enter purpose.');
@@ -743,14 +852,24 @@ async function handleBook() {
 }
 
 /* ===== Global Event Handlers ===== */
-// Close time picker when clicking outside
+/**
+ * Handles clicks outside time picker to close it
+ * @param {Event} event - Click event
+ */
 function handleClickOutside(event) {
   if (!event.target.closest('.time-picker')) {
     isTimePickerOpen.value = false;
   }
 }
 
+/**
+ * Checks if a time slot should be disabled
+ * @param {Object} slot - Time slot object
+ * @param {number} index - Slot index
+ * @returns {boolean} True if slot should be disabled
+ */
 function isSlotDisabled(slot, index) {
+  // No date selected ⇒ all slots disabled
   if (!selectedDate.value) return true;
 
   const today = new Date();
@@ -759,10 +878,14 @@ function isSlotDisabled(slot, index) {
   const sel = new Date(selectedDate.value);
   sel.setHours(0, 0, 0, 0);
 
+
+  // Selected date is in past ⇒ disabled
   if (sel < today) return true;
 
+  // Selected date is in future ⇒ enabled
   if (sel > today) return false;
 
+  // Selected date is today ⇒ check if slot time has passed
   const now = new Date();
   const [h, m] = slot.start.split(':').map(Number);
   const slotTime = new Date(sel);
@@ -773,6 +896,12 @@ function isSlotDisabled(slot, index) {
 
 
 /* ===== Lifecycle Hooks ===== */
+/**
+ * Component mounted lifecycle hook
+ * - Fetches current user data
+ * - Loads room data from backend
+ * - Sets up click outside handler
+ */
 onMounted(async () => {
   let me = await instance.appContext.config.globalProperties.$me()
   user.value = me.data
@@ -799,6 +928,11 @@ onMounted(async () => {
   document.addEventListener('click', handleClickOutside);
 });
 
+
+/**
+ * Component beforeUnmount lifecycle hook
+ * - Cleans up click outside handler
+ */
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
 });

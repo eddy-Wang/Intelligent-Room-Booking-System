@@ -1,14 +1,36 @@
+<!--
+VerifyView.vue - Component for email verification code entry.
+
+Features:
+- Two-column layout (single column on mobile)
+- Verification code input with validation
+- Responsive design with mobile adaptation
+- Back button navigation
+- Dynamic routing based on user permission
+- Visual feedback for disabled states
+
+Props: None
+Events: None
+Dependencies:
+- Vue Router for navigation
+- Element Plus for notifications
+- @jamescoyle/vue-icon for SVG icons
+- @mdi/js for Material Design icons
+-->
 <template>
+  <!-- Main application container -->
   <div class="app-container">
     <div class="main-content">
       <div class="left-content">
         <div class="header">
           <img src="../assets/header-logo.png" alt="DIICSU Header Logo" class="header-logo">
         </div>
+        <!-- Verification form container -->
         <div class="input-button-container">
           <h1 class="title">Verify Your Code</h1>
           <p class="subtitle">Please enter the verification code sent to your email</p>
 
+          <!-- Verification code input group -->
           <div class="input-group">
             <input
                 type="text"
@@ -18,6 +40,7 @@
                 maxlength="6"
             >
           </div>
+          <!-- Verify button -->
           <div class="button-container">
             <button
                 @click="handleVerify"
@@ -29,6 +52,7 @@
             </button>
           </div>
         </div>
+        <!-- Back button -->
         <div class="back-button-container">
           <button
               @click="handleBack"
@@ -39,6 +63,7 @@
         </div>
       </div>
 
+      <!-- Right content section (image) -->
       <div class="right-content">
         <img src="../assets/DIICSUPicture.png" alt="DIICSU Building" class="diicsu-picture">
       </div>
@@ -52,21 +77,32 @@ import {useRouter, useRoute} from 'vue-router'
 import {ElMessage} from "element-plus";
 import SvgIcon from '@jamescoyle/vue-icon';
 import {mdiKeyboardBackspace} from '@mdi/js';
-
+/**
+ * Component initialization
+ */
 const vueInstance = getCurrentInstance()
 const backendAddress = vueInstance.appContext.config.globalProperties.$backendAddress
 const router = useRouter()
 const route = useRoute()
+// Get email from route params
 const email = route.params.email
 
+// Reactive data properties
 const verificationCode = ref('')
 const path = ref(mdiKeyboardBackspace)
-
+/**
+ * Computed property to check if verification code is valid
+ * @returns {boolean} True if code length is exactly 6 characters
+ */
 const isValidCode = computed(() => verificationCode.value.length === 6)
-
+/**
+ * Handles verification code submission
+ * @async
+ */
 const handleVerify = async () => {
   if (isValidCode.value) {
     try {
+      // Send verification request to backend
       const response = await fetch(backendAddress + '/verify-code', {
         method: 'POST',
         credentials: 'include',
@@ -78,11 +114,11 @@ const handleVerify = async () => {
           code: verificationCode.value
         })
       });
-
+      // Handle HTTP errors
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+      // Process response
       const data = await response.json();
       if (data.code === "000") {
         const userPermission = data.data.permission
@@ -107,13 +143,16 @@ const handleVerify = async () => {
     }
   }
 }
-
+/**
+ * Handles back button click - navigates to email entry page
+ */
 const handleBack = () => {
   router.push('/email')
 }
 </script>
 
 <style scoped>
+/* Base reset and typography */
 * {
   margin: 0;
   padding: 0;
@@ -123,7 +162,7 @@ const handleBack = () => {
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
 }
-
+/* Main container styling */
 .app-container {
   font-family: 'Cambria', serif;
   min-height: 100vh;
@@ -131,13 +170,13 @@ body {
   display: flex;
   justify-content: space-between;
 }
-
+/* Main content area layout */
 .main-content {
   flex: 1;
   display: flex;
   align-items: center;
 }
-
+/* Left content section styling (form area) */
 .left-content {
   flex: 0 0 50%;
   position: relative;
@@ -195,7 +234,7 @@ body {
       box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
     }
   }
-
+  /* Verification input field */
   .verification-input {
     flex: 1;
     border: none;
@@ -243,7 +282,7 @@ body {
     position: relative;
     padding: 0;
   }
-
+  /* Verify button styles */
   .verify-button {
     background: #319efd;
     color: #FFFFFF;
@@ -268,6 +307,7 @@ body {
     transition: opacity 0.3s ease;
   }
 
+  /* Disabled button state */
   .button-disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -275,6 +315,7 @@ body {
   }
 }
 
+/* Right content section (image area) */
 .right-content {
   flex: 1;
   width: 40%;
@@ -292,6 +333,7 @@ body {
   border-radius: 20px;
 }
 
+/* Mobile responsive styles */
 @media (max-width: 768px) {
   .app-container {
     padding: 0;
@@ -305,7 +347,7 @@ body {
     height: 100vh;
     position: relative;
   }
-
+  /* Mobile left content adjustments */
   .left-content {
     position: relative;
     z-index: 2;
@@ -338,7 +380,7 @@ body {
       background-color: rgba(49, 85, 239, 0.68);
       border-radius: 2.5rem;
     }
-
+    /* Mobile typography adjustments */
     .title {
       font-size: 2rem;
       margin-bottom: 1rem;
@@ -348,7 +390,7 @@ body {
       font-size: 1.1rem;
       margin-bottom: 2rem;
     }
-
+    /* Mobile input adjustments */
     .input-group {
       margin: 0 auto 1rem;
       width: 100%;
@@ -361,7 +403,7 @@ body {
       padding: 0.3rem 0 0.3rem 0.3rem;
       width: 60%;
     }
-
+    /* Mobile button adjustments */
     .button-container {
       max-width: 300px;
       margin: 0 auto;
@@ -385,7 +427,7 @@ body {
       cursor: not-allowed;
       background: rgba(213, 221, 255, 0.8);
     }
-
+    /* Mobile back button adjustments */
     .back-button-container {
       position: fixed;
       left: 1rem;
@@ -413,7 +455,7 @@ body {
       color: rgba(49, 85, 239, 0.8);
     }
   }
-
+  /* Mobile right content adjustments */
   .right-content {
     position: absolute;
     top: 0;
@@ -424,7 +466,7 @@ body {
     padding: 0;
     margin: 0;
   }
-
+  /* Overlay for background image on mobile */
   .right-content::after {
     content: "";
     position: absolute;
@@ -444,7 +486,7 @@ body {
     border-radius: 0;
   }
 }
-
+/* Animation for form container */
 .input-button-container {
   transition: transform 0.5s ease-in-out;
 }
