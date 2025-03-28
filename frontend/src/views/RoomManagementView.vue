@@ -75,9 +75,9 @@
 
               <label for="room-access">Access:</label>
               <select id="room-access" v-model="newRoom.access" required>
-                <option value="All">All</option>
-                <option value="Staff Only">Staff Only</option>
-                <option value="Selected Staff Only">Selected Staff Only</option>
+                <option value=0>All</option>
+                <option value=1>Staff Only</option>
+                <option value=2>Selected Staff Only</option>
               </select>
 
               <label for="room-image">Image:</label>
@@ -196,13 +196,14 @@ export default {
           WiFi: false
         },
         image_url: null,
-        access: "All",
+        access: 0,
         information: null,
       },
 
       //modifiedRoom
       modifiedRoom: {
         index: null,
+        id: 0,
         name: "",
         capacity: 0,
         location: "",
@@ -215,7 +216,7 @@ export default {
           WiFi: false
         },
         image_url: null,
-        access: "All",
+        access: 0,
         information: null,
       }
     };
@@ -250,7 +251,16 @@ export default {
       try {
         const response = await fetch(this.backendAddress + '/getRooms');
         const data = await response.json();
-        this.rooms = data.data;
+        this.rooms = data.data.map(room => ({
+          id: room.id,
+          name: room.name,
+          capacity: room.capacity,
+          location: room.location,
+          equipment: room.equipment,
+          access: room.access,
+          image_url: room.image_url,
+          information: room.info // Map database 'info' to frontend 'information'
+        }));
       } catch (error) {
         console.error('Error fetching room data:', error);
       }
@@ -283,9 +293,10 @@ export default {
         });
         const data = await response.json();
         if (data.code === '000') {
+          const room_id = data.message.room_id
           this.rooms.push(room);
           this.showAddRoomModal = false;
-          this.resetNewRoom();
+          this.resetNewRoom(room_id);
         }
       } catch (error) {
         console.error('Failed to add room:', error);
@@ -330,7 +341,7 @@ export default {
         image_url: this.modifiedRoom.image_url,
         information: this.modifiedRoom.information || null
       };
-      console.log(this.modifiedRoom.id)
+      console.log('ID', this.modifiedRoom.id)
       try {
         const response = await fetch(this.backendAddress + `/rooms/${this.modifiedRoom.id}`, {
           method: 'PUT',
@@ -345,7 +356,7 @@ export default {
             this.rooms.splice(index, 1, {...this.rooms[index], ...room});
           }
           this.showModifyRoomModal = false;
-          this.resetNewRoom();
+          this.fetchRoomData()
         }
       } catch (error) {
         console.error('Failed to modify room:', error);
@@ -453,8 +464,9 @@ export default {
         this.currentPage++;
       }
     },
-    resetNewRoom() {
+    resetNewRoom(room_id) {
       this.newRoom = {
+        id: room_id,
         name: "",
         capacity: 0,
         location: "",
@@ -467,7 +479,7 @@ export default {
           WiFi: false
         },
         image_url: null,
-        access: "All",
+        access: 0,
         information: null,
       };
     },

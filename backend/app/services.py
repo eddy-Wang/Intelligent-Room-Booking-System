@@ -551,7 +551,13 @@ def add_room(room_data):
         cursor.execute(insert_query, (room_name, capacity, location, equipment, access, information, 0, image_url))
         connection.commit()
 
-        return True, 'Room added successfully!'
+        cursor.execute(check_query, (room_name,))
+        new_room = cursor.fetchone()
+        if new_room:
+            room_id = new_room[0]
+            return True, {'message': 'Room added successfully!', 'room_id': room_id}
+        else:
+            return False, 'Room added but could not retrieve room_id.'
     except Exception as e:
         return False, str(e)
     finally:
