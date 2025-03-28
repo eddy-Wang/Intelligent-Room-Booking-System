@@ -6,7 +6,7 @@
         aria-label="Main navigation"
     >
       <router-link
-          to="/"
+          to="/index"
           class="top-icon"
           aria-label="Return to homepage"
       >

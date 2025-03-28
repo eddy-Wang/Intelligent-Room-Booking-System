@@ -6,7 +6,7 @@
         aria-label="Main navigation"
     >
       <router-link
-          to="/"
+          to="/index"
           class="top-icon"
           aria-label="Return to homepage"
       >
@@ -14,7 +14,7 @@
             src="../src/assets/diiLogo.png"
             alt="Company Logo"
             class="logo-image"
-            @click="setActiveNav()"
+            @click="setActiveNav(0)"
         >
       </router-link>
 

@@ -295,7 +295,7 @@ body {
 
 .card {
   background-color: white;
-  border-radius: 8px;
+  border-radius: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   height: 100%;
   display: flex;
@@ -411,6 +411,6 @@ body {
   height: 10%;
   line-height: 40px;
   text-align: center;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 20px 20px;
 }
 </style>
