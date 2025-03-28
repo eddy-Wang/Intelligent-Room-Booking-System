@@ -28,14 +28,14 @@
               <span class="button-text">VERIFY</span>
             </button>
           </div>
-          <div class="back-button-container">
-            <button
-                @click="handleBack"
-                class="back-button"
-            >
-              <svg-icon type="mdi" :path="path" class="back-icon"></svg-icon>
-            </button>
-          </div>
+        </div>
+        <div class="back-button-container">
+          <button
+              @click="handleBack"
+              class="back-button"
+          >
+            <svg-icon type="mdi" :path="path" class="back-icon"></svg-icon>
+          </button>
         </div>
       </div>
 
@@ -53,7 +53,6 @@ import {ElMessage} from "element-plus";
 import SvgIcon from '@jamescoyle/vue-icon';
 import {mdiKeyboardBackspace} from '@mdi/js';
 
-
 const vueInstance = getCurrentInstance()
 const backendAddress = vueInstance.appContext.config.globalProperties.$backendAddress
 const router = useRouter()
@@ -63,12 +62,9 @@ const email = route.params.email
 const verificationCode = ref('')
 const path = ref(mdiKeyboardBackspace)
 
-const isValidCode = computed(() => {
-  return verificationCode.value.length === 6
-})
+const isValidCode = computed(() => verificationCode.value.length === 6)
 
 const handleVerify = async () => {
-  console.log(email)
   if (isValidCode.value) {
     try {
       const response = await fetch(backendAddress + '/verify-code', {
@@ -89,11 +85,7 @@ const handleVerify = async () => {
 
       const data = await response.json();
       if (data.code === "000") {
-        console.log(data)
-        // vueInstance.appContext.config.globalProperties.$user.email = data.data.email
-        // vueInstance.appContext.config.globalProperties.$user.name = data.data.name
         const userPermission = data.data.permission
-
         if (window.innerWidth <= 768) {
           if (userPermission === "Admin") {
             await router.push({path: "../AdminEnterPageMobile"})
@@ -132,7 +124,6 @@ body {
   font-family: 'Segoe UI', Arial, sans-serif;
 }
 
-
 .app-container {
   font-family: 'Cambria', serif;
   min-height: 100vh;
@@ -146,7 +137,6 @@ body {
   display: flex;
   align-items: center;
 }
-
 
 .left-content {
   flex: 0 0 50%;
@@ -241,7 +231,6 @@ body {
     color: white;
     transition: color 0.3s ease;
   }
-
 
   .back-button:hover .back-icon {
     color: rgba(255, 255, 255, 0.8);
@@ -342,7 +331,6 @@ body {
       width: auto;
     }
 
-
     .input-button-container {
       width: 100%;
       height: 47%;
@@ -399,12 +387,15 @@ body {
     }
 
     .back-button-container {
-      margin-top: 0.5rem;
+      position: fixed;
+      left: 1rem;
+      bottom: 1rem;
+      z-index: 1000;
     }
 
     .back-button {
-      margin-left: 1.5rem;
-      margin-bottom: 85%;
+      position: static;
+      margin: 0;
       background: none;
       border: none;
       padding: 0;
@@ -422,7 +413,6 @@ body {
       color: rgba(49, 85, 239, 0.8);
     }
   }
-
 
   .right-content {
     position: absolute;
