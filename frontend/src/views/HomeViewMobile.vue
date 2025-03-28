@@ -472,7 +472,7 @@ function isSelected(date) {
 // Update time slots status based on selected date and room bookings
 const handleDateSelection = () => {
   if (!selectedRoom.value || !selectedDate.value) {
-    timeSlots.value = timeSlots.value.map(slot => ({ ...slot, status: 0 }));
+    timeSlots.value = timeSlots.value.map(slot => ({...slot, status: 0}));
     return;
   }
 
@@ -491,7 +491,6 @@ const handleDateSelection = () => {
 
   emitSelection();
 };
-
 
 
 /* ===== Time Slot Functions ===== */
@@ -1132,12 +1131,14 @@ body {
 }
 
 .room-card {
-  height: 140px;
+  min-height: 140px;
   width: 100%;
   border-radius: 20px;
   overflow: hidden;
   background: #fff;
   cursor: pointer;
+  display: flex;
+  align-items: stretch;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -1151,9 +1152,10 @@ body {
   flex-direction: row;
 }
 
+
 .room-image {
   width: 140px;
-  height: 140px;
+  height: 100%;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -1162,6 +1164,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .room-details {
@@ -1276,7 +1279,7 @@ body {
 }
 
 /* ===== Media Queries ===== */
-@media (max-width: 200px) {
+@media (max-width: 390px) {
   .room-card-content {
     flex-direction: column;
   }
