@@ -5,7 +5,7 @@
         <div class="header">
           <img src="../assets/header-logo.png" alt="DIICSU Header Logo" class="header-logo">
         </div>
-        <div class="input-button-container">
+        <div class="input-button-container" :class="{ 'has-error': showError }">
           <h1 class="title">Verify Your Identification</h1>
           <p class="subtitle">Please enter your Dundee or CSU email address to continue</p>
           <div class="input-group">
@@ -36,6 +36,7 @@
             </button>
           </div>
         </div>
+
       </div>
 
       <div class="right-content">
@@ -355,6 +356,10 @@ body {
       border-radius: 2.5rem;
     }
 
+    .input-button-container.has-error {
+      height: 60%;
+    }
+
     .title {
       font-size: 2rem;
       margin-bottom: 1rem;
@@ -393,6 +398,7 @@ body {
       margin: 0 auto;
       padding: 0;
     }
+
 
     .error-message {
       color: #FFE5E5;

@@ -333,7 +333,7 @@ body {
 
     .input-button-container {
       width: 100%;
-      height: 47%;
+      min-height: 47%;
       padding: 2rem 2.5rem 2.5rem 2rem;
       background-color: rgba(49, 85, 239, 0.68);
       border-radius: 2.5rem;
