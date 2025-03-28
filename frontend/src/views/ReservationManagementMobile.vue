@@ -440,7 +440,7 @@ const limitUsageForm = ref({
       room_id: '',
       date: '',
       time: [],
-      user_email: userEmail.value,
+      user_email: '',
       purpose: ''
     })
 ;
@@ -457,6 +457,7 @@ const disabledDate = (time) => {
 }
 const submitLimitUsage = async () => {
   try {
+    limitUsageForm.value.user_email = userEmail.value
     const payload = {
       ...limitUsageForm.value,
     };

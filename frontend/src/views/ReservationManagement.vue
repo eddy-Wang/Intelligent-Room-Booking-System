@@ -646,6 +646,7 @@ onMounted(async () => {
   let me = await instance.appContext.config.globalProperties.$me()
   let user = me.data
   userEmail.value = user.email
+  console.log(userEmail.value)
   await fetchBookings();
   await fetchRooms();
   await fetchUsers();
@@ -762,7 +763,7 @@ const limitUsageForm = ref({
       room_id: '',
       date: '',
       time: [],
-      user_email: userEmail.value,
+      user_email: '',
       purpose: ''
     })
 ;
@@ -779,10 +780,11 @@ const disabledDate = (time) => {
 }
 const submitLimitUsage = async () => {
   try {
+    limitUsageForm.value.user_email = userEmail.value
     const payload = {
       ...limitUsageForm.value,
     };
-    console.log(payload);
+    console.log('p='+payload);
     const response = await fetch(backendAddress + '/ban', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
