@@ -472,43 +472,26 @@ function isSelected(date) {
 // Update time slots status based on selected date and room bookings
 const handleDateSelection = () => {
   if (!selectedRoom.value || !selectedDate.value) {
-    timeSlots.value = timeSlots.value.map(slot => ({...slot, status:0}));
+    timeSlots.value = timeSlots.value.map(slot => ({ ...slot, status: 0 }));
     return;
   }
-  console.log(bookings.value)
 
   const key = formatDate(selectedDate.value);
-  console.log(key)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  // const sel = new Date(selectedDate.value);
-  // sel.setHours(0, 0, 0, 0);
 
-  if (bookings.value[key]) {
-    console.log(bookings.value)
-    timeSlots.value = timeSlots.value.map((slot, index) => {
-      const isPast = selectedDate.value.getTime() === today.getTime() &&
-          this.isSlotDisabled(slot, index);
+  timeSlots.value = timeSlots.value.map((slot, index) => {
+    const isBooked = bookings.value[key]?.[index] === 0;
+    const isPastSlot = isSlotDisabled(slot, index);
+    return {
+      ...slot,
+      status: (isBooked || isPastSlot) ? 0 : 1
+    };
+  });
 
-      return {
-        ...slot,
-        status: isPast ? 0 : bookings.value[key][index]
-      };
-    });
-  } else {
-    timeSlots.value = timeSlots.value.map((slot, index) => {
-      const isPast = selectedDate.value.getTime() === today.getTime() &&
-          this.isSlotDisabled(slot, index);
+  emitSelection();
+};
 
-      return {
-        ...slot,
-        status: isPast ? 0 : 1
-      };
-    });
-  }
-
-  this.emitSelection();
-}
 
 
 /* ===== Time Slot Functions ===== */
@@ -769,7 +752,6 @@ function handleClickOutside(event) {
 }
 
 function isSlotDisabled(slot, index) {
-  // 没选日期 ⇒ 全部禁用
   if (!selectedDate.value) return true;
 
   const today = new Date();
@@ -778,13 +760,10 @@ function isSlotDisabled(slot, index) {
   const sel = new Date(selectedDate.value);
   sel.setHours(0, 0, 0, 0);
 
-  // 选的日期在今天之前 ⇒ 禁用
   if (sel < today) return true;
 
-  // 选的日期在今天之后 ⇒ 可用
   if (sel > today) return false;
 
-  // 选的日期就是今天 ⇒ 比较时段开始时间
   const now = new Date();
   const [h, m] = slot.start.split(':').map(Number);
   const slotTime = new Date(sel);

@@ -427,7 +427,8 @@ export default {
             return; // stop once it succeeds
           }
 
-          // If daily limit hit, try next credentials
+          // '今日上传数量上限！' means that an account has reached its maximum number of uploads
+          // As the API is from a Chinese website, so the return message must be used in Chinese in the code.
           if (result.code === -1000 && result.msg === '今日上传数量上限！') {
             console.log(`Account ${i + 1} limit reached — switching credentials`);
             continue;
