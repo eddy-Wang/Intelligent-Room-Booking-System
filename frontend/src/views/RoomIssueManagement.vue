@@ -164,6 +164,10 @@ const timestampToTime = (timestamp) => {
 };
 const exportToExcel = () => {
     // Original export data
+  const roomNameMap = {};
+    rooms.value.forEach(room => {
+        roomNameMap[room.room_id] = room.name;
+    });
     const dataForExport = filteredReports.value.map(report => {
         return {
             'Room Name': getRoomName(report.room_id),
@@ -192,10 +196,9 @@ const exportToExcel = () => {
     const frequentIssuesData = Object.entries(roomIssueCounts)
         .filter(([_, count]) => count >= 5)
         .map(([room_id, count]) => ({
-            'Room Name': getRoomName(room_id),
+            'Room Name': roomNameMap[room_id] || 'Unknown Room',
             'Issue Count': count
         }));
-
     // Create worksheet for frequent issues
     const frequentIssuesWs = XLSX.utils.json_to_sheet(frequentIssuesData);
 
