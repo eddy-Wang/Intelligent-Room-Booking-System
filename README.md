@@ -155,6 +155,11 @@ For a detailed guide on how to use the system—including booking procedures, ro
 This project is licensed under the MIT License. Feel free to use and modify the code for your own projects under the terms of the license.
 
 ---
+## Note
+
+Our database will expire on 2025.4.6. It will not be available at that time.
+
+---
 
 ## Acknowledgements
 
