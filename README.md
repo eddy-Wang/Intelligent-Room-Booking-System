@@ -10,9 +10,10 @@ This is a comprehensive system for managing room reservations, developed by our 
 3. [Getting Started](#getting-started)  
 4. [Usage](#usage)  
 5. [Contributing](#contributing)  
-6. [License](#license)  
-7. [Acknowledgements](#acknowledgements)
-8. [User Manual (PDF)](#user-manual-pdf)
+6. [License](#license)
+7. [Note](#note)
+8. [Acknowledgements](#acknowledgements)
+9. [User Manual (PDF)](#user-manual-pdf)
 ---
 
 ## Project Overview
@@ -145,11 +146,6 @@ We welcome contributions from the community! To get started:
 
 ---
 
-## User Manual (PDF)
-For a detailed guide on how to use the system—including booking procedures, room management, and administrative functions—please refer to our [User Manual](./User%20Manual.pdf).
-
----
-
 ## License
 
 This project is licensed under the MIT License. Feel free to use and modify the code for your own projects under the terms of the license.
@@ -169,3 +165,9 @@ We also appreciate the valuable feedback and support from the GitHub community. 
 [https://github.com/eddy-Wang/Intelligent-Room-Booking-System](https://github.com/eddy-Wang/Intelligent-Room-Booking-System)
 
 Thank you for being a part of this journey with us!
+
+---
+
+## User Manual (PDF)
+For a detailed guide on how to use the system—including booking procedures, room management, and administrative functions—please refer to our [User Manual](./User%20Manual.pdf).
+
